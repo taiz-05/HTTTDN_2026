@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Cổng Khách Hàng - SGU Tech CRM</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header style="background:#1d4ed8;">
+        <h2>PORTAL 3: CỔNG THÔNG TIN KHÁCH HÀNG (CUSTOMER PORTAL)</h2>
+        <div id="userHeaderBox" style="display:none;">
+            <span id="cusWelcome" style="margin-right:15px;"></span>
+            <button class="btn btn-danger" onclick="logoutCustomer()">Đăng xuất</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- KHỐI ĐĂNG NHẬP & ĐĂNG KÝ KHÁCH HÀNG (Mục 4.3.1 & 4.3.2) -->
+        <div id="authSection" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+            <div class="card">
+                <h3>Đăng nhập Khách hàng</h3>
+                <div style="margin:12px 0;"><input type="text" id="lUser" placeholder="Username (VD: khachhang1)"></div>
+                <div style="margin:12px 0;"><input type="password" id="lPass" value="123456"></div>
+                <button class="btn" onclick="loginCustomer()">Đăng nhập</button>
+            </div>
+            <div class="card">
+                <h3>Đăng ký Tài khoản Khách hàng mới</h3>
+                <div class="grid-form" style="margin-top:10px;">
+                    <input type="text" id="rUser" placeholder="Tên đăng nhập">
+                    <input type="password" id="rPass" placeholder="Mật khẩu">
+                    <input type="text" id="rName" placeholder="Họ và tên">
+                    <input type="text" id="rPhone" placeholder="Số điện thoại">
+                    <input type="number" id="rAge" placeholder="Tuổi (VD: 21)">
+                    <select id="rInterest">
+                        <option value="Gaming">Gaming</option>
+                        <option value="Văn phòng">Văn phòng</option>
+                        <option value="Đồ họa">Đồ họa</option>
+                        <option value="Lập trình">Lập trình</option>
+                    </select>
+                </div>
+                <button class="btn btn-success" onclick="registerCustomer()">Đăng ký Tài khoản</button>
+            </div>
+        </div>
+
+        <!-- KHỐI CHỨC NĂNG SAU KHI ĐĂNG NHẬP -->
+        <div id="portalSection" style="display:none;">
+            <!-- Mục 4.3.3: Chỉnh sửa thông tin -->
+            <div class="card">
+                <h3>1. Thông tin Cá nhân & Sở thích</h3>
+                <div class="grid-form" style="margin-top:10px;">
+                    <input type="text" id="pFullName" placeholder="Họ tên">
+                    <input type="text" id="pPhone" placeholder="Số điện thoại">
+                    <input type="number" id="pAge" placeholder="Độ tuổi">
+                    <input type="text" id="pAddress" placeholder="Địa chỉ">
+                    <select id="pInterest">
+                        <option value="Gaming">Gaming</option>
+                        <option value="Văn phòng">Văn phòng</option>
+                        <option value="Đồ họa">Đồ họa</option>
+                        <option value="Lập trình">Lập trình</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="updateProfile()">Lưu Thay đổi Hồ sơ</button>
+            </div>
+
+            <!-- Mục 4.3.4: Gửi phản hồi về sản phẩm -->
+            <div class="card">
+                <h3>2. Gửi Đánh giá & Phản hồi về Sản phẩm</h3>
+                <div class="grid-form" style="margin-top:10px;">
+                    <select id="fbProduct"></select>
+                    <select id="fbRating">
+                        <option value="5">5 Sao - Rất hài lòng</option>
+                        <option value="4">4 Sao - Hài lòng</option>
+                        <option value="3">3 Sao - Bình thường</option>
+                        <option value="2">2 Sao - Chưa tốt</option>
+                        <option value="1">1 Sao - Không hài lòng</option>
+                    </select>
+                    <input type="text" id="fbComment" placeholder="Nhập nhận xét về chất lượng sản phẩm...">
+                </div>
+                <button class="btn btn-success" onclick="sendFeedback()">Gửi Phản hồi</button>
+                <table>
+                    <thead>
+                        <tr><th>Sản phẩm</th><th>Số sao</th><th>Nhận xét của bạn</th><th>Giải đáp từ Quản lý</th><th>Trạng thái</th></tr>
+                    </thead>
+                    <tbody id="myFeedbackTable"></tbody>
+                </table>
+            </div>
+
+            <!-- Mục 4.3.5: Nhận khảo sát và thực hiện -->
+            <div class="card">
+                <h3>3. Khảo sát Thăm dò Sản phẩm Chuẩn bị Ra mắt</h3>
+                <table>
+                    <thead>
+                        <tr><th>Chiến dịch Khảo sát</th><th>Sản phẩm Mới</th><th>Giá dự kiến</th><th>Trạng thái / Thực hiện</th></tr>
+                    </thead>
+                    <tbody id="mySurveyTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="user.js"></script>
+</body>
+</html>

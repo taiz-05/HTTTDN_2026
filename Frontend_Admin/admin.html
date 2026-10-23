@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Server - Quản trị Hệ thống</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h2>PORTAL 1: ADMIN SERVER (QUẢN TRỊ HỆ THỐNG)</h2>
+        <div>
+            <span id="adminName" style="margin-right:15px;"></span>
+            <button class="btn btn-danger" onclick="logout()">Đăng xuất</button>
+        </div>
+    </header>
+    <div class="container">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('tabProducts', this)">1. Quản lý Sản phẩm (Lọc & Sắp xếp)</button>
+            <button class="tab-btn" onclick="switchTab('tabSuppliers', this)">2. Quản lý Nhà cung cấp</button>
+            <button class="tab-btn" onclick="switchTab('tabAccounts', this)">3. Tài khoản & Phân quyền</button>
+        </div>
+
+        <!-- TAB 1: SẢN PHẨM -->
+        <div id="tabProducts" class="tab-content">
+            <div class="card">
+                <h3>Bộ lọc Tìm kiếm Nâng cao & Sắp xếp Sản phẩm</h3>
+                <div class="grid-form" style="margin-top:10px;">
+                    <input type="text" id="fKeyword" placeholder="Từ khóa mã/tên SP...">
+                    <select id="fCategory"><option value="">-- Tất cả Danh mục --</option></select>
+                    <select id="fSupplier"><option value="">-- Tất cả Nhà cung cấp --</option></select>
+                    <input type="number" id="fMinPrice" placeholder="Giá từ (VNĐ)">
+                    <input type="number" id="fMaxPrice" placeholder="Giá đến (VNĐ)">
+                    <select id="fSort">
+                        <option value="">Mới nhất</option>
+                        <option value="price_asc">Giá tăng dần</option>
+                        <option value="price_desc">Giá giảm dần</option>
+                        <option value="name_asc">Tên A-Z</option>
+                        <option value="stock_desc">Tồn kho nhiều nhất</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="loadProducts()">Lọc & Tìm kiếm</button>
+            </div>
+
+            <div class="card">
+                <h3>Thêm Sản phẩm mới</h3>
+                <div class="grid-form" style="margin-top:10px;">
+                    <input type="text" id="pCode" placeholder="Mã SP (VD: SP005)">
+                    <input type="text" id="pName" placeholder="Tên sản phẩm">
+                    <select id="pCat"></select>
+                    <select id="pSup"></select>
+                    <input type="number" id="pPrice" placeholder="Giá bán">
+                    <input type="number" id="pStock" placeholder="Tồn kho">
+                </div>
+                <button class="btn btn-success" onclick="createProduct()">+ Thêm Sản phẩm</button>
+                <table>
+                    <thead>
+                        <tr><th>Mã SP</th><th>Tên Sản phẩm</th><th>Danh mục</th><th>Nhà cung cấp</th><th>Giá bán</th><th>Tồn kho</th><th>Trạng thái</th><th>Xóa</th></tr>
+                    </thead>
+                    <tbody id="productTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 2: NHÀ CUNG CẤP -->
+        <div id="tabSuppliers" class="tab-content" style="display:none;">
+            <div class="card">
+                <h3>Quản lý Nhà cung cấp</h3>
+                <div class="grid-form" style="margin-top:10px;">
+                    <input type="text" id="sCode" placeholder="Mã NCC (VD: NCC004)">
+                    <input type="text" id="sName" placeholder="Tên Nhà cung cấp">
+                    <input type="text" id="sPhone" placeholder="Số điện thoại">
+                    <input type="text" id="sAddress" placeholder="Địa chỉ">
+                </div>
+                <button class="btn btn-success" onclick="createSupplier()">+ Thêm Nhà cung cấp</button>
+                <table>
+                    <thead>
+                        <tr><th>Mã NCC</th><th>Tên Nhà cung cấp</th><th>Điện thoại</th><th>Địa chỉ</th><th>Thao tác</th></tr>
+                    </thead>
+                    <tbody id="supplierTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 3: TÀI KHOẢN & PHÂN QUYỀN -->
+        <div id="tabAccounts" class="tab-content" style="display:none;">
+            <div class="card">
+                <h3>Thêm Tài khoản & Cấp quyền Hệ thống</h3>
+                <div class="grid-form" style="margin-top:10px;">
+                    <input type="text" id="aUser" placeholder="Username">
+                    <input type="text" id="aName" placeholder="Họ và tên">
+                    <input type="email" id="aEmail" placeholder="Email">
+                    <select id="aRole"></select>
+                </div>
+                <button class="btn btn-success" onclick="createAccount()">+ Tạo Tài khoản (MK mặc định: 123456)</button>
+                <table>
+                    <thead>
+                        <tr><th>ID</th><th>Username</th><th>Họ tên</th><th>Email</th><th>Phân quyền (Role)</th><th>Xóa</th></tr>
+                    </thead>
+                    <tbody id="accountTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

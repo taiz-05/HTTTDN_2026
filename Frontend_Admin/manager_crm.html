@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý CRM - SGU Tech</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header style="background:#0f766e;">
+        <h2>PORTAL 2: HỆ THỐNG QUẢN LÝ QUAN HỆ KHÁCH HÀNG (CRM MANAGER)</h2>
+        <div>
+            <span id="managerName" style="margin-right:15px;"></span>
+            <button class="btn btn-danger" onclick="logout()">Đăng xuất</button>
+        </div>
+    </header>
+    <div class="container">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('tabCustomers', this)">1. Quản lý Khách hàng (Thêm/Xóa/Khóa)</button>
+            <button class="tab-btn" onclick="switchTab('tabFeedbacks', this)">2. Tiếp nhận Phản hồi Sản phẩm</button>
+            <button class="tab-btn" onclick="switchTab('tabDemographics', this)">3. Báo cáo Độ tuổi & Sở thích</button>
+            <button class="tab-btn" onclick="switchTab('tabSurveys', this)">4. Khảo sát SP Mới & Thống kê</button>
+        </div>
+
+        <!-- MỤC 4.1.1, 4.1.2, 4.1.3: QUẢN LÝ KHÁCH HÀNG -->
+        <div id="tabCustomers" class="tab-content">
+            <div class="card">
+                <h3>Thêm Khách hàng mới</h3>
+                <div class="grid-form" style="margin-top:10px;">
+                    <input type="text" id="cUser" placeholder="Username">
+                    <input type="text" id="cName" placeholder="Họ tên khách hàng">
+                    <input type="text" id="cPhone" placeholder="Số điện thoại">
+                    <input type="number" id="cAge" placeholder="Độ tuổi (VD: 22)">
+                    <select id="cInterest">
+                        <option value="Gaming">Gaming</option>
+                        <option value="Văn phòng">Văn phòng</option>
+                        <option value="Đồ họa">Đồ họa</option>
+                        <option value="Lập trình">Lập trình</option>
+                    </select>
+                </div>
+                <button class="btn btn-success" onclick="addCustomer()">+ Thêm Khách hàng</button>
+                <table>
+                    <thead>
+                        <tr><th>Username</th><th>Họ tên</th><th>SĐT</th><th>Tuổi</th><th>Sở thích</th><th>Trạng thái</th><th>Hành động</th></tr>
+                    </thead>
+                    <tbody id="customerList"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- MỤC 4.1.4: TIẾP NHẬN PHẢN HỒI -->
+        <div id="tabFeedbacks" class="tab-content" style="display:none;">
+            <div class="card">
+                <h3>Danh sách Phản hồi của Khách hàng về Sản phẩm</h3>
+                <table>
+                    <thead>
+                        <tr><th>Khách hàng</th><th>Sản phẩm</th><th>Đánh giá</th><th>Ý kiến khách hàng</th><th>Phản hồi từ Quản lý</th><th>Trạng thái</th><th>Trả lời</th></tr>
+                    </thead>
+                    <tbody id="feedbackList"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- MỤC 4.1.5: BÁO CÁO ĐỘ TUỔI & SỞ THÍCH -->
+        <div id="tabDemographics" class="tab-content" style="display:none;">
+            <div class="card">
+                <h3>Báo cáo Thống kê Độ tuổi & Sở thích Khách hàng</h3>
+                <p style="margin:10px 0;">Tổng số hồ sơ khách hàng: <b id="totalCus">0</b></p>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:25px; margin-top:15px;">
+                    <div>
+                        <h4>1. Tỷ lệ theo Nhóm Độ tuổi</h4>
+                        <div id="ageReportBox" style="margin-top:10px;"></div>
+                    </div>
+                    <div>
+                        <h4>2. Tỷ lệ theo Sở thích Tiêu dùng</h4>
+                        <div id="interestReportBox" style="margin-top:10px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MỤC 4.1.6 & 4.1.7: TẠO KHẢO SÁT & THỐNG KÊ -->
+        <div id="tabSurveys" class="tab-content" style="display:none;">
+            <div class="card">
+                <h3>Phát hành Bảng Khảo sát Ra mắt Sản phẩm mới</h3>
+                <div class="grid-form" style="margin-top:10px;">
+                    <input type="text" id="svTitle" placeholder="Tiêu đề chiến dịch khảo sát">
+                    <input type="text" id="svProduct" placeholder="Tên sản phẩm dự kiến ra mắt">
+                    <input type="number" id="svPrice" placeholder="Giá bán dự kiến (VNĐ)">
+                    <input type="text" id="svDesc" placeholder="Mô tả tính năng nổi bật">
+                </div>
+                <button class="btn btn-success" onclick="createSurvey()">+ Phát hành Khảo sát đến Khách hàng</button>
+                <table>
+                    <thead>
+                        <tr><th>Tiêu đề Khảo sát</th><th>Sản phẩm Mục tiêu</th><th>Giá dự kiến</th><th>Số lượt làm</th><th>Xem Thống kê</th></tr>
+                    </thead>
+                    <tbody id="surveyList"></tbody>
+                </table>
+            </div>
+
+            <div class="card" id="surveyStatCard" style="display:none; border:2px solid #0f766e;">
+                <h3 id="statTitle">Kết quả Thống kê Khảo sát</h3>
+                <p id="statSummary" style="margin:10px 0; font-weight:bold; color:#0f766e;"></p>
+                <table>
+                    <thead>
+                        <tr><th>Khách hàng</th><th>Điểm hài lòng</th><th>Ý định mua</th><th>Ý kiến đóng góp về giá & tính năng</th></tr>
+                    </thead>
+                    <tbody id="statResponses"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="manager_crm.js"></script>
+</body>
+</html>

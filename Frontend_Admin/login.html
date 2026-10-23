@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng nhập Hệ thống - SGU Tech</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body style="display:flex; justify-content:center; align-items:center; height:100vh;">
+    <div class="card" style="width:400px;">
+        <h2 style="margin-bottom:15px; text-align:center;">CỔNG ĐĂNG NHẬP HỆ THỐNG</h2>
+        <div style="margin-bottom:12px;">
+            <label>Tên đăng nhập</label>
+            <input type="text" id="username" placeholder="admin hoặc quanly">
+        </div>
+        <div style="margin-bottom:15px;">
+            <label>Mật khẩu</label>
+            <input type="password" id="password" value="123456">
+        </div>
+        <button class="btn" style="width:100%;" onclick="handleLogin()">Đăng Nhập</button>
+        <p style="margin-top:15px; text-align:center; font-size:14px;">
+            Bạn là Khách hàng? <a href="user.html">Vào Cổng Khách Hàng tại đây</a>
+        </p>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:5000/api/admin/auth/login";
+        async function handleLogin() {
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const res = await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+            if (!res.ok) return alert(data.message || "Đăng nhập thất bại!");
+
+            localStorage.setItem("currentUser", JSON.stringify(data));
+            if (data.roleName === "Admin") window.location.href = "admin.html";
+            else if (data.roleName === "Manager") window.location.href = "manager_crm.html";
+            else window.location.href = "user.html";
+        }
+    </script>
+</body>
+</html>
