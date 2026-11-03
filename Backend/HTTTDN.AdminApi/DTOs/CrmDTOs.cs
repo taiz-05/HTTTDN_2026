@@ -42,6 +42,9 @@ namespace HTTTDN.AdminApi.DTOs
         public string? Description { get; set; }
         public string TargetProduct { get; set; } = string.Empty;
         public decimal ExpectedPrice { get; set; }
+        public string DurationType { get; set; } = "NoLimit"; // "NoLimit" | "Days" | "Date"
+        public int? DurationDays { get; set; }
+        public DateTime? ExpiresAt { get; set; }
     }
 
     public class SurveyAnswerDto

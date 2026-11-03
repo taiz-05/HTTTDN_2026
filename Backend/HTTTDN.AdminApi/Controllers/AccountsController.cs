@@ -60,23 +60,47 @@ namespace HTTTDN.AdminApi.Controllers
         }
 
         [HttpPut("{id}/role")]
-        public async Task<IActionResult> UpdateRole(int id, [FromBody] UpdateRoleDto dto)
+        public async Task<IActionResult> UpdateRole(int id, [FromBody] UpdateRoleDto dto, [FromQuery] int? currentUserId)
         {
-            var acc = await _context.Accounts.FindAsync(id);
-            if (acc == null) return NotFound();
+            var acc = await _context.Accounts
+                .Include(a => a.Role)
+                .FirstOrDefaultAsync(a => a.AccountId == id);
+
+            if (acc == null) return NotFound(new { message = "Không tìm thấy tài khoản!" });
+
+            // Không cho phép thay đổi quyền của một Admin khác
+            if (acc.Role?.RoleName == "Admin" && currentUserId.HasValue && acc.AccountId != currentUserId.Value)
+            {
+                return BadRequest(new { message = "Bạn không có quyền thay đổi vai trò của một Admin khác!" });
+            }
+
             acc.RoleId = dto.RoleId;
             await _context.SaveChangesAsync();
             return Ok(new { message = "Cập nhật phân quyền thành công!" });
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id, [FromQuery] int? currentUserId)
         {
-            var acc = await _context.Accounts.FindAsync(id);
-            if (acc == null) return NotFound();
+            var acc = await _context.Accounts
+                .Include(a => a.Role)
+                .FirstOrDefaultAsync(a => a.AccountId == id);
+
+            if (acc == null)
+                return NotFound(new { message = "Không tìm thấy tài khoản!" });
+
+            // RÀNG BUỘC: Nếu tài khoản cần xóa là Admin thì chỉ chính chủ mới được tự xóa
+            if (acc.Role?.RoleName == "Admin")
+            {
+                if (!currentUserId.HasValue || acc.AccountId != currentUserId.Value)
+                {
+                    return BadRequest(new { message = "Không thể xóa tài khoản của Admin khác! Bạn chỉ có thể tự xóa tài khoản Admin của chính mình." });
+                }
+            }
+
             _context.Accounts.Remove(acc);
             await _context.SaveChangesAsync();
-            return Ok(new { message = "Đã xóa tài khoản!" });
+            return Ok(new { message = "Đã xóa tài khoản thành công!" });
         }
     }
 }

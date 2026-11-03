@@ -22,5 +22,6 @@ namespace HTTTDN.AdminApi.Models
         public int StockQuantity { get; set; }
         public string Unit { get; set; } = "Cái";
         public string Status { get; set; } = "Đang bán";
+        public string? ImageUrl { get; set; }
     }
 }

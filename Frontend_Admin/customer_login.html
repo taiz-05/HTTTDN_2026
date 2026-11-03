@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập Khách hàng — SGU Tech CRM</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="auth-wrapper">
+        <div class="auth-card" style="max-width: 460px;">
+            <div class="auth-brand">
+                <div class="logo-mark lime">C</div>
+                <h2>Cổng Thành Viên SGU Tech</h2>
+                <p>Đăng nhập hoặc tạo tài khoản khách hàng để đánh giá & khảo sát</p>
+            </div>
+
+            <div class="tabs" style="width: 100%; display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 20px;">
+                <button class="tab-btn active" id="tabLoginBtn" onclick="switchAuthMode('login')">Đăng nhập</button>
+                <button class="tab-btn" id="tabRegBtn" onclick="switchAuthMode('register')">Đăng ký mới</button>
+            </div>
+
+            <!-- FORM 1: ĐĂNG NHẬP KHÁCH HÀNG -->
+            <div id="loginBox">
+                <div style="margin-bottom: 14px;">
+                    <label for="lUser">Tên đăng nhập khách hàng</label>
+                    <input type="text" id="lUser" placeholder="VD: khachhang1">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label for="lPass">Mật khẩu</label>
+                    <input type="password" id="lPass" value="123456">
+                </div>
+                <button class="btn" style="width: 100%; padding: 10px;" onclick="loginCustomer()">Đăng nhập Cổng Khách hàng</button>
+            </div>
+
+            <!-- FORM 2: ĐĂNG KÝ TÀI KHOẢN KHÁCH HÀNG MỚI -->
+            <div id="registerBox" style="display: none;">
+                <div class="grid-form" style="grid-template-columns: 1fr 1fr; margin-top: 0;">
+                    <div>
+                        <label>Tên đăng nhập</label>
+                        <input type="text" id="rUser" placeholder="Username">
+                    </div>
+                    <div>
+                        <label>Mật khẩu</label>
+                        <input type="password" id="rPass" placeholder="Mật khẩu">
+                    </div>
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <label>Họ và tên đầy đủ</label>
+                    <input type="text" id="rName" placeholder="Nhập họ và tên">
+                </div>
+                <div class="grid-form" style="grid-template-columns: 1fr 1fr; margin-top: 0;">
+                    <div>
+                        <label>Số điện thoại</label>
+                        <input type="text" id="rPhone" placeholder="SĐT liên hệ">
+                    </div>
+                    <div>
+                        <label>Độ tuổi</label>
+                        <input type="number" id="rAge" placeholder="VD: 21" value="21">
+                    </div>
+                </div>
+                <div style="margin-bottom: 18px;">
+                    <label>Nhóm sản phẩm yêu thích</label>
+                    <select id="rInterest">
+                        <option value="Gaming">Sở thích: Gaming</option>
+                        <option value="Văn phòng">Sở thích: Văn phòng</option>
+                        <option value="Đồ họa">Sở thích: Đồ họa</option>
+                        <option value="Lập trình">Sở thích: Lập trình</option>
+                    </select>
+                </div>
+                <button class="btn btn-success" style="width: 100%; padding: 10px;" onclick="registerCustomer()">Hoàn tất Đăng ký Tài khoản</button>
+            </div>
+
+            <div style="margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--border-color); text-align: center; font-size: 13px; color: var(--text-muted);">
+                Dành cho Quản trị viên & Quản lý CRM: <a href="login.html">Đăng nhập Nội bộ →</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CUS_API = "http://localhost:5000/api/customer";
+
+        window.onload = () => {
+            const currentCus = JSON.parse(localStorage.getItem("currentCustomer") || "null");
+            if (currentCus) {
+                window.location.href = "user.html";
+            }
+        };
+
+        function switchAuthMode(mode) {
+            const isLogin = mode === 'login';
+            document.getElementById("loginBox").style.display = isLogin ? "block" : "none";
+            document.getElementById("registerBox").style.display = isLogin ? "none" : "block";
+            document.getElementById("tabLoginBtn").classList.toggle("active", isLogin);
+            document.getElementById("tabRegBtn").classList.toggle("active", !isLogin);
+        }
+
+        async function loginCustomer() {
+            const username = document.getElementById("lUser").value.trim();
+            const password = document.getElementById("lPass").value.trim();
+            if (!username || !password) return alert("Vui lòng nhập tên đăng nhập và mật khẩu!");
+
+            const res = await fetch(`${CUS_API}/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+            if (!res.ok) return alert(data.message || "Đăng nhập thất bại!");
+
+            localStorage.setItem("currentCustomer", JSON.stringify(data));
+            window.location.href = "user.html";
+        }
+
+        async function registerCustomer() {
+            const username = document.getElementById("rUser").value.trim();
+            const password = document.getElementById("rPass").value.trim();
+            const fullName = document.getElementById("rName").value.trim();
+
+            if (!username || !password || !fullName) {
+                return alert("Vui lòng nhập đầy đủ Username, Mật khẩu và Họ tên!");
+            }
+
+            const body = {
+                username,
+                password,
+                fullName,
+                phone: document.getElementById("rPhone").value.trim(),
+                age: Number(document.getElementById("rAge").value || 20),
+                interest: document.getElementById("rInterest").value
+            };
+
+            const res = await fetch(`${CUS_API}/register`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+            if (!res.ok) return alert(data.message || "Lỗi đăng ký!");
+
+            alert(data.message + " Mời bạn đăng nhập.");
+            document.getElementById("lUser").value = username;
+            document.getElementById("lPass").value = password;
+            switchAuthMode('login');
+        }
+    </script>
+</body>
+</html>

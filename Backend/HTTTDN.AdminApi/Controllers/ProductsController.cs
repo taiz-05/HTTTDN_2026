@@ -55,6 +55,8 @@ namespace HTTTDN.AdminApi.Controllers
                 _ => query.OrderByDescending(p => p.ProductId)
             };
 
+            var defaultImg = "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600&auto=format&fit=crop&q=80";
+
             var result = await query.Select(p => new
             {
                 p.ProductId,
@@ -68,7 +70,10 @@ namespace HTTTDN.AdminApi.Controllers
                 p.CostPrice,
                 p.StockQuantity,
                 p.Unit,
-                p.Status
+                p.Status,
+                ImageUrl = string.IsNullOrEmpty(p.ImageUrl) ? defaultImg : p.ImageUrl,
+                ReviewCount = _context.Feedbacks.Count(f => f.ProductId == p.ProductId),
+                AvgRating = _context.Feedbacks.Where(f => f.ProductId == p.ProductId).Select(f => (double?)f.Rating).Average() ?? 5.0
             }).ToListAsync();
 
             return Ok(result);
@@ -87,7 +92,10 @@ namespace HTTTDN.AdminApi.Controllers
                 CostPrice = dto.CostPrice,
                 StockQuantity = dto.StockQuantity,
                 Unit = dto.Unit,
-                Status = dto.Status
+                Status = dto.Status,
+                ImageUrl = string.IsNullOrWhiteSpace(dto.ImageUrl)
+                    ? "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600&auto=format&fit=crop&q=80"
+                    : dto.ImageUrl.Trim()
             };
             _context.Products.Add(prod);
             await _context.SaveChangesAsync();

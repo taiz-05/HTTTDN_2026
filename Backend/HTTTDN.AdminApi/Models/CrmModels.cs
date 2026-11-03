@@ -44,6 +44,7 @@ namespace HTTTDN.AdminApi.Models
         public decimal ExpectedPrice { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public bool IsActive { get; set; } = true;
+        public DateTime? ExpiresAt { get; set; } // NULL = Không thời hạn
     }
 
     public class SurveyResponse

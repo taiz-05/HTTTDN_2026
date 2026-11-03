@@ -17,7 +17,6 @@ namespace HTTTDN.AdminApi.Controllers
             _context = context;
         }
 
-        // 1. Lấy danh sách khách hàng kèm hồ sơ nhân khẩu học
         [HttpGet("customers")]
         public async Task<IActionResult> GetCustomers()
         {
@@ -41,7 +40,6 @@ namespace HTTTDN.AdminApi.Controllers
             return Ok(customers);
         }
 
-        // 2. Thêm khách hàng mới (Mục 4.1.1)
         [HttpPost("customers")]
         public async Task<IActionResult> CreateCustomer([FromBody] CustomerRegisterDto dto)
         {
@@ -82,7 +80,6 @@ namespace HTTTDN.AdminApi.Controllers
             return Ok(new { message = "Thêm khách hàng mới thành công!", accountId = account.AccountId });
         }
 
-        // 3. Xóa khách hàng (Mục 4.1.2)
         [HttpDelete("customers/{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)
         {
@@ -94,7 +91,6 @@ namespace HTTTDN.AdminApi.Controllers
             return Ok(new { message = "Đã xóa khách hàng thành công." });
         }
 
-        // 4. Khóa / Mở khóa tài khoản khách hàng (Mục 4.1.3)
         [HttpPut("customers/{id}/toggle-status")]
         public async Task<IActionResult> ToggleCustomerStatus(int id)
         {
@@ -111,7 +107,6 @@ namespace HTTTDN.AdminApi.Controllers
             });
         }
 
-        // 5. Tiếp nhận và trả lời phản hồi khách hàng (Mục 4.1.4)
         [HttpGet("feedbacks")]
         public async Task<IActionResult> GetFeedbacks()
         {
@@ -126,6 +121,7 @@ namespace HTTTDN.AdminApi.Controllers
                     CustomerName = f.Account != null ? f.Account.FullName : "Khách hàng",
                     f.ProductId,
                     ProductName = f.Product != null ? f.Product.ProductName : "Sản phẩm",
+                    ProductImage = f.Product != null ? f.Product.ImageUrl : null,
                     f.Rating,
                     f.Comment,
                     f.AdminReply,
@@ -150,7 +146,6 @@ namespace HTTTDN.AdminApi.Controllers
             return Ok(new { message = "Đã gửi phản hồi cho khách hàng." });
         }
 
-        // 6. Báo cáo tỷ lệ độ tuổi và sở thích khách hàng (Mục 4.1.5)
         [HttpGet("reports/demographics")]
         public async Task<IActionResult> GetDemographicsReport()
         {
@@ -177,10 +172,11 @@ namespace HTTTDN.AdminApi.Controllers
             return Ok(new { totalCustomers = total, ageStats, interestStats });
         }
 
-        // 7. Tạo khảo sát sản phẩm mới & Thống kê kết quả (Mục 4.1.6 & 4.1.7)
+        // 7. QUẢN LÝ KHẢO SÁT (CÓ THỜI HẠN + KHÓA/MỞ KHÓA + XÓA)
         [HttpGet("surveys")]
         public async Task<IActionResult> GetSurveys()
         {
+            var now = DateTime.Now;
             var surveys = await _context.Surveys
                 .OrderByDescending(s => s.CreatedAt)
                 .Select(s => new
@@ -192,6 +188,8 @@ namespace HTTTDN.AdminApi.Controllers
                     s.ExpectedPrice,
                     s.CreatedAt,
                     s.IsActive,
+                    s.ExpiresAt,
+                    IsExpired = s.ExpiresAt.HasValue && s.ExpiresAt.Value < now,
                     TotalResponses = _context.SurveyResponses.Count(r => r.SurveyId == s.SurveyId)
                 })
                 .ToListAsync();
@@ -202,6 +200,17 @@ namespace HTTTDN.AdminApi.Controllers
         [HttpPost("surveys")]
         public async Task<IActionResult> CreateSurvey([FromBody] SurveyCreateDto dto)
         {
+            DateTime? expiresAt = null;
+            if (dto.DurationType == "Days" && dto.DurationDays.HasValue && dto.DurationDays.Value > 0)
+            {
+                expiresAt = DateTime.Now.AddDays(dto.DurationDays.Value);
+            }
+            else if (dto.DurationType == "Date" && dto.ExpiresAt.HasValue)
+            {
+                // Đặt hạn tới cuối ngày (23:59:59) của ngày được chọn
+                expiresAt = dto.ExpiresAt.Value.Date.AddDays(1).AddSeconds(-1);
+            }
+
             var survey = new Survey
             {
                 Title = dto.Title,
@@ -209,13 +218,51 @@ namespace HTTTDN.AdminApi.Controllers
                 TargetProduct = dto.TargetProduct,
                 ExpectedPrice = dto.ExpectedPrice,
                 CreatedAt = DateTime.Now,
-                IsActive = true
+                IsActive = true,
+                ExpiresAt = expiresAt
             };
 
             _context.Surveys.Add(survey);
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "Đã phát hành bảng khảo sát mới!", surveyId = survey.SurveyId });
+        }
+
+        // API KHÓA / MỞ KHÓA KHẢO SÁT
+        [HttpPut("surveys/{id}/toggle-lock")]
+        public async Task<IActionResult> ToggleSurveyLock(int id)
+        {
+            var survey = await _context.Surveys.FindAsync(id);
+            if (survey == null)
+                return NotFound(new { message = "Không tìm thấy khảo sát!" });
+
+            survey.IsActive = !survey.IsActive;
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = survey.IsActive ? "Đã mở khóa khảo sát cho khách hàng tham gia!" : "Đã khóa khảo sát!",
+                isActive = survey.IsActive
+            });
+        }
+
+        [HttpDelete("surveys/{id}")]
+        public async Task<IActionResult> DeleteSurvey(int id)
+        {
+            var survey = await _context.Surveys.FindAsync(id);
+            if (survey == null)
+                return NotFound(new { message = "Không tìm thấy bảng khảo sát cần xóa!" });
+
+            var responses = await _context.SurveyResponses.Where(r => r.SurveyId == id).ToListAsync();
+            if (responses.Any())
+            {
+                _context.SurveyResponses.RemoveRange(responses);
+            }
+
+            _context.Surveys.Remove(survey);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Đã xóa bảng khảo sát thành công!" });
         }
 
         [HttpGet("surveys/{id}/statistics")]

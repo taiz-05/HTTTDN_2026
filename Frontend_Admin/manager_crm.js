@@ -1,4 +1,7 @@
 const CRM_API = "http://localhost:5000/api/admin/crm";
+let currentViewedSurveyId = null;
+let crmStarChart = null;
+let crmProdChart = null;
 
 window.onload = () => {
     const user = JSON.parse(localStorage.getItem("currentUser") || "null");
@@ -14,9 +17,15 @@ window.onload = () => {
 
 function switchTab(id, btn) {
     document.querySelectorAll(".tab-content").forEach(el => el.style.display = "none");
-    document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
+    document.querySelectorAll(".sherah-nav-item").forEach(el => el.classList.remove("active"));
     document.getElementById(id).style.display = "block";
     btn.classList.add("active");
+}
+
+function onDurationTypeChange() {
+    const type = document.getElementById("svDurationType").value;
+    document.getElementById("svDaysBox").style.display = type === "Days" ? "block" : "none";
+    document.getElementById("svDateBox").style.display = type === "Date" ? "block" : "none";
 }
 
 async function loadCustomers() {
@@ -29,9 +38,9 @@ async function loadCustomers() {
             <td>${c.profile?.age || "-"}</td>
             <td>${c.profile?.interest || "-"}</td>
             <td><span class="badge ${c.isActive ? 'badge-active' : 'badge-locked'}">${c.isActive ? 'Hoạt động' : 'Đã khóa'}</span></td>
-            <td>
-                <button class="btn btn-warning" onclick="toggleLock(${c.accountId})">${c.isActive ? 'Khóa TK' : 'Mở khóa'}</button>
-                <button class="btn btn-danger" onclick="deleteCustomer(${c.accountId})">Xóa</button>
+            <td style="display:flex; gap:8px;">
+                <button class="btn btn-warning" onclick="toggleLock(${c.accountId})">${c.isActive ? '🔒 Khóa TK' : '🔓 Mở khóa'}</button>
+                <button class="btn btn-danger" onclick="deleteCustomer(${c.accountId})">🗑️ Xóa</button>
             </td>
         </tr>
     `).join("");
@@ -67,15 +76,63 @@ async function deleteCustomer(id) {
 
 async function loadFeedbacks() {
     const list = await (await fetch(`${CRM_API}/feedbacks`)).json();
+    document.getElementById("crmTotalReviewsBadge").innerText = `${list.length} lượt đánh giá`;
+
+    const starCounts = [1, 2, 3, 4, 5].map(s => list.filter(f => f.rating === s).length);
+    const ctx1 = document.getElementById("crmRatingBarChart").getContext("2d");
+    if (crmStarChart) crmStarChart.destroy();
+    crmStarChart = new Chart(ctx1, {
+        type: "bar",
+        data: {
+            labels: ["1 Sao", "2 Sao", "3 Sao", "4 Sao", "5 Sao"],
+            datasets: [{
+                label: "Số lượt đánh giá",
+                data: starCounts,
+                backgroundColor: ["#ef4444", "#f97316", "#eab308", "#1e3a8a", "#65a30d"],
+                borderRadius: 8,
+                barThickness: 34
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+    });
+
+    const prodCounts = {};
+    list.forEach(f => {
+        const p = f.productName || "Khác";
+        prodCounts[p] = (prodCounts[p] || 0) + 1;
+    });
+    const ctx2 = document.getElementById("crmProductReviewChart").getContext("2d");
+    if (crmProdChart) crmProdChart.destroy();
+    crmProdChart = new Chart(ctx2, {
+        type: "doughnut",
+        data: {
+            labels: Object.keys(prodCounts),
+            datasets: [{
+                data: Object.values(prodCounts),
+                backgroundColor: ["#1e3a8a", "#65a30d", "#0ea5e9", "#f59e0b", "#6366f1"]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: "bottom" } }
+        }
+    });
+
     document.getElementById("feedbackList").innerHTML = list.map(f => `
         <tr>
             <td><b>${f.customerName}</b></td>
             <td>${f.productName}</td>
-            <td>${"⭐".repeat(f.rating)}</td>
+            <td style="color:#f59e0b; font-weight:700;">${"⭐".repeat(f.rating)}</td>
             <td>${f.comment}</td>
             <td>${f.adminReply || "<i>Chưa phản hồi</i>"}</td>
-            <td>${f.status}</td>
-            <td><button class="btn" onclick="replyFeedback(${f.feedbackId})">Trả lời</button></td>
+            <td><span class="badge ${f.status.includes('Đã') ? 'badge-active' : 'badge-locked'}">${f.status}</span></td>
+            <td><button class="btn" onclick="replyFeedback(${f.feedbackId})">💬 Trả lời</button></td>
         </tr>
     `).join("");
 }
@@ -101,46 +158,126 @@ async function loadDemographics() {
     const o30 = Math.round((data.ageStats.over30 / total) * 100);
 
     document.getElementById("ageReportBox").innerHTML = `
-        <div>Dưới 20 tuổi: ${data.ageStats.under20} khách (${u20}%)</div>
-        <div class="progress-bar"><div class="progress-fill" style="width:${u20}%">${u20}%</div></div>
-        <div>Từ 20 - 30 tuổi: ${data.ageStats.from20To30} khách (${f20_30}%)</div>
-        <div class="progress-bar"><div class="progress-fill" style="width:${f20_30}%">${f20_30}%</div></div>
-        <div>Trên 30 tuổi: ${data.ageStats.over30} khách (${o30}%)</div>
-        <div class="progress-bar"><div class="progress-fill" style="width:${o30}%">${o30}%</div></div>
+        <div>Dưới 20 tuổi: <b>${data.ageStats.under20}</b> khách (${u20}%)</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${u20}%"></div></div>
+        <div>Từ 20 - 30 tuổi: <b>${data.ageStats.from20To30}</b> khách (${f20_30}%)</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${f20_30}%"></div></div>
+        <div>Trên 30 tuổi: <b>${data.ageStats.over30}</b> khách (${o30}%)</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${o30}%"></div></div>
     `;
 
     document.getElementById("interestReportBox").innerHTML = data.interestStats.map(i => `
         <div>Sở thích <b>${i.interest}</b>: ${i.count} khách (${i.percentage}%)</div>
-        <div class="progress-bar"><div class="progress-fill" style="background:#0f766e; width:${i.percentage}%">${i.percentage}%</div></div>
+        <div class="progress-bar"><div class="progress-fill" style="background:#65a30d; width:${i.percentage}%"></div></div>
     `).join("");
 }
 
 async function loadSurveys() {
     const list = await (await fetch(`${CRM_API}/surveys`)).json();
-    document.getElementById("surveyList").innerHTML = list.map(s => `
+    document.getElementById("surveyList").innerHTML = list.map(s => {
+        let expireText = `<span class="badge badge-active">♾️ Không thời hạn</span>`;
+        if (s.expiresAt) {
+            const d = new Date(s.expiresAt).toLocaleDateString("vi-VN");
+            expireText = s.isExpired
+                ? `<span class="badge badge-locked">⏰ Đã hết hạn (${d})</span>`
+                : `<span class="portal-tag">📅 Đến: ${d}</span>`;
+        }
+
+        let statusBadge = "";
+        if (!s.isActive) {
+            statusBadge = `<span class="badge badge-locked">🔒 Đã khóa</span>`;
+        } else if (s.isExpired) {
+            statusBadge = `<span class="badge badge-locked">Hết thời hạn</span>`;
+        } else {
+            statusBadge = `<span class="badge badge-active">Đang mở</span>`;
+        }
+
+        return `
         <tr>
             <td><b>${s.title}</b><br><small>${s.description || ""}</small></td>
             <td>${s.targetProduct}</td>
-            <td>${Number(s.expectedPrice).toLocaleString()} đ</td>
+            <td><b>${Number(s.expectedPrice).toLocaleString()} đ</b></td>
+            <td>${expireText}</td>
+            <td>${statusBadge}</td>
             <td><b>${s.totalResponses}</b> lượt</td>
-            <td><button class="btn" onclick="viewSurveyStats(${s.surveyId})">Thống kê KQ</button></td>
+            <td style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="btn" onclick="viewSurveyStats(${s.surveyId})">📊 Thống kê</button>
+                <button class="btn btn-warning" onclick="toggleSurveyLock(${s.surveyId})">${s.isActive ? '🔒 Khóa' : '🔓 Mở khóa'}</button>
+                <button class="btn btn-danger" onclick="deleteSurvey(${s.surveyId})">🗑️ Xóa</button>
+            </td>
         </tr>
-    `).join("");
+        `;
+    }).join("");
 }
 
 async function createSurvey() {
+    const title = document.getElementById("svTitle").value.trim();
+    const targetProduct = document.getElementById("svProduct").value.trim();
+    const expectedPrice = Number(document.getElementById("svPrice").value);
+    const description = document.getElementById("svDesc").value.trim();
+    const durationType = document.getElementById("svDurationType").value;
+    const durationDays = Number(document.getElementById("svDurationDays").value || 7);
+    const expireDateVal = document.getElementById("svExpireDate").value;
+
+    if (!title || !targetProduct) {
+        return alert("Vui lòng nhập đầy đủ Tiêu đề khảo sát và Tên sản phẩm dự kiến!");
+    }
+
+    if (durationType === "Date" && !expireDateVal) {
+        return alert("Vui lòng chọn ngày kết thúc khảo sát!");
+    }
+
     const body = {
-        title: document.getElementById("svTitle").value,
-        targetProduct: document.getElementById("svProduct").value,
-        expectedPrice: Number(document.getElementById("svPrice").value),
-        description: document.getElementById("svDesc").value
+        title,
+        targetProduct,
+        expectedPrice,
+        description,
+        durationType,
+        durationDays: durationType === "Days" ? durationDays : null,
+        expiresAt: durationType === "Date" ? expireDateVal : null
     };
-    await fetch(`${CRM_API}/surveys`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+
+    await fetch(`${CRM_API}/surveys`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+    });
+
+    document.getElementById("svTitle").value = "";
+    document.getElementById("svProduct").value = "";
+    document.getElementById("svPrice").value = "";
+    document.getElementById("svDesc").value = "";
+
     alert("Đã phát hành khảo sát tới toàn bộ tài khoản khách hàng!");
     loadSurveys();
 }
 
+async function toggleSurveyLock(id) {
+    const res = await fetch(`${CRM_API}/surveys/${id}/toggle-lock`, { method: "PUT" });
+    const data = await res.json();
+    alert(data.message);
+    loadSurveys();
+}
+
+async function deleteSurvey(id) {
+    if (!confirm("Bạn có chắc chắn muốn xóa khảo sát này và toàn bộ kết quả phản hồi liên quan không?")) return;
+
+    const res = await fetch(`${CRM_API}/surveys/${id}`, { method: "DELETE" });
+    const data = await res.json();
+
+    if (!res.ok) return alert(data.message || "Không thể xóa khảo sát!");
+
+    if (currentViewedSurveyId === id) {
+        document.getElementById("surveyStatCard").style.display = "none";
+        currentViewedSurveyId = null;
+    }
+
+    alert(data.message);
+    loadSurveys();
+}
+
 async function viewSurveyStats(id) {
+    currentViewedSurveyId = id;
     const s = await (await fetch(`${CRM_API}/surveys/${id}/statistics`)).json();
     document.getElementById("surveyStatCard").style.display = "block";
     document.getElementById("statTitle").innerText = `Thống kê: ${s.title} (${s.targetProduct})`;

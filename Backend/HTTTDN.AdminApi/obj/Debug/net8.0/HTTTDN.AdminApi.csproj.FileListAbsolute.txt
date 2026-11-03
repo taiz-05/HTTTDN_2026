@@ -71,3 +71,4 @@ D:\HTTTDN_New\Backend\HTTTDN.AdminApi\obj\Debug\net8.0\refint\HTTTDN.AdminApi.dl
 D:\HTTTDN_New\Backend\HTTTDN.AdminApi\obj\Debug\net8.0\HTTTDN.AdminApi.pdb
 D:\HTTTDN_New\Backend\HTTTDN.AdminApi\obj\Debug\net8.0\HTTTDN.AdminApi.genruntimeconfig.cache
 D:\HTTTDN_New\Backend\HTTTDN.AdminApi\obj\Debug\net8.0\ref\HTTTDN.AdminApi.dll
+D:\HTTTDN_New\Backend\HTTTDN.AdminApi\obj\Debug\net8.0\HTTTDN.AdminApi.sourcelink.json
