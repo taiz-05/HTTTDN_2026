@@ -3,32 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập Quản trị — SGU Tech Enterprise</title>
+    <title>Đăng nhập Nội bộ - Hệ thống HTTT Doanh nghiệp</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="auth-wrapper">
         <div class="auth-card">
-            <div class="auth-brand">
-                <div class="logo-mark">S</div>
-                <h2>SGU Tech Enterprise</h2>
-                <p>Đăng nhập cổng Quản trị Hệ thống & CRM</p>
+            <div class="auth-header">
+                <h2>HỆ THỐNG QUẢN TRỊ NỘI BỘ</h2>
+                <p>Đăng nhập dành cho Quản trị viên (Admin) & Quản lý CRM</p>
             </div>
 
-            <div style="margin-bottom: 16px;">
-                <label for="username">Tên đăng nhập</label>
-                <input type="text" id="username" placeholder="Nhập admin hoặc quanly" autocomplete="username">
+            <div style="margin-bottom: 14px;">
+                <label for="username">Tài khoản đăng nhập</label>
+                <input type="text" id="username" placeholder="Nhập tên tài khoản (admin / quanly)">
             </div>
 
             <div style="margin-bottom: 20px;">
                 <label for="password">Mật khẩu</label>
-                <input type="password" id="password" value="123456" autocomplete="current-password">
+                <input type="password" id="password" value="123456">
             </div>
 
-            <button class="btn" style="width: 100%; padding: 10px;" onclick="handleLogin()">Đăng nhập hệ thống</button>
+            <button class="btn" style="width: 100%; padding: 10px;" onclick="handleLogin()">Đăng nhập</button>
 
-            <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-color); text-align: center; font-size: 13px; color: var(--text-muted);">
-                Bạn là khách hàng mua sắm? <a href="customer_login.html">Mở Cổng Đăng nhập Khách hàng →</a>
+            <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-color); text-align: center; font-size: 13px;">
+                Khách hàng mua sắm: <a href="customer_login.html">Chuyển sang trang Khách hàng</a>
             </div>
         </div>
     </div>
@@ -38,7 +37,7 @@
         async function handleLogin() {
             const username = document.getElementById("username").value.trim();
             const password = document.getElementById("password").value.trim();
-            if (!username || !password) return alert("Vui lòng nhập đầy đủ tài khoản và mật khẩu!");
+            if (!username || !password) return alert("Vui lòng nhập đầy đủ tài khoản và mật khẩu.");
 
             const res = await fetch(API_URL, {
                 method: "POST",
@@ -46,7 +45,7 @@
                 body: JSON.stringify({ username, password })
             });
             const data = await res.json();
-            if (!res.ok) return alert(data.message || "Đăng nhập thất bại!");
+            if (!res.ok) return alert(data.message || "Đăng nhập thất bại.");
 
             localStorage.setItem("currentUser", JSON.stringify(data));
             if (data.roleName === "Admin") window.location.href = "admin.html";

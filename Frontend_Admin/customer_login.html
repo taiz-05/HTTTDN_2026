@@ -3,39 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập Khách hàng — SGU Tech CRM</title>
+    <title>Đăng nhập & Đăng ký Khách hàng</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="auth-wrapper">
-        <div class="auth-card" style="max-width: 460px;">
-            <div class="auth-brand">
-                <div class="logo-mark lime">C</div>
-                <h2>Cổng Thành Viên SGU Tech</h2>
-                <p>Đăng nhập hoặc tạo tài khoản khách hàng để đánh giá & khảo sát</p>
+        <div class="auth-card" style="max-width: 440px;">
+            <div class="auth-header" style="border-bottom-color: var(--success);">
+                <h2>CỔNG THÔNG TIN KHÁCH HÀNG</h2>
+                <p>Đăng nhập hoặc đăng ký tài khoản khách hàng mới</p>
             </div>
 
-            <div class="tabs" style="width: 100%; display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 20px;">
-                <button class="tab-btn active" id="tabLoginBtn" onclick="switchAuthMode('login')">Đăng nhập</button>
-                <button class="tab-btn" id="tabRegBtn" onclick="switchAuthMode('register')">Đăng ký mới</button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 18px; background: #f3f4f6; padding: 4px; border-radius: 4px;">
+                <button class="btn" id="tabLoginBtn" onclick="switchAuthMode('login')">Đăng nhập</button>
+                <button class="btn btn-warning" id="tabRegBtn" onclick="switchAuthMode('register')">Đăng ký tài khoản</button>
             </div>
 
-            <!-- FORM 1: ĐĂNG NHẬP KHÁCH HÀNG -->
+            <!-- FORM ĐĂNG NHẬP -->
             <div id="loginBox">
                 <div style="margin-bottom: 14px;">
-                    <label for="lUser">Tên đăng nhập khách hàng</label>
-                    <input type="text" id="lUser" placeholder="VD: khachhang1">
+                    <label for="lUser">Tên đăng nhập</label>
+                    <input type="text" id="lUser" placeholder="Nhập username khách hàng">
                 </div>
-                <div style="margin-bottom: 20px;">
+                <div style="margin-bottom: 18px;">
                     <label for="lPass">Mật khẩu</label>
                     <input type="password" id="lPass" value="123456">
                 </div>
-                <button class="btn" style="width: 100%; padding: 10px;" onclick="loginCustomer()">Đăng nhập Cổng Khách hàng</button>
+                <button class="btn btn-success" style="width: 100%; padding: 10px;" onclick="loginCustomer()">Đăng nhập</button>
             </div>
 
-            <!-- FORM 2: ĐĂNG KÝ TÀI KHOẢN KHÁCH HÀNG MỚI -->
+            <!-- FORM ĐĂNG KÝ -->
             <div id="registerBox" style="display: none;">
-                <div class="grid-form" style="grid-template-columns: 1fr 1fr; margin-top: 0;">
+                <div class="grid-form" style="grid-template-columns: 1fr 1fr;">
                     <div>
                         <label>Tên đăng nhập</label>
                         <input type="text" id="rUser" placeholder="Username">
@@ -46,33 +45,33 @@
                     </div>
                 </div>
                 <div style="margin-bottom: 12px;">
-                    <label>Họ và tên đầy đủ</label>
+                    <label>Họ và tên khách hàng</label>
                     <input type="text" id="rName" placeholder="Nhập họ và tên">
                 </div>
-                <div class="grid-form" style="grid-template-columns: 1fr 1fr; margin-top: 0;">
+                <div class="grid-form" style="grid-template-columns: 1fr 1fr;">
                     <div>
                         <label>Số điện thoại</label>
-                        <input type="text" id="rPhone" placeholder="SĐT liên hệ">
+                        <input type="text" id="rPhone" placeholder="Số điện thoại">
                     </div>
                     <div>
                         <label>Độ tuổi</label>
-                        <input type="number" id="rAge" placeholder="VD: 21" value="21">
+                        <input type="number" id="rAge" value="21">
                     </div>
                 </div>
                 <div style="margin-bottom: 18px;">
-                    <label>Nhóm sản phẩm yêu thích</label>
+                    <label>Sở thích tiêu dùng</label>
                     <select id="rInterest">
-                        <option value="Gaming">Sở thích: Gaming</option>
-                        <option value="Văn phòng">Sở thích: Văn phòng</option>
-                        <option value="Đồ họa">Sở thích: Đồ họa</option>
-                        <option value="Lập trình">Sở thích: Lập trình</option>
+                        <option value="Gaming">Gaming</option>
+                        <option value="Văn phòng">Văn phòng</option>
+                        <option value="Đồ họa">Đồ họa</option>
+                        <option value="Lập trình">Lập trình</option>
                     </select>
                 </div>
-                <button class="btn btn-success" style="width: 100%; padding: 10px;" onclick="registerCustomer()">Hoàn tất Đăng ký Tài khoản</button>
+                <button class="btn btn-success" style="width: 100%; padding: 10px;" onclick="registerCustomer()">Hoàn tất đăng ký</button>
             </div>
 
-            <div style="margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--border-color); text-align: center; font-size: 13px; color: var(--text-muted);">
-                Dành cho Quản trị viên & Quản lý CRM: <a href="login.html">Đăng nhập Nội bộ →</a>
+            <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-color); text-align: center; font-size: 13px;">
+                Nhân sự nội bộ: <a href="login.html">Đăng nhập Quản trị / CRM</a>
             </div>
         </div>
     </div>
@@ -82,23 +81,21 @@
 
         window.onload = () => {
             const currentCus = JSON.parse(localStorage.getItem("currentCustomer") || "null");
-            if (currentCus) {
-                window.location.href = "user.html";
-            }
+            if (currentCus) window.location.href = "user.html";
         };
 
         function switchAuthMode(mode) {
             const isLogin = mode === 'login';
             document.getElementById("loginBox").style.display = isLogin ? "block" : "none";
             document.getElementById("registerBox").style.display = isLogin ? "none" : "block";
-            document.getElementById("tabLoginBtn").classList.toggle("active", isLogin);
-            document.getElementById("tabRegBtn").classList.toggle("active", !isLogin);
+            document.getElementById("tabLoginBtn").className = isLogin ? "btn" : "btn btn-warning";
+            document.getElementById("tabRegBtn").className = !isLogin ? "btn" : "btn btn-warning";
         }
 
         async function loginCustomer() {
             const username = document.getElementById("lUser").value.trim();
             const password = document.getElementById("lPass").value.trim();
-            if (!username || !password) return alert("Vui lòng nhập tên đăng nhập và mật khẩu!");
+            if (!username || !password) return alert("Vui lòng nhập tên đăng nhập và mật khẩu.");
 
             const res = await fetch(`${CUS_API}/login`, {
                 method: "POST",
@@ -106,7 +103,7 @@
                 body: JSON.stringify({ username, password })
             });
             const data = await res.json();
-            if (!res.ok) return alert(data.message || "Đăng nhập thất bại!");
+            if (!res.ok) return alert(data.message || "Đăng nhập thất bại.");
 
             localStorage.setItem("currentCustomer", JSON.stringify(data));
             window.location.href = "user.html";
@@ -118,7 +115,7 @@
             const fullName = document.getElementById("rName").value.trim();
 
             if (!username || !password || !fullName) {
-                return alert("Vui lòng nhập đầy đủ Username, Mật khẩu và Họ tên!");
+                return alert("Vui lòng nhập đầy đủ Tên đăng nhập, Mật khẩu và Họ tên.");
             }
 
             const body = {
@@ -136,9 +133,9 @@
                 body: JSON.stringify(body)
             });
             const data = await res.json();
-            if (!res.ok) return alert(data.message || "Lỗi đăng ký!");
+            if (!res.ok) return alert(data.message || "Lỗi đăng ký.");
 
-            alert(data.message + " Mời bạn đăng nhập.");
+            alert("Đăng ký tài khoản thành công. Vui lòng đăng nhập.");
             document.getElementById("lUser").value = username;
             document.getElementById("lPass").value = password;
             switchAuthMode('login');

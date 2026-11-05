@@ -82,34 +82,76 @@ namespace HTTTDN.AdminApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] ProductSaveDto dto)
         {
+            if (await _context.Products.AnyAsync(p => p.ProductCode == dto.ProductCode.Trim()))
+                return BadRequest(new { message = "Mã sản phẩm đã tồn tại!" });
+
             var prod = new Product
             {
-                ProductCode = dto.ProductCode,
-                ProductName = dto.ProductName,
+                ProductCode = dto.ProductCode.Trim(),
+                ProductName = dto.ProductName.Trim(),
                 CategoryId = dto.CategoryId,
                 SupplierId = dto.SupplierId,
                 Price = dto.Price,
-                CostPrice = dto.CostPrice,
+                CostPrice = dto.CostPrice > 0 ? dto.CostPrice : dto.Price * 0.8m,
                 StockQuantity = dto.StockQuantity,
-                Unit = dto.Unit,
-                Status = dto.Status,
+                Unit = string.IsNullOrWhiteSpace(dto.Unit) ? "Cái" : dto.Unit,
+                Status = string.IsNullOrWhiteSpace(dto.Status)
+                    ? (dto.StockQuantity > 0 ? "Đang bán" : "Hết hàng")
+                    : dto.Status,
                 ImageUrl = string.IsNullOrWhiteSpace(dto.ImageUrl)
                     ? "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600&auto=format&fit=crop&q=80"
                     : dto.ImageUrl.Trim()
             };
             _context.Products.Add(prod);
             await _context.SaveChangesAsync();
-            return Ok(prod);
+            return Ok(new { message = "Thêm sản phẩm thành công!", product = prod });
+        }
+
+        // API SỬA THÔNG TIN SẢN PHẨM
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] ProductSaveDto dto)
+        {
+            var prod = await _context.Products.FindAsync(id);
+            if (prod == null)
+                return NotFound(new { message = "Không tìm thấy sản phẩm cần sửa!" });
+
+            if (await _context.Products.AnyAsync(p => p.ProductCode == dto.ProductCode.Trim() && p.ProductId != id))
+                return BadRequest(new { message = "Mã sản phẩm này đã trùng với sản phẩm khác!" });
+
+            prod.ProductCode = dto.ProductCode.Trim();
+            prod.ProductName = dto.ProductName.Trim();
+            prod.CategoryId = dto.CategoryId;
+            prod.SupplierId = dto.SupplierId;
+            prod.Price = dto.Price;
+            prod.CostPrice = dto.CostPrice > 0 ? dto.CostPrice : dto.Price * 0.8m;
+            prod.StockQuantity = dto.StockQuantity;
+            prod.Status = dto.Status;
+
+            if (!string.IsNullOrWhiteSpace(dto.ImageUrl))
+            {
+                prod.ImageUrl = dto.ImageUrl.Trim();
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Cập nhật thông tin sản phẩm thành công!" });
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var prod = await _context.Products.FindAsync(id);
-            if (prod == null) return NotFound();
+            if (prod == null) return NotFound(new { message = "Không tìm thấy sản phẩm." });
+
+            // Xóa các đánh giá liên quan trước khi xóa sản phẩm để tránh lỗi khóa ngoại
+            var relatedFeedbacks = await _context.Feedbacks.Where(f => f.ProductId == id).ToListAsync();
+            if (relatedFeedbacks.Any())
+            {
+                _context.Feedbacks.RemoveRange(relatedFeedbacks);
+            }
+
             _context.Products.Remove(prod);
             await _context.SaveChangesAsync();
-            return Ok(new { message = "Đã xóa sản phẩm." });
+            return Ok(new { message = "Đã xóa sản phẩm thành công." });
         }
     }
 }

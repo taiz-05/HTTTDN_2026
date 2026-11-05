@@ -17,64 +17,118 @@ namespace HTTTDN.AdminApi.Controllers
             _context = context;
         }
 
+        // 1. ĐĂNG KÝ TÀI KHOẢN KHÁCH HÀNG (Mục 4.3.1) - Đã fix lỗi NULL Email & BCrypt
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] CustomerRegisterDto dto)
         {
-            if (await _context.Accounts.AnyAsync(a => a.Username == dto.Username))
-                return BadRequest(new { message = "Tên đăng nhập đã được sử dụng!" });
-
-            var role = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == "Customer");
-            if (role == null) return BadRequest(new { message = "Chưa có Role Customer." });
-
-            var acc = new Account
+            try
             {
-                Username = dto.Username,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-                FullName = dto.FullName,
-                Email = dto.Email,
-                Phone = dto.Phone,
-                RoleId = role.RoleId,
-                IsActive = true,
-                CreatedAt = DateTime.Now
-            };
+                string username = (dto.Username ?? "").Trim();
+                string password = (dto.Password ?? "").Trim();
+                string fullName = (dto.FullName ?? "").Trim();
 
-            _context.Accounts.Add(acc);
-            await _context.SaveChangesAsync();
+                if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+                    return BadRequest(new { message = "Vui lòng nhập đầy đủ Tên đăng nhập và Mật khẩu!" });
 
-            var profile = new CustomerProfile
+                // Kiểm tra trùng Username (không phân biệt hoa thường)
+                if (await _context.Accounts.AnyAsync(a => a.Username.ToLower() == username.ToLower()))
+                    return BadRequest(new { message = "Tên đăng nhập này đã được sử dụng!" });
+
+                // Tìm Role Customer, nếu chưa có thì tự tạo
+                var role = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == "Customer");
+                if (role == null)
+                {
+                    role = new Role { RoleName = "Customer", Description = "Khách hàng mua sắm và đánh giá" };
+                    _context.Roles.Add(role);
+                    await _context.SaveChangesAsync();
+                }
+
+                // Tự sinh email mặc định nếu form không truyền lên (tránh lỗi NOT NULL / UNIQUE trong CSDL cũ)
+                string email = string.IsNullOrWhiteSpace(dto.Email)
+                    ? $"{username.ToLower()}@customer.sgutech.vn"
+                    : dto.Email.Trim();
+
+                var acc = new Account
+                {
+                    Username = username,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
+                    FullName = string.IsNullOrEmpty(fullName) ? username : fullName,
+                    Email = email,
+                    Phone = string.IsNullOrWhiteSpace(dto.Phone) ? "" : dto.Phone.Trim(),
+                    RoleId = role.RoleId,
+                    IsActive = true,
+                    CreatedAt = DateTime.Now
+                };
+
+                _context.Accounts.Add(acc);
+                await _context.SaveChangesAsync();
+
+                var profile = new CustomerProfile
+                {
+                    AccountId = acc.AccountId,
+                    Age = dto.Age > 0 ? dto.Age : 20,
+                    Gender = string.IsNullOrWhiteSpace(dto.Gender) ? "Khác" : dto.Gender,
+                    Address = dto.Address ?? "",
+                    Interest = string.IsNullOrWhiteSpace(dto.Interest) ? "Lập trình" : dto.Interest
+                };
+
+                _context.CustomerProfiles.Add(profile);
+                await _context.SaveChangesAsync();
+
+                // Trả về đầy đủ thông tin phiên để Frontend có thể đăng nhập ngay
+                return Ok(new
+                {
+                    message = "Đăng ký tài khoản thành công!",
+                    accountId = acc.AccountId,
+                    username = acc.Username,
+                    fullName = acc.FullName,
+                    role = "Customer"
+                });
+            }
+            catch (Exception ex)
             {
-                AccountId = acc.AccountId,
-                Age = dto.Age,
-                Gender = dto.Gender,
-                Address = dto.Address,
-                Interest = dto.Interest
-            };
-
-            _context.CustomerProfiles.Add(profile);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "Đăng ký tài khoản thành công!", accountId = acc.AccountId });
+                return BadRequest(new { message = "Lỗi lưu CSDL: " + (ex.InnerException?.Message ?? ex.Message) });
+            }
         }
 
+        // 2. ĐĂNG NHẬP KHÁCH HÀNG (Mục 4.3.2) - Hỗ trợ cả BCrypt và mật khẩu thuần
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto dto)
         {
+            string username = (dto.Username ?? "").Trim();
+            string inputPass = (dto.Password ?? "").Trim();
+
             var acc = await _context.Accounts
                 .Include(a => a.Role)
-                .FirstOrDefaultAsync(a => a.Username == dto.Username.Trim());
+                .FirstOrDefaultAsync(a => a.Username.ToLower() == username.ToLower());
 
-            if (acc == null || acc.Role?.RoleName != "Customer")
+            if (acc == null)
                 return Unauthorized(new { message = "Tài khoản khách hàng không tồn tại!" });
+
+            // Cho phép đăng nhập nếu Role là Customer (hoặc RoleId == 3)
+            if (acc.Role != null && acc.Role.RoleName != "Customer")
+                return Unauthorized(new { message = $"Tài khoản này thuộc quyền '{acc.Role.RoleName}', vui lòng đăng nhập tại Cổng Nội Bộ!" });
 
             if (!acc.IsActive)
                 return Unauthorized(new { message = "Tài khoản của bạn đã bị khóa bởi người quản lý!" });
 
-            string inputPass = dto.Password.Trim();
             string dbPass = (acc.PasswordHash ?? "").Trim();
-            bool validPass = dbPass == inputPass || inputPass == "123456";
-            if (!validPass && dbPass.StartsWith("$2"))
+            bool validPass = false;
+
+            if (dbPass == inputPass || inputPass == "123456")
             {
-                try { validPass = BCrypt.Net.BCrypt.Verify(inputPass, dbPass); } catch { validPass = false; }
+                validPass = true;
+            }
+            else if (dbPass.StartsWith("$2"))
+            {
+                try
+                {
+                    validPass = BCrypt.Net.BCrypt.Verify(inputPass, dbPass);
+                }
+                catch
+                {
+                    validPass = false;
+                }
             }
 
             if (!validPass)
@@ -85,7 +139,7 @@ namespace HTTTDN.AdminApi.Controllers
                 accountId = acc.AccountId,
                 username = acc.Username,
                 fullName = acc.FullName,
-                role = acc.Role.RoleName
+                role = acc.Role?.RoleName ?? "Customer"
             });
         }
 
@@ -136,7 +190,6 @@ namespace HTTTDN.AdminApi.Controllers
             return Ok(new { message = "Cập nhật thông tin hồ sơ thành công!" });
         }
 
-        // LẤY TẤT CẢ ĐÁNH GIÁ CỦA MỌI KHÁCH HÀNG (Có thể lọc theo ProductId)
         [HttpGet("all-feedbacks")]
         public async Task<IActionResult> GetAllPublicFeedbacks([FromQuery] int? productId)
         {
@@ -213,7 +266,6 @@ namespace HTTTDN.AdminApi.Controllers
             return Ok(new { message = "Cảm ơn bạn đã gửi đánh giá sản phẩm!" });
         }
 
-        // NHẬN DANH SÁCH KHẢO SÁT KÈM TRẠNG THÁI KHÓA & THỜI HẠN
         [HttpGet("surveys/{accountId}")]
         public async Task<IActionResult> GetAvailableSurveys(int accountId)
         {

@@ -3,103 +3,212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cổng Khách Hàng — SGU Tech</title>
+    <title>Cổng Thông tin Khách hàng</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <h2>
-            <span class="portal-tag customer">Portal 03</span>
-            Cổng Dịch vụ & Trải nghiệm Khách hàng
-        </h2>
-        <div class="user-meta">
+    <nav class="customer-navbar">
+        <div style="font-weight:700; font-size:15px; letter-spacing:0.02em;">
+            CỔNG THÔNG TIN KHÁCH HÀNG
+        </div>
+
+        <div class="customer-nav-links">
+            <button class="cus-nav-btn active" onclick="switchCustomerTab('secShop', this)">1. Danh mục Sản phẩm</button>
+            <button class="cus-nav-btn" onclick="switchCustomerTab('secReviews', this)">2. Lịch sử & Cộng đồng Đánh giá</button>
+            <button class="cus-nav-btn" onclick="switchCustomerTab('secSurveys', this)">3. Khảo sát Sản phẩm mới</button>
+            <button class="cus-nav-btn" onclick="switchCustomerTab('secProfile', this)">4. Thông tin Cá nhân</button>
+        </div>
+
+        <div class="user-info" style="color:#ffffff;">
             <span id="cusWelcome"></span>
             <button class="btn btn-danger" onclick="logoutCustomer()">Đăng xuất</button>
         </div>
-    </header>
+    </nav>
 
     <div class="container">
-        <!-- 1. GIAN HÀNG SẢN PHẨM TRỰC QUAN CHO MỌI KHÁCH HÀNG XEM & ĐÁNH GIÁ -->
-        <div class="card">
-            <h3>1. Danh mục Sản phẩm Trực quan & Đánh giá nhanh</h3>
-            <p class="card-subtitle">Khám phá sản phẩm, xem điểm đánh giá trung bình từ cộng đồng và bấm chọn để gửi nhận xét của bạn</p>
-            <div id="productGallery" class="product-showcase-grid"></div>
-        </div>
-
-        <!-- 2. GỬI ĐÁNH GIÁ & XEM TOÀN BỘ ĐÁNH GIÁ CỘNG ĐỒNG -->
-        <div class="card" id="reviewSectionCard">
-            <h3>2. Gửi Đánh giá Sản phẩm & Xem Nhận xét từ Mọi Khách hàng</h3>
-            <p class="card-subtitle">Mọi khách hàng đều có thể xem nhận xét công khai và phản hồi chính thức từ Ban Quản lý CRM</p>
-            <div class="grid-form">
-                <select id="fbProduct" onchange="loadCommunityFeedbacks(false)"></select>
-                <select id="fbRating">
-                    <option value="5">⭐⭐⭐⭐⭐ (5/5 - Rất hài lòng)</option>
-                    <option value="4">⭐⭐⭐⭐ (4/5 - Hài lòng)</option>
-                    <option value="3">⭐⭐⭐ (3/5 - Bình thường)</option>
-                    <option value="2">⭐⭐ (2/5 - Chưa tốt)</option>
-                    <option value="1">⭐ (1/5 - Không hài lòng)</option>
-                </select>
-                <input type="text" id="fbComment" placeholder="Nhập cảm nhận chi tiết về chất lượng sản phẩm...">
-            </div>
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                <button class="btn btn-success" onclick="sendFeedback()">+ Gửi đánh giá sản phẩm</button>
-                <button class="btn" onclick="loadCommunityFeedbacks(true)">🌐 Xem tất cả đánh giá của mọi sản phẩm</button>
-            </div>
-
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Hình ảnh</th>
-                            <th>Sản phẩm</th>
-                            <th>Khách hàng đánh giá</th>
-                            <th>Số Sao</th>
-                            <th>Nhận xét khách hàng</th>
-                            <th>Phản hồi từ Doanh nghiệp</th>
-                        </tr>
-                    </thead>
-                    <tbody id="myFeedbackTable"></tbody>
-                </table>
+        <!-- MỤC 1: DANH MỤC SẢN PHẨM & GỬI PHẢN HỒI -->
+        <div id="secShop" class="cus-section">
+            <div class="card">
+                <div class="card-title">
+                    <span>Danh mục sản phẩm kinh doanh</span>
+                    <input type="text" id="cusSearchInput" placeholder="Tìm tên sản phẩm..." onkeyup="filterShowcaseProducts()" style="max-width:260px;">
+                </div>
+                <div id="productGallery" class="product-showcase-grid"></div>
             </div>
         </div>
 
-        <!-- 3. NHẬN KHẢO SÁT VÀ THỰC HIỆN -->
-        <div class="card">
-            <h3>3. Khảo sát Thăm dò Sản phẩm Chuẩn bị Ra mắt</h3>
-            <p class="card-subtitle">Đóng góp ý kiến về tính năng và mức giá dự kiến trước khi thời hạn khảo sát kết thúc</p>
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Chiến dịch Khảo sát</th>
-                            <th>Sản phẩm Dự kiến</th>
-                            <th>Giá bán Dự kiến</th>
-                            <th>Thời hạn hiệu lực</th>
-                            <th>Trạng thái tham gia</th>
-                        </tr>
-                    </thead>
-                    <tbody id="mySurveyTable"></tbody>
-                </table>
+        <!-- MỤC 2: XEM ĐÁNH GIÁ SẢN PHẨM -->
+        <div id="secReviews" class="cus-section" style="display:none;">
+            <div class="card">
+                <div class="card-title">
+                    <span>Tổng hợp đánh giá sản phẩm & Phản hồi từ doanh nghiệp</span>
+                    <div style="display:flex; gap:8px;">
+                        <select id="filterReviewProduct" onchange="loadCommunityFeedbacks(false)" style="min-width:220px;"></select>
+                        <button class="btn" onclick="loadCommunityFeedbacks(true)">Xem tất cả</button>
+                        <button class="btn btn-success" onclick="openReviewModalFromFilter()">Gửi đánh giá mới</button>
+                    </div>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Hình ảnh</th>
+                                <th>Sản phẩm</th>
+                                <th>Khách hàng</th>
+                                <th>Điểm đánh giá</th>
+                                <th>Nội dung nhận xét</th>
+                                <th>Phản hồi từ Quản lý</th>
+                            </tr>
+                        </thead>
+                        <tbody id="myFeedbackTable"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <!-- 4. CHỈNH SỬA HỒ SƠ CÁ NHÂN -->
-        <div class="card">
-            <h3>4. Hồ sơ Cá nhân & Nhóm Sở thích</h3>
-            <p class="card-subtitle">Cập nhật thông tin liên hệ và lĩnh vực công nghệ bạn quan tâm</p>
-            <div class="grid-form">
-                <input type="text" id="pFullName" placeholder="Họ và tên">
-                <input type="text" id="pPhone" placeholder="Số điện thoại">
-                <input type="number" id="pAge" placeholder="Độ tuổi">
-                <input type="text" id="pAddress" placeholder="Địa chỉ nhận hàng">
-                <select id="pInterest">
-                    <option value="Gaming">Gaming</option>
-                    <option value="Văn phòng">Văn phòng</option>
-                    <option value="Đồ họa">Đồ họa</option>
-                    <option value="Lập trình">Lập trình</option>
-                </select>
+        <!-- MỤC 3: NHẬN VÀ THỰC HIỆN KHẢO SÁT -->
+        <div id="secSurveys" class="cus-section" style="display:none;">
+            <div class="card">
+                <div class="card-title">Danh sách khảo sát thăm dò sản phẩm chuẩn bị ra mắt</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tiêu đề khảo sát</th>
+                                <th>Sản phẩm dự kiến</th>
+                                <th>Giá dự kiến</th>
+                                <th>Thời hạn</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mySurveyTable"></tbody>
+                    </table>
+                </div>
             </div>
-            <button class="btn" onclick="updateProfile()">Lưu thông tin hồ sơ</button>
+        </div>
+
+        <!-- MỤC 4: CHỈNH SỬA THÔNG TIN CÁ NHÂN -->
+        <div id="secProfile" class="cus-section" style="display:none;">
+            <div class="card" style="max-width:680px; margin:0 auto;">
+                <div class="card-title">Chỉnh sửa thông tin tài khoản khách hàng</div>
+                <div class="grid-form" style="grid-template-columns: 1fr 1fr;">
+                    <div>
+                        <label>Họ và tên</label>
+                        <input type="text" id="pFullName">
+                    </div>
+                    <div>
+                        <label>Số điện thoại</label>
+                        <input type="text" id="pPhone">
+                    </div>
+                    <div>
+                        <label>Độ tuổi</label>
+                        <input type="number" id="pAge">
+                    </div>
+                    <div>
+                        <label>Sở thích</label>
+                        <select id="pInterest">
+                            <option value="Gaming">Gaming</option>
+                            <option value="Văn phòng">Văn phòng</option>
+                            <option value="Đồ họa">Đồ họa</option>
+                            <option value="Lập trình">Lập trình</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-bottom:16px;">
+                    <label>Địa chỉ liên hệ</label>
+                    <input type="text" id="pAddress">
+                </div>
+                <button class="btn btn-success" onclick="updateProfile()">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- POP-UP MODAL 1: GỬI PHẢN HỒI SẢN PHẨM -->
+    <div class="modal-overlay" id="reviewModal" onclick="if(event.target===this) closeReviewModal()">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>Đánh giá & Phản hồi sản phẩm</h3>
+                <button class="modal-close" onclick="closeReviewModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-product-summary">
+                    <img id="modalProdImg" src="" alt="Product">
+                    <div>
+                        <span class="badge badge-info" id="modalProdCat">Danh mục</span>
+                        <h4 id="modalProdName" style="font-size:14.5px; margin:4px 0;">Tên sản phẩm</h4>
+                        <div id="modalProdPrice" style="font-weight:700; color:var(--primary);">0 đ</div>
+                    </div>
+                </div>
+
+                <label>Chọn mức độ hài lòng (1 - 5 sao):</label>
+                <div class="star-picker">
+                    <button type="button" class="star-btn active" onclick="selectStar(1)">★</button>
+                    <button type="button" class="star-btn active" onclick="selectStar(2)">★</button>
+                    <button type="button" class="star-btn active" onclick="selectStar(3)">★</button>
+                    <button type="button" class="star-btn active" onclick="selectStar(4)">★</button>
+                    <button type="button" class="star-btn active" onclick="selectStar(5)">★</button>
+                    <span class="star-label" id="starTextLabel">5/5 - Rất hài lòng</span>
+                </div>
+
+                <label for="modalFbComment">Nội dung phản hồi về sản phẩm:</label>
+                <textarea id="modalFbComment" rows="3" placeholder="Nhập ý kiến đánh giá của bạn về sản phẩm..."></textarea>
+
+                <div class="modal-reviews-list">
+                    <label>Đánh giá của khách hàng về sản phẩm này (<span id="modalReviewCount">0</span>):</label>
+                    <div id="modalProductReviewsBox" style="margin-top:8px;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-warning" onclick="closeReviewModal()">Đóng</button>
+                <button class="btn btn-success" onclick="submitModalFeedback()">Gửi phản hồi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- POP-UP MODAL 2: THỰC HIỆN KHẢO SÁT SẢN PHẨM MỚI -->
+    <div class="modal-overlay" id="surveyModal" onclick="if(event.target===this) closeSurveyModal()">
+        <div class="modal-box" style="max-width:520px;">
+            <div class="modal-header">
+                <h3>Thực hiện khảo sát sản phẩm mới</h3>
+                <button class="modal-close" onclick="closeSurveyModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div style="padding:12px; background:#f9fafb; border:1px solid var(--border-color); border-radius:4px; margin-bottom:16px;">
+                    <div style="font-weight:700; color:var(--primary);" id="svModalTitle"></div>
+                    <div style="font-size:12.5px; color:var(--text-muted); margin:4px 0 8px;" id="svModalDesc"></div>
+                    <div style="font-size:13px;">Sản phẩm: <b id="svModalProduct"></b> | Giá dự kiến: <b style="color:var(--success);" id="svModalPrice"></b></div>
+                </div>
+
+                <div style="margin-bottom:14px;">
+                    <label>1. Đánh giá mức độ quan tâm đối với sản phẩm (1 - 5):</label>
+                    <select id="svModalScore">
+                        <option value="5">5 điểm - Rất hài lòng</option>
+                        <option value="4">4 điểm - Hài lòng</option>
+                        <option value="3">3 điểm - Bình thường</option>
+                        <option value="2">2 điểm - Ít quan tâm</option>
+                        <option value="1">1 điểm - Không quan tâm</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom:14px;">
+                    <label>2. Dự kiến quyết định mua khi sản phẩm ra mắt:</label>
+                    <select id="svModalIntent">
+                        <option value="Rất muốn mua">Rất muốn mua</option>
+                        <option value="Đang cân nhắc">Đang cân nhắc</option>
+                        <option value="Không mua">Không mua</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>3. Ý kiến đóng góp về mức giá dự kiến và tính năng:</label>
+                    <textarea id="svModalOpinion" rows="3" placeholder="Nhập góp ý của bạn..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-warning" onclick="closeSurveyModal()">Hủy</button>
+                <button class="btn btn-success" onclick="submitModalSurvey()">Gửi kết quả khảo sát</button>
+            </div>
         </div>
     </div>
 
