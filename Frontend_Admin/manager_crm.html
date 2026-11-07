@@ -9,77 +9,138 @@
 </head>
 <body>
     <div class="app-layout">
+        <!-- SIDEBAR CHUẨN CRM DOANH NGHIỆP -->
         <aside class="app-sidebar">
             <div class="sidebar-header">
-                <h1>PHÂN HỆ CRM</h1>
-                <span>Quản lý Quan hệ Khách hàng</span>
+                <div class="sidebar-logo-badge" style="background: linear-gradient(135deg, #059669, #047857);">CRM</div>
+                <div>
+                    <div class="sidebar-brand-title">SGU TECH JSC</div>
+                    <div class="sidebar-brand-sub">Customer Relationship Mgmt</div>
+                </div>
             </div>
 
             <nav class="sidebar-nav">
-                <button class="nav-item active" onclick="switchTab('tabCustomers', this)">1. Quản lý Khách hàng</button>
-                <button class="nav-item" onclick="switchTab('tabFeedbacks', this)">2. Tiếp nhận Phản hồi</button>
-                <button class="nav-item" onclick="switchTab('tabDemographics', this)">3. Báo cáo Độ tuổi & Sở thích</button>
-                <button class="nav-item" onclick="switchTab('tabSurveys', this)">4. Khảo sát Sản phẩm mới</button>
+                <div class="nav-section-title">Nghiệp vụ CRM (Mục III.4)</div>
+
+                <button class="nav-item active" onclick="switchTab('tabCustomers', this)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <span>1. Quản lý Khách hàng</span>
+                </button>
+
+                <button class="nav-item" onclick="switchTab('tabFeedbacks', this)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span>2. Tiếp nhận Phản hồi</span>
+                </button>
+
+                <button class="nav-item" onclick="switchTab('tabDemographics', this)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    <span>3. Báo cáo Độ tuổi & Sở thích</span>
+                </button>
+
+                <button class="nav-item" onclick="switchTab('tabSurveys', this)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    <span>4. Khảo sát Sản phẩm mới</span>
+                </button>
             </nav>
 
             <div class="sidebar-footer">
-                <button class="btn btn-danger" style="width: 100%;" onclick="logout()">Đăng xuất</button>
+                <div class="quick-switch-wrap">
+                    <a href="admin.html" class="quick-switch-btn" title="Chuyển sang Quản trị Máy chủ Admin Server">
+                        <span>Máy chủ Admin</span>
+                        <span>↗</span>
+                    </a>
+                    <a href="user.html" class="quick-switch-btn" title="Chuyển sang Cổng mua sắm & Khảo sát Khách hàng">
+                        <span>Cổng Khách hàng</span>
+                        <span>🛒</span>
+                    </a>
+                </div>
+                <div class="sidebar-footer-info">
+                    <span>Phiên bản v2.6 Pro</span>
+                    <span>Phân hệ CRM</span>
+                </div>
+                <button class="btn btn-danger" style="width: 100%; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="logout()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    <span>Đăng xuất hệ thống</span>
+                </button>
             </div>
         </aside>
 
+        <!-- KHUNG NỘI DUNG CHÍNH CRM -->
         <div class="app-main">
+            <!-- TOPBAR TRỰC TUYẾN -->
             <div class="app-topbar">
-                <div class="topbar-title">Hệ thống Quản lý Quan hệ Khách hàng (CRM - Mục III.4)</div>
-                <div class="user-info">
-                    <span id="managerName">Người quản lý</span>
+                <div class="topbar-left">
+                    <span class="topbar-server-pill">Máy chủ: Trực tuyến (Port 5000)</span>
+                    <span class="topbar-title">Hệ thống Quản trị Quan hệ Khách hàng (CRM Enterprise)</span>
+                </div>
+                <div class="topbar-right">
+                    <button class="btn btn-warning" onclick="refreshCrmDataSilently()" title="Đồng bộ & Làm mới dữ liệu" style="display:flex; align-items:center; gap:6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                        <span>Làm mới</span>
+                    </button>
+                    <div class="user-badge-wrap">
+                        <div class="user-avatar-circle" style="background:#059669;">QL</div>
+                        <span class="user-name-text" id="managerName">Trần Trưởng Phòng CRM</span>
+                    </div>
                 </div>
             </div>
 
             <div class="app-content">
-                <!-- MỤC 4.1.1, 4.1.2, 4.1.3: THÊM, XÓA, KHÓA KHÁCH HÀNG -->
+                <!-- =========================================================
+                     MỤC 1: QUẢN LÝ KHÁCH HÀNG (MỤC III.4.1 - 4.1.3)
+                     ========================================================= -->
                 <div id="tabCustomers" class="tab-content">
-                    <div class="card">
-                        <div class="card-title">Thêm khách hàng mới</div>
-                        <div class="grid-form">
-                            <div>
-                                <label>Tên đăng nhập</label>
-                                <input type="text" id="cUser" placeholder="Username">
-                            </div>
-                            <div>
-                                <label>Họ và tên khách hàng</label>
-                                <input type="text" id="cName" placeholder="Nhập họ và tên">
-                            </div>
-                            <div>
-                                <label>Số điện thoại</label>
-                                <input type="text" id="cPhone" placeholder="Số điện thoại">
-                            </div>
-                            <div>
-                                <label>Độ tuổi</label>
-                                <input type="number" id="cAge" placeholder="VD: 22">
-                            </div>
-                            <div>
-                                <label>Sở thích</label>
-                                <select id="cInterest">
-                                    <option value="Gaming">Gaming</option>
-                                    <option value="Văn phòng">Văn phòng</option>
-                                    <option value="Đồ họa">Đồ họa</option>
-                                    <option value="Lập trình">Lập trình</option>
-                                </select>
-                            </div>
+                    <div class="page-header">
+                        <div>
+                            <h2 class="page-header-title">Hồ sơ & Danh sách Khách hàng (Mục III.4.1 - 4.1.3)</h2>
+                            <p class="page-header-sub">Quản lý hồ sơ định danh, độ tuổi, sở thích và quản trị kích hoạt/khóa tài khoản khách hàng</p>
                         </div>
-                        <button class="btn btn-success" onclick="addCustomer()">Thêm khách hàng</button>
+                        <div class="page-header-actions">
+                            <button class="btn btn-success" onclick="openAddCustomerModal()" style="display:flex; align-items:center; gap:6px;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                <span>Thêm khách hàng mới</span>
+                            </button>
+                        </div>
+                    </div>
 
-                        <div class="table-wrap">
+                    <div class="filter-toolbar">
+                        <div class="search-box-wrap" style="max-width:360px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input type="text" id="cusSearchInput" placeholder="Tìm theo tên đăng nhập, họ tên hoặc SĐT..." oninput="filterCustomerList()">
+                        </div>
+
+                        <select id="cusFilterAge" onchange="filterCustomerList()">
+                            <option value="">Tất cả độ tuổi</option>
+                            <option value="under20">Dưới 20 tuổi (Gen Z)</option>
+                            <option value="20to30">20 - 30 tuổi</option>
+                            <option value="over30">Trên 30 tuổi</option>
+                        </select>
+
+                        <select id="cusFilterInterest" onchange="filterCustomerList()">
+                            <option value="">Tất cả sở thích</option>
+                            <option value="Gaming">Gaming</option>
+                            <option value="Văn phòng">Văn phòng</option>
+                            <option value="Đồ họa">Đồ họa</option>
+                            <option value="Lập trình">Lập trình</option>
+                        </select>
+
+                        <button class="btn btn-warning" onclick="resetCustomerFilter()">↺ Đặt lại</button>
+                        <span class="badge badge-info" id="cusCountBadge" style="margin-left:auto;">Đang hiển thị 8 khách hàng</span>
+                    </div>
+
+                    <div class="card" style="padding: 16px 20px;">
+                        <div class="table-wrap" style="margin-top:0;">
                             <table>
                                 <thead>
                                     <tr>
                                         <th>Tài khoản</th>
-                                        <th>Họ và tên</th>
+                                        <th>Họ và tên khách hàng</th>
                                         <th>Số điện thoại</th>
-                                        <th>Độ tuổi</th>
-                                        <th>Sở thích</th>
+                                        <th>Độ tuổi & Nhóm tuổi</th>
+                                        <th>Sở thích tiêu dùng</th>
+                                        <th>Địa chỉ liên hệ</th>
                                         <th>Trạng thái</th>
-                                        <th>Thao tác</th>
+                                        <th style="text-align: center; width: 150px;">Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody id="customerList"></tbody>
@@ -88,13 +149,61 @@
                     </div>
                 </div>
 
-                <!-- MỤC 4.1.4: TIẾP NHẬN PHẢN HỒI CỦA KHÁCH HÀNG -->
+                <!-- =========================================================
+                     MỤC 2: TIẾP NHẬN PHẢN HỒI (MỤC III.4.4)
+                     ========================================================= -->
                 <div id="tabFeedbacks" class="tab-content" style="display:none;">
+                    <div class="page-header">
+                        <div>
+                            <h2 class="page-header-title">Tiếp nhận & Xử lý Ý kiến Phản hồi (Mục III.4.4)</h2>
+                            <p class="page-header-sub">Phân loại phản hồi sản phẩm, theo dõi mức điểm hài lòng và gửi giải đáp trực tiếp đến khách hàng</p>
+                        </div>
+                    </div>
+
+                    <!-- 4 KPI PHẢN HỒI -->
+                    <div class="stat-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 20px;">
+                        <div class="kpi-card" style="border-top: 3px solid #2563eb;">
+                            <div class="kpi-card-header">
+                                <span class="kpi-card-label">Tổng phản hồi</span>
+                                <span class="kpi-card-icon" style="background:#eff6ff; color:#2563eb;">💬</span>
+                            </div>
+                            <div class="kpi-card-val" id="crmKpiTotal">10</div>
+                            <div class="kpi-card-sub">Tổng số ý kiến tiếp nhận</div>
+                        </div>
+
+                        <div class="kpi-card" style="border-top: 3px solid #059669;">
+                            <div class="kpi-card-header">
+                                <span class="kpi-card-label">Đã giải đáp</span>
+                                <span class="kpi-card-icon" style="background:#ecfdf5; color:#059669;">✅</span>
+                            </div>
+                            <div class="kpi-card-val" id="crmKpiAnswered">4</div>
+                            <div class="kpi-card-sub">Đã gửi câu trả lời tới khách</div>
+                        </div>
+
+                        <div class="kpi-card" style="border-top: 3px solid #ea580c;">
+                            <div class="kpi-card-header">
+                                <span class="kpi-card-label">Chờ giải đáp</span>
+                                <span class="kpi-card-icon" style="background:#fff7ed; color:#ea580c;">⏳</span>
+                            </div>
+                            <div class="kpi-card-val" id="crmKpiPending">6</div>
+                            <div class="kpi-card-sub">Cần quản lý phản hồi sớm</div>
+                        </div>
+
+                        <div class="kpi-card" style="border-top: 3px solid #f59e0b;">
+                            <div class="kpi-card-header">
+                                <span class="kpi-card-label">Điểm hài lòng TB</span>
+                                <span class="kpi-card-icon" style="background:#fef3c7; color:#f59e0b;">⭐</span>
+                            </div>
+                            <div class="kpi-card-val" id="crmKpiAvg">4.8 / 5.0</div>
+                            <div class="kpi-card-sub">Chỉ số đo lường chất lượng</div>
+                        </div>
+                    </div>
+
                     <div class="charts-row">
                         <div class="card" style="margin-bottom:0;">
                             <div class="card-title">
                                 <span>Phân bố điểm đánh giá độ hài lòng (1 - 5 sao)</span>
-                                <span class="badge badge-info" id="crmTotalReviewsBadge">0 đánh giá</span>
+                                <span class="badge badge-info" id="crmTotalReviewsBadge">10 đánh giá</span>
                             </div>
                             <div class="chart-container">
                                 <canvas id="crmRatingBarChart"></canvas>
@@ -111,9 +220,11 @@
                         </div>
                     </div>
 
-                    <div class="card" style="margin-top:20px;">
-                        <div class="card-title">Danh sách phản hồi của khách hàng về sản phẩm</div>
-                        <div class="table-wrap">
+                    <div class="card" style="margin-top:20px; padding:16px 20px;">
+                        <div class="card-title" style="margin-bottom:12px;">
+                            <span>Danh sách phản hồi của khách hàng về sản phẩm</span>
+                        </div>
+                        <div class="table-wrap" style="margin-top:0;">
                             <table>
                                 <thead>
                                     <tr>
@@ -121,9 +232,9 @@
                                         <th>Sản phẩm</th>
                                         <th>Mức điểm</th>
                                         <th>Nội dung phản hồi</th>
-                                        <th>Nội dung giải đáp</th>
+                                        <th>Giải đáp của Quản lý CRM</th>
                                         <th>Trạng thái</th>
-                                        <th>Thao tác</th>
+                                        <th style="text-align: center; width: 120px;">Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody id="feedbackList"></tbody>
@@ -132,78 +243,110 @@
                     </div>
                 </div>
 
-                <!-- MỤC 4.1.5: BÁO CÁO TỶ LỆ ĐỘ TUỔI, SỞ THÍCH -->
+                <!-- =========================================================
+                     MỤC 3: BÁO CÁO ĐỘ TUỔI, SỞ THÍCH (MỤC III.4.5)
+                     ========================================================= -->
                 <div id="tabDemographics" class="tab-content" style="display:none;">
+                    <div class="page-header">
+                        <div>
+                            <h2 class="page-header-title">Báo cáo Cơ cấu Độ tuổi & Sở thích Khách hàng (Mục III.4.5)</h2>
+                            <p class="page-header-sub">Phân tích chuyên sâu nhân khẩu học người dùng để hỗ trợ cửa hàng quyết định nhập hàng hóa phù hợp</p>
+                        </div>
+                    </div>
+
+                    <!-- 3 KPI TỔNG HỢP NHÂN KHẨU HỌC -->
+                    <div class="stat-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 20px;">
+                        <div class="kpi-card" style="border-top: 3px solid #2563eb;">
+                            <div class="kpi-card-header">
+                                <span class="kpi-card-label">Tổng hồ sơ khảo sát</span>
+                                <span class="kpi-card-icon" style="background:#eff6ff; color:#2563eb;">📋</span>
+                            </div>
+                            <div class="kpi-card-val"><span id="totalCus">8</span> khách hàng</div>
+                            <div class="kpi-card-sub">Dữ liệu từ hồ sơ thành viên hệ thống</div>
+                        </div>
+
+                        <div class="kpi-card" style="border-top: 3px solid #059669;">
+                            <div class="kpi-card-header">
+                                <span class="kpi-card-label">Nhóm tuổi chiếm ưu thế</span>
+                                <span class="kpi-card-icon" style="background:#ecfdf5; color:#059669;">🎯</span>
+                            </div>
+                            <div class="kpi-card-val">18 - 30 tuổi (75%)</div>
+                            <div class="kpi-card-sub">Nhóm khách hàng trẻ có sức mua cao</div>
+                        </div>
+
+                        <div class="kpi-card" style="border-top: 3px solid #7c3aed;">
+                            <div class="kpi-card-header">
+                                <span class="kpi-card-label">Sở thích dẫn đầu</span>
+                                <span class="kpi-card-icon" style="background:#f5f3ff; color:#7c3aed;">🎮</span>
+                            </div>
+                            <div class="kpi-card-val">Gaming & Lập trình (62.5%)</div>
+                            <div class="kpi-card-sub">Nhu cầu thiết bị cấu hình mạnh vượt trội</div>
+                        </div>
+                    </div>
+
                     <div class="card">
                         <div class="card-title">
-                            <span>Báo cáo thống kê khách hàng theo Độ tuổi & Sở thích</span>
-                            <span>Tổng số hồ sơ: <b id="totalCus" style="color:var(--primary);">0</b></span>
+                            <span>Phân bổ chi tiết theo Độ tuổi & Nhóm sở thích</span>
                         </div>
 
                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 24px;">
-                            <div style="padding: 16px; border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
-                                <h4 style="margin-bottom:14px; color:var(--primary);">1. Tỷ lệ theo nhóm độ tuổi</h4>
+                            <div style="padding: 18px; border: 1px solid var(--brand-border); border-radius: var(--radius-md); background:#ffffff;">
+                                <h4 style="margin-bottom:14px; color:#1d4ed8; font-weight:700; font-size:14px;">1. Tỷ lệ theo nhóm độ tuổi</h4>
                                 <div id="ageReportBox"></div>
                             </div>
-                            <div style="padding: 16px; border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
-                                <h4 style="margin-bottom:14px; color:var(--primary);">2. Tỷ lệ theo nhóm sở thích</h4>
+                            <div style="padding: 18px; border: 1px solid var(--brand-border); border-radius: var(--radius-md); background:#ffffff;">
+                                <h4 style="margin-bottom:14px; color:#059669; font-weight:700; font-size:14px;">2. Tỷ lệ theo nhóm sở thích</h4>
                                 <div id="interestReportBox"></div>
+                            </div>
+                        </div>
+
+                        <!-- HỘP KHUYẾN NGHỊ NHẬP HÀNG THÔNG MINH (BUSINESS INTELLIGENCE INSIGHTS) -->
+                        <div class="insight-card">
+                            <div class="insight-card-header">
+                                <span style="font-size: 20px;">💡</span>
+                                <span class="insight-card-title">Khuyến nghị Chiến lược Nhập hàng cho Ban Giám Đốc / Phòng Thu Mua:</span>
+                            </div>
+                            <div class="insight-card-body">
+                                <p>• <b>Đối tượng chủ lực:</b> Có tới <b>75% khách hàng</b> nằm trong phân khúc từ 18 đến 30 tuổi (Sinh viên & Người đi làm trẻ tuổi), sở hữu thói quen tiêu dùng công nghệ hiện đại.</p>
+                                <p>• <b>Xu hướng hàng hóa:</b> Nhóm sở thích <b>Gaming (37.5%)</b> và <b>Lập trình (25.0%)</b> chiếm đa số tuyệt đối (hơn 62%).</p>
+                                <p>• <b>Hành động cụ thể:</b> Ưu tiên nhập kho các dòng <b>Laptop Gaming cấu hình cao</b> (ASUS ROG, Acer Predator), <b>Màn hình 2K/4K tần số quét cao</b>, <b>Bàn phím cơ Custom</b> và <b>Ổ cứng SSD NVMe tốc độ cao</b>. Hạn chế nhập các mẫu máy tính văn phòng phổ thông cấu hình thấp.</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- MỤC 4.1.6 & 4.1.7: TẠO BẢNG KHẢO SÁT & THỐNG KÊ KẾT QUẢ -->
+                <!-- =========================================================
+                     MỤC 4: KHẢO SÁT SẢN PHẨM MỚI (MỤC III.4.6 & 4.7)
+                     ========================================================= -->
                 <div id="tabSurveys" class="tab-content" style="display:none;">
-                    <div class="card">
-                        <div class="card-title">Tạo bảng khảo sát thăm dò ra mắt sản phẩm mới</div>
-                        <div class="grid-form">
-                            <div>
-                                <label>Tiêu đề khảo sát</label>
-                                <input type="text" id="svTitle" placeholder="Nhập tiêu đề khảo sát">
-                            </div>
-                            <div>
-                                <label>Tên sản phẩm mới</label>
-                                <input type="text" id="svProduct" placeholder="Tên sản phẩm dự kiến">
-                            </div>
-                            <div>
-                                <label>Giá dự kiến (VNĐ)</label>
-                                <input type="number" id="svPrice" placeholder="0">
-                            </div>
-                            <div>
-                                <label>Mô tả sản phẩm</label>
-                                <input type="text" id="svDesc" placeholder="Thông số hoặc tính năng chính">
-                            </div>
-                            <div>
-                                <label>Thời hạn khảo sát</label>
-                                <select id="svDurationType" onchange="onDurationTypeChange()">
-                                    <option value="NoLimit">Không thời hạn</option>
-                                    <option value="Days">Theo số ngày</option>
-                                    <option value="Date">Đến ngày cụ thể</option>
-                                </select>
-                            </div>
-                            <div id="svDaysBox" style="display:none;">
-                                <label>Số ngày hiệu lực</label>
-                                <input type="number" id="svDurationDays" min="1" value="7">
-                            </div>
-                            <div id="svDateBox" style="display:none;">
-                                <label>Ngày kết thúc</label>
-                                <input type="date" id="svExpireDate">
-                            </div>
+                    <div class="page-header">
+                        <div>
+                            <h2 class="page-header-title">Khảo sát Thị trường & Thăm dò Sản phẩm mới (Mục III.4.6 & 4.7)</h2>
+                            <p class="page-header-sub">Tạo cuộc khảo sát thăm dò ý định mua sắm, mức giá mong đợi của người dùng trước khi quyết định nhập hàng</p>
                         </div>
-                        <button class="btn btn-success" onclick="createSurvey()">Phát hành khảo sát</button>
+                        <div class="page-header-actions">
+                            <button class="btn btn-success" onclick="openCreateSurveyModal()" style="display:flex; align-items:center; gap:6px;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                <span>Phát hành khảo sát mới</span>
+                            </button>
+                        </div>
+                    </div>
 
-                        <div class="table-wrap">
+                    <div class="card" style="padding: 16px 20px;">
+                        <div class="card-title" style="margin-bottom:12px;">
+                            <span>Danh sách các bài khảo sát thị trường</span>
+                        </div>
+                        <div class="table-wrap" style="margin-top:0;">
                             <table>
                                 <thead>
                                     <tr>
                                         <th>Tiêu đề khảo sát</th>
-                                        <th>Sản phẩm dự kiến</th>
+                                        <th>Sản phẩm dự kiến nhập</th>
                                         <th>Giá dự kiến</th>
-                                        <th>Thời hạn</th>
+                                        <th>Thời hạn khảo sát</th>
                                         <th>Trạng thái</th>
-                                        <th>Số phản hồi</th>
-                                        <th>Thao tác</th>
+                                        <th>Số lượt phản hồi</th>
+                                        <th style="text-align: center; width: 170px;">Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody id="surveyList"></tbody>
@@ -211,17 +354,20 @@
                         </div>
                     </div>
 
-                    <div class="card" id="surveyStatCard" style="display:none; border-left: 4px solid var(--primary);">
-                        <div class="card-title" id="statTitle">Thống kê kết quả khảo sát</div>
-                        <p id="statSummary" style="margin-bottom: 14px; font-weight: 600; color: var(--primary);"></p>
-                        <div class="table-wrap">
+                    <!-- THẺ CHI TIẾT THỐNG KÊ KẾT QUẢ KHẢO SÁT (MỤC 4.1.7) -->
+                    <div class="card" id="surveyStatCard" style="display:none; border-left: 4px solid #2563eb; margin-top:20px; padding:20px;">
+                        <div class="card-title" id="statTitle" style="color:#1d4ed8; font-size:16px;">Thống kê kết quả khảo sát</div>
+                        <div style="background:#eff6ff; padding:12px 16px; border-radius:6px; margin-bottom:16px; border:1px solid #bfdbfe;">
+                            <p id="statSummary" style="margin-bottom: 0; font-weight: 600; color: #1e3a8a; line-height:1.6;"></p>
+                        </div>
+                        <div class="table-wrap" style="margin-top:0;">
                             <table>
                                 <thead>
                                     <tr>
                                         <th>Khách hàng</th>
                                         <th>Mức điểm</th>
-                                        <th>Ý định mua</th>
-                                        <th>Ý kiến đóng góp của khách hàng</th>
+                                        <th>Ý định mua sắm</th>
+                                        <th>Ý kiến đóng góp & đề xuất của khách hàng</th>
                                     </tr>
                                 </thead>
                                 <tbody id="statResponses"></tbody>
@@ -233,24 +379,157 @@
         </div>
     </div>
 
-    <!-- MODAL TRẢ LỜI PHẢN HỒI KHÁCH HÀNG -->
+    <!-- =========================================================
+         POP-UP MODAL: THÊM KHÁCH HÀNG MỚI
+         ========================================================= -->
+    <div class="modal-overlay" id="customerModal" onclick="if(event.target===this) closeCustomerModal()">
+        <div class="modal-box" style="max-width: 520px;">
+            <div class="modal-header">
+                <h3>Thêm hồ sơ khách hàng mới</h3>
+                <button class="modal-close" onclick="closeCustomerModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="grid-form" style="grid-template-columns: 1fr 1fr;">
+                    <div>
+                        <label>Tên đăng nhập *</label>
+                        <input type="text" id="cUser" placeholder="VD: khachhang9">
+                    </div>
+                    <div>
+                        <label>Họ và tên khách hàng *</label>
+                        <input type="text" id="cName" placeholder="Nhập họ và tên">
+                    </div>
+                </div>
+
+                <div class="grid-form" style="grid-template-columns: 1fr 1fr;">
+                    <div>
+                        <label>Số điện thoại</label>
+                        <input type="text" id="cPhone" placeholder="0912...">
+                    </div>
+                    <div>
+                        <label>Độ tuổi</label>
+                        <input type="number" id="cAge" placeholder="VD: 23">
+                    </div>
+                </div>
+
+                <div class="grid-form" style="grid-template-columns: 1fr 1fr;">
+                    <div>
+                        <label>Giới tính</label>
+                        <select id="cGender">
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                            <option value="Khác">Khác</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Sở thích tiêu dùng *</label>
+                        <select id="cInterest">
+                            <option value="Gaming">Gaming (Game thủ, Gear)</option>
+                            <option value="Văn phòng">Văn phòng (Office, Mỏng nhẹ)</option>
+                            <option value="Đồ họa">Đồ họa (Design, Màu chuẩn)</option>
+                            <option value="Lập trình">Lập trình (Dev, Cấu hình mạnh)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid-form" style="grid-template-columns: 1fr;">
+                    <div>
+                        <label>Địa chỉ liên hệ</label>
+                        <input type="text" id="cAddress" placeholder="Địa chỉ nơi ở / giao hàng">
+                    </div>
+                </div>
+
+                <div style="padding:10px 12px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:4px; font-size:12px; color:#15803d; margin-top:6px;">
+                    ℹ️ Mật khẩu ban đầu được gán mặc định: <b>123456</b>.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-warning" onclick="closeCustomerModal()">Hủy bỏ</button>
+                <button class="btn btn-success" onclick="submitAddCustomerModal()">Lưu khách hàng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         POP-UP MODAL: TẠO BẢNG KHẢO SÁT MỚI
+         ========================================================= -->
+    <div class="modal-overlay" id="surveyModal" onclick="if(event.target===this) closeCreateSurveyModal()">
+        <div class="modal-box" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Phát hành bài khảo sát sản phẩm mới</h3>
+                <button class="modal-close" onclick="closeCreateSurveyModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="grid-form" style="grid-template-columns: 1fr;">
+                    <div>
+                        <label>Tiêu đề khảo sát *</label>
+                        <input type="text" id="svTitle" placeholder="VD: Khảo sát nhu cầu dòng Laptop AI Siêu Mỏng Nhẹ 2026">
+                    </div>
+                </div>
+
+                <div class="grid-form" style="grid-template-columns: 2fr 1fr;">
+                    <div>
+                        <label>Tên sản phẩm dự kiến nhập *</label>
+                        <input type="text" id="svProduct" placeholder="VD: ASUS Zenbook S16 OLED AI">
+                    </div>
+                    <div>
+                        <label>Giá dự kiến (VNĐ) *</label>
+                        <input type="number" id="svPrice" placeholder="VD: 36990000">
+                    </div>
+                </div>
+
+                <div class="grid-form" style="grid-template-columns: 1fr;">
+                    <div>
+                        <label>Mô tả tính năng nổi bật & mục tiêu</label>
+                        <textarea id="svDesc" rows="3" placeholder="Đánh giá nhu cầu trang bị chip NPU AI chuyên dụng..."></textarea>
+                    </div>
+                </div>
+
+                <div class="grid-form" style="grid-template-columns: 1fr 1fr;">
+                    <div>
+                        <label>Loại thời hạn hiệu lực</label>
+                        <select id="svDurationType" onchange="onDurationTypeChange()">
+                            <option value="NoLimit">Không thời hạn</option>
+                            <option value="Days">Theo số ngày cụ thể</option>
+                            <option value="Date">Đến một ngày cố định</option>
+                        </select>
+                    </div>
+                    <div id="svDaysBox" style="display:none;">
+                        <label>Số ngày hiệu lực</label>
+                        <input type="number" id="svDurationDays" min="1" value="7">
+                    </div>
+                    <div id="svDateBox" style="display:none;">
+                        <label>Ngày hết hạn</label>
+                        <input type="date" id="svExpireDate">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-warning" onclick="closeCreateSurveyModal()">Hủy bỏ</button>
+                <button class="btn btn-success" onclick="submitCreateSurveyModal()">Phát hành ngay</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         POP-UP MODAL: GIẢI ĐÁP PHẢN HỒI KHÁCH HÀNG
+         ========================================================= -->
     <div class="modal-overlay" id="replyModal" onclick="if(event.target===this) closeReplyModal()">
-        <div class="modal-box" style="max-width:480px;">
+        <div class="modal-box" style="max-width:520px;">
             <div class="modal-header">
                 <h3>Phản hồi ý kiến khách hàng</h3>
                 <button class="modal-close" onclick="closeReplyModal()">×</button>
             </div>
             <div class="modal-body">
-                <div style="padding:10px 12px; background:#f9fafb; border:1px solid var(--border-color); border-radius:4px; margin-bottom:14px;">
-                    <div style="font-size:12.5px; color:var(--text-muted);" id="replyModalMeta"></div>
-                    <div style="margin-top:4px; font-weight:500;" id="replyModalComment"></div>
+                <div style="padding:12px 14px; background:#f8fafc; border:1px solid var(--brand-border); border-radius:6px; margin-bottom:16px;">
+                    <div style="font-size:12.5px; color:var(--text-muted); font-weight:600;" id="replyModalMeta"></div>
+                    <div style="margin-top:6px; font-weight:600; color:var(--text-primary); font-size:13.5px;" id="replyModalComment"></div>
                 </div>
-                <label for="replyModalText">Nội dung giải đáp của Quản lý CRM:</label>
-                <textarea id="replyModalText" rows="4" placeholder="Nhập nội dung phản hồi gửi tới khách hàng..."></textarea>
+                <label for="replyModalText">Nội dung giải đáp của Quản lý CRM gửi đến khách hàng:</label>
+                <textarea id="replyModalText" rows="4" placeholder="Nhập câu trả lời chi tiết và lịch sự gửi đến khách hàng..."></textarea>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-warning" onclick="closeReplyModal()">Hủy</button>
-                <button class="btn btn-success" onclick="submitReplyFeedback()">Lưu & Gửi phản hồi</button>
+                <button class="btn btn-success" onclick="submitReplyFeedback()">Lưu & Gửi câu trả lời</button>
             </div>
         </div>
     </div>

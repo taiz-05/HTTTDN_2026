@@ -9,44 +9,45 @@
 <body>
     <div class="auth-wrapper">
         <div class="auth-card" style="max-width: 440px;">
-            <div class="auth-header" style="border-bottom-color: var(--success);">
+            <div class="auth-brand-badge" style="background:#ecfdf5; border-color:#a7f3d0; color:#047857;">SGU TECH STORE</div>
+            <div class="auth-header">
                 <h2>CỔNG THÔNG TIN KHÁCH HÀNG</h2>
                 <p>Đăng nhập hoặc đăng ký tài khoản khách hàng mới</p>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 18px; background: #f3f4f6; padding: 4px; border-radius: 4px;">
-                <button class="btn" id="tabLoginBtn" onclick="switchAuthMode('login')">Đăng nhập</button>
-                <button class="btn btn-warning" id="tabRegBtn" onclick="switchAuthMode('register')">Đăng ký tài khoản</button>
+                <button type="button" class="btn" id="tabLoginBtn" onclick="switchAuthMode('login')">Đăng nhập</button>
+                <button type="button" class="btn btn-warning" id="tabRegBtn" onclick="switchAuthMode('register')">Đăng ký tài khoản</button>
             </div>
 
-            <!-- FORM ĐĂNG NHẬP -->
-            <div id="loginBox">
+            <!-- FORM ĐĂNG NHẬP (Nhấn Enter tự động đăng nhập) -->
+            <form id="loginBox" onsubmit="event.preventDefault(); loginCustomer();">
                 <div style="margin-bottom: 14px;">
                     <label for="lUser">Tên đăng nhập</label>
-                    <input type="text" id="lUser" placeholder="Nhập username khách hàng">
+                    <input type="text" id="lUser" placeholder="Nhập username (VD: khachhang1)" autocomplete="username" required autofocus>
                 </div>
                 <div style="margin-bottom: 18px;">
                     <label for="lPass">Mật khẩu</label>
-                    <input type="password" id="lPass" value="123456">
+                    <input type="password" id="lPass" placeholder="Nhập mật khẩu" autocomplete="current-password" required>
                 </div>
-                <button class="btn btn-success" style="width: 100%; padding: 10px;" onclick="loginCustomer()">Đăng nhập</button>
-            </div>
+                <button type="submit" class="btn btn-success" style="width: 100%; padding: 10px;">Đăng nhập</button>
+            </form>
 
-            <!-- FORM ĐĂNG KÝ -->
-            <div id="registerBox" style="display: none;">
+            <!-- FORM ĐĂNG KÝ (Nhấn Enter tự động đăng ký) -->
+            <form id="registerBox" style="display: none;" onsubmit="event.preventDefault(); registerCustomer();">
                 <div class="grid-form" style="grid-template-columns: 1fr 1fr;">
                     <div>
                         <label>Tên đăng nhập</label>
-                        <input type="text" id="rUser" placeholder="Username">
+                        <input type="text" id="rUser" placeholder="Username" required>
                     </div>
                     <div>
                         <label>Mật khẩu</label>
-                        <input type="password" id="rPass" placeholder="Mật khẩu">
+                        <input type="password" id="rPass" placeholder="Mật khẩu" required>
                     </div>
                 </div>
                 <div style="margin-bottom: 12px;">
                     <label>Họ và tên khách hàng</label>
-                    <input type="text" id="rName" placeholder="Nhập họ và tên">
+                    <input type="text" id="rName" placeholder="Nhập họ và tên" required>
                 </div>
                 <div class="grid-form" style="grid-template-columns: 1fr 1fr;">
                     <div>
@@ -55,7 +56,7 @@
                     </div>
                     <div>
                         <label>Độ tuổi</label>
-                        <input type="number" id="rAge" value="21">
+                        <input type="number" id="rAge" value="20" min="10" max="100">
                     </div>
                 </div>
                 <div style="margin-bottom: 18px;">
@@ -67,12 +68,8 @@
                         <option value="Lập trình">Lập trình</option>
                     </select>
                 </div>
-                <button class="btn btn-success" style="width: 100%; padding: 10px;" onclick="registerCustomer()">Hoàn tất đăng ký</button>
-            </div>
-
-            <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-color); text-align: center; font-size: 13px;">
-                Nhân sự nội bộ: <a href="login.html">Đăng nhập Quản trị / CRM</a>
-            </div>
+                <button type="submit" class="btn btn-success" style="width: 100%; padding: 10px;">Hoàn tất đăng ký</button>
+            </form>
         </div>
     </div>
 
@@ -90,6 +87,11 @@
             document.getElementById("registerBox").style.display = isLogin ? "none" : "block";
             document.getElementById("tabLoginBtn").className = isLogin ? "btn" : "btn btn-warning";
             document.getElementById("tabRegBtn").className = !isLogin ? "btn" : "btn btn-warning";
+            if (isLogin) {
+                document.getElementById("lUser").focus();
+            } else {
+                document.getElementById("rUser").focus();
+            }
         }
 
         async function loginCustomer() {
@@ -97,16 +99,20 @@
             const password = document.getElementById("lPass").value.trim();
             if (!username || !password) return alert("Vui lòng nhập tên đăng nhập và mật khẩu.");
 
-            const res = await fetch(`${CUS_API}/login`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password })
-            });
-            const data = await res.json();
-            if (!res.ok) return alert(data.message || "Đăng nhập thất bại.");
+            try {
+                const res = await fetch(`${CUS_API}/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                if (!res.ok) return alert(data.message || "Đăng nhập thất bại.");
 
-            localStorage.setItem("currentCustomer", JSON.stringify(data));
-            window.location.href = "user.html";
+                localStorage.setItem("currentCustomer", JSON.stringify(data));
+                window.location.href = "user.html";
+            } catch (err) {
+                alert("Không thể kết nối đến máy chủ Backend (http://localhost:5000). Vui lòng đảm bảo bạn đã chạy lệnh 'dotnet run' tại thư mục Backend!");
+            }
         }
 
         async function registerCustomer() {
@@ -127,18 +133,22 @@
                 interest: document.getElementById("rInterest").value
             };
 
-            const res = await fetch(`${CUS_API}/register`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body)
-            });
-            const data = await res.json();
-            if (!res.ok) return alert(data.message || "Lỗi đăng ký.");
+            try {
+                const res = await fetch(`${CUS_API}/register`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (!res.ok) return alert(data.message || "Lỗi đăng ký.");
 
-            alert("Đăng ký tài khoản thành công. Vui lòng đăng nhập.");
-            document.getElementById("lUser").value = username;
-            document.getElementById("lPass").value = password;
-            switchAuthMode('login');
+                alert("Đăng ký tài khoản thành công. Vui lòng đăng nhập.");
+                document.getElementById("lUser").value = username;
+                document.getElementById("lPass").value = password;
+                switchAuthMode('login');
+            } catch (err) {
+                alert("Không thể kết nối đến máy chủ Backend. Vui lòng kiểm tra lệnh 'dotnet run'!");
+            }
         }
     </script>
 </body>

@@ -83,6 +83,22 @@ namespace HTTTDN.AdminApi.Controllers
             return Ok(new { message = "Cập nhật phân quyền thành công!" });
         }
 
+        // Cho phép Admin khóa / mở khóa tài khoản
+        [HttpPut("{id}/toggle-status")]
+        public async Task<IActionResult> ToggleStatus(int id)
+        {
+            var acc = await _context.Accounts.FindAsync(id);
+            if (acc == null) return NotFound(new { message = "Không tìm thấy tài khoản!" });
+
+            acc.IsActive = !acc.IsActive;
+            await _context.SaveChangesAsync();
+            return Ok(new
+            {
+                message = acc.IsActive ? "Đã mở khóa tài khoản thành công!" : "Đã khóa tài khoản thành công!",
+                isActive = acc.IsActive
+            });
+        }
+
         // Cho phép Admin xóa bất kỳ Admin khác hoặc tài khoản khác
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
