@@ -16,8 +16,11 @@ namespace HTTTDN.AdminApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
+            var allowedRoles = new[] { "Admin", "Manager", "Customer" };
+
             var list = await _context.Accounts
                 .Include(a => a.Role)
+                .Where(a => a.Role == null || allowedRoles.Contains(a.Role.RoleName))
                 .OrderByDescending(a => a.AccountId)
                 .Select(a => new
                 {
@@ -27,7 +30,7 @@ namespace HTTTDN.AdminApi.Controllers
                     a.Email,
                     a.Phone,
                     a.RoleId,
-                    RoleName = a.Role != null ? a.Role.RoleName : "",
+                    RoleName = a.Role != null ? a.Role.RoleName : "Customer",
                     a.IsActive,
                     a.CreatedAt
                 })
@@ -35,68 +38,68 @@ namespace HTTTDN.AdminApi.Controllers
             return Ok(list);
         }
 
+        // Chỉ trả về đúng 3 quyền: Admin, Manager, Customer
         [HttpGet("roles")]
-        public async Task<IActionResult> GetRoles() => Ok(await _context.Roles.ToListAsync());
+        public async Task<IActionResult> GetRoles()
+        {
+            var allowedRoles = new[] { "Admin", "Manager", "Customer" };
+            var roles = await _context.Roles
+                .Where(r => allowedRoles.Contains(r.RoleName))
+                .ToListAsync();
+            return Ok(roles);
+        }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] AccountCreateDto dto)
         {
-            if (await _context.Accounts.AnyAsync(a => a.Username == dto.Username))
+            if (await _context.Accounts.AnyAsync(a => a.Username.ToLower() == dto.Username.Trim().ToLower()))
                 return BadRequest(new { message = "Username đã tồn tại!" });
 
             var acc = new Account
             {
-                Username = dto.Username,
+                Username = dto.Username.Trim(),
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-                FullName = dto.FullName,
+                FullName = dto.FullName.Trim(),
                 Email = dto.Email,
                 Phone = dto.Phone,
                 RoleId = dto.RoleId,
-                IsActive = true
+                IsActive = true,
+                CreatedAt = DateTime.Now
             };
             _context.Accounts.Add(acc);
             await _context.SaveChangesAsync();
             return Ok(new { message = "Tạo tài khoản thành công!" });
         }
 
+        // Cho phép Admin đổi quyền của bất kỳ tài khoản nào (kể cả Admin khác)
         [HttpPut("{id}/role")]
-        public async Task<IActionResult> UpdateRole(int id, [FromBody] UpdateRoleDto dto, [FromQuery] int? currentUserId)
+        public async Task<IActionResult> UpdateRole(int id, [FromBody] UpdateRoleDto dto)
         {
-            var acc = await _context.Accounts
-                .Include(a => a.Role)
-                .FirstOrDefaultAsync(a => a.AccountId == id);
-
+            var acc = await _context.Accounts.FindAsync(id);
             if (acc == null) return NotFound(new { message = "Không tìm thấy tài khoản!" });
-
-            // Không cho phép thay đổi quyền của một Admin khác
-            if (acc.Role?.RoleName == "Admin" && currentUserId.HasValue && acc.AccountId != currentUserId.Value)
-            {
-                return BadRequest(new { message = "Bạn không có quyền thay đổi vai trò của một Admin khác!" });
-            }
 
             acc.RoleId = dto.RoleId;
             await _context.SaveChangesAsync();
             return Ok(new { message = "Cập nhật phân quyền thành công!" });
         }
 
+        // Cho phép Admin xóa bất kỳ Admin khác hoặc tài khoản khác
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id, [FromQuery] int? currentUserId)
+        public async Task<IActionResult> Delete(int id)
         {
-            var acc = await _context.Accounts
-                .Include(a => a.Role)
-                .FirstOrDefaultAsync(a => a.AccountId == id);
-
+            var acc = await _context.Accounts.FindAsync(id);
             if (acc == null)
                 return NotFound(new { message = "Không tìm thấy tài khoản!" });
 
-            // RÀNG BUỘC: Nếu tài khoản cần xóa là Admin thì chỉ chính chủ mới được tự xóa
-            if (acc.Role?.RoleName == "Admin")
-            {
-                if (!currentUserId.HasValue || acc.AccountId != currentUserId.Value)
-                {
-                    return BadRequest(new { message = "Không thể xóa tài khoản của Admin khác! Bạn chỉ có thể tự xóa tài khoản Admin của chính mình." });
-                }
-            }
+            // Xóa dữ liệu liên quan (nếu có) để tránh lỗi khóa ngoại SQL Server
+            var profiles = await _context.CustomerProfiles.Where(p => p.AccountId == id).ToListAsync();
+            if (profiles.Any()) _context.CustomerProfiles.RemoveRange(profiles);
+
+            var feedbacks = await _context.Feedbacks.Where(f => f.AccountId == id).ToListAsync();
+            if (feedbacks.Any()) _context.Feedbacks.RemoveRange(feedbacks);
+
+            var responses = await _context.SurveyResponses.Where(r => r.AccountId == id).ToListAsync();
+            if (responses.Any()) _context.SurveyResponses.RemoveRange(responses);
 
             _context.Accounts.Remove(acc);
             await _context.SaveChangesAsync();

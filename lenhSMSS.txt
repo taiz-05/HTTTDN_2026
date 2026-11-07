@@ -1,0 +1,89 @@
+USE [HTTTDN_DB];
+GO
+
+-- 1. Nới lỏng ràng buộc bảng Accounts để Đăng ký Khách hàng không bị lỗi NULL Email
+ALTER TABLE Accounts ALTER COLUMN Email VARCHAR(100) NULL;
+ALTER TABLE Accounts ALTER COLUMN Phone VARCHAR(20) NULL;
+ALTER TABLE Accounts ALTER COLUMN PasswordHash NVARCHAR(255) NOT NULL;
+GO
+
+-- 2. Thêm cột ImageUrl cho bảng Products (nếu chưa có)
+IF COL_LENGTH('Products', 'ImageUrl') IS NULL
+BEGIN
+    ALTER TABLE Products ADD ImageUrl NVARCHAR(500) NULL;
+END
+GO
+
+-- 3. Thêm cột ExpiresAt (Thời hạn khảo sát) cho bảng Surveys (nếu chưa có)
+IF COL_LENGTH('Surveys', 'ExpiresAt') IS NULL
+BEGIN
+    ALTER TABLE Surveys ADD ExpiresAt DATETIME NULL;
+END
+GO
+
+-- 4. Đồng bộ mật khẩu '123456' và mở khóa cho toàn bộ tài khoản test
+UPDATE Accounts 
+SET PasswordHash = '123456', IsActive = 1
+WHERE Username IN ('admin', 'quanly', 'nv_kho', 'nv_banhang', 'nv_nhansu', 'khachhang1', 'khachhang2', 'Tuantai');
+GO
+
+-- 5. Cập nhật chính xác hình ảnh trực quan cho từng sản phẩm (SP001 -> SP009)
+UPDATE Products 
+SET ImageUrl = 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600&auto=format&fit=crop&q=80' 
+WHERE ProductCode = 'SP001' OR ProductName LIKE N'%Bàn phím%';
+
+UPDATE Products 
+SET ImageUrl = 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=600&auto=format&fit=crop&q=80' 
+WHERE ProductCode = 'SP002' OR ProductName LIKE N'%G102%';
+
+UPDATE Products 
+SET ImageUrl = 'https://images.unsplash.com/photo-1562976540-1502c2145186?w=600&auto=format&fit=crop&q=80' 
+WHERE ProductCode = 'SP003' OR ProductName LIKE N'%RAM%';
+
+UPDATE Products 
+SET ImageUrl = 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=600&auto=format&fit=crop&q=80' 
+WHERE ProductCode = 'SP004' OR ProductName LIKE N'%Màn hình%';
+
+UPDATE Products 
+SET ImageUrl = 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=600&auto=format&fit=crop&q=80' 
+WHERE ProductCode = 'SP005' OR ProductName LIKE N'%SSD%' OR ProductName LIKE N'%Ổ cứng%';
+
+UPDATE Products 
+SET ImageUrl = 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&auto=format&fit=crop&q=80' 
+WHERE ProductCode = 'SP006' OR ProductName LIKE N'%Router%' OR ProductName LIKE N'%WiFi%';
+
+UPDATE Products 
+SET ImageUrl = 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=600&auto=format&fit=crop&q=80' 
+WHERE ProductCode = 'SP007' OR ProductName LIKE N'%MX Master%';
+
+UPDATE Products 
+SET ImageUrl = 'https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=600&auto=format&fit=crop&q=80',
+    StockQuantity = 12,
+    Status = N'Đang bán'
+WHERE ProductCode = 'SP008' OR ProductName LIKE N'%Cloud II%';
+
+UPDATE Products 
+SET ImageUrl = 'https://images.unsplash.com/photo-1599669454699-248893623440?w=600&auto=format&fit=crop&q=80' 
+WHERE ProductCode = 'SP009';
+
+UPDATE Products 
+SET ImageUrl = 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600&auto=format&fit=crop&q=80' 
+WHERE ImageUrl IS NULL OR ImageUrl = '';
+GO
+
+-- 6. Thêm dữ liệu đánh giá rải đều các ngày gần nhất để Biểu đồ Thống kê theo ngày hiển thị trực quan
+DECLARE @CusId INT = (SELECT TOP 1 AccountId FROM Accounts WHERE Username = 'khachhang1');
+IF @CusId IS NULL SET @CusId = (SELECT TOP 1 AccountId FROM Accounts);
+
+DECLARE @Prod1 INT = (SELECT TOP 1 ProductId FROM Products ORDER BY ProductId ASC);
+DECLARE @Prod2 INT = (SELECT TOP 1 ProductId FROM Products ORDER BY ProductId DESC);
+
+IF @CusId IS NOT NULL AND @Prod1 IS NOT NULL
+BEGIN
+    INSERT INTO Feedbacks (AccountId, ProductId, Rating, Comment, AdminReply, Status, CreatedAt) VALUES
+    (@CusId, @Prod1, 5, N'Sản phẩm chính hãng, đóng gói cẩn thận, dùng rất êm.', N'Cảm ơn quý khách đã tin tưởng ủng hộ!', N'Đã tiếp nhận & Xử lý', DATEADD(DAY, -5, GETDATE())),
+    (@CusId, @Prod2, 4, N'Giao hàng nhanh, chất lượng tốt trong tầm giá.', N'Cảm ơn phản hồi tích cực của bạn!', N'Đã tiếp nhận & Xử lý', DATEADD(DAY, -3, GETDATE())),
+    (@CusId, @Prod1, 5, N'Hiệu năng ổn định, rất phù hợp cho công việc và học tập.', NULL, N'Chờ xử lý', DATEADD(DAY, -2, GETDATE())),
+    (@CusId, @Prod2, 3, N'Thiết kế đẹp nhưng mong shop có thêm nhiều chương trình khuyến mãi.', NULL, N'Chờ xử lý', DATEADD(DAY, -1, GETDATE()));
+END
+GO
