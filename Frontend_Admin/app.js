@@ -2,14 +2,20 @@ const API = "http://localhost:5000/api/admin";
 const DEFAULT_IMG = "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400";
 
 let rolesList = [];
+let categoriesList = [];
+let suppliersList = [];
 let adminProductsCache = [];
 let allAccountsCache = [];
+let currentAccountRoleFilter = "all";
 let currentUser = null;
 let editingProductId = null;
+let editingSupplierId = null;
 
 let dailyTrendChartInstance = null;
 let ratingChartInstance = null;
+let categoryChartInstance = null;
 let productChartInstance = null;
+let stockChartInstance = null;
 
 // KÊNH ĐỒNG BỘ REAL-TIME GIỮA CÁC TAB TRÌNH DUYỆT
 const syncChannel = new BroadcastChannel("htttdn_realtime_sync");
@@ -35,7 +41,7 @@ window.onload = async () => {
 
     const adminNameEl = document.getElementById("adminName");
     if (adminNameEl) {
-        adminNameEl.innerText = "Tài khoản: " + currentUser.fullName + " (" + currentUser.username + ")";
+        adminNameEl.innerText = `${currentUser.fullName} (${currentUser.username})`;
     }
 
     // Khởi tạo mặc định bộ lọc 7 ngày gần nhất
@@ -44,8 +50,6 @@ window.onload = async () => {
     await loadCategoriesAndSuppliers();
     await loadRoles();
     await refreshAllAdminDataSilently();
-
-    setInterval(refreshAllAdminDataSilently, 4000);
 };
 
 async function refreshAllAdminDataSilently() {
@@ -67,10 +71,13 @@ function switchTab(id, btn) {
     const target = document.getElementById(id);
     if (target) target.style.display = "block";
     if (btn) btn.classList.add("active");
+    if (id === "tabDashboard") {
+        setTimeout(loadReviewAnalytics, 50);
+    }
 }
 
 // =========================================================
-// 1. XỬ LÝ BỘ LỌC NGÀY & THỐNG KÊ THEO NGÀY
+// 1. XỬ LÝ BỘ LỌC NGÀY & THỐNG KÊ DOANH NGHIỆP
 // =========================================================
 function toLocalIsoDate(dateObj) {
     const y = dateObj.getFullYear();
@@ -161,30 +168,49 @@ async function loadReviewAnalytics() {
         });
 
         const rangeLabel = document.getElementById("statDateRangeLabel");
-        const kpiReviewsLabel = document.getElementById("kpiReviewsLabel");
-        if (rangeLabel && kpiReviewsLabel) {
+        if (rangeLabel) {
             if (!startVal && !endVal) {
                 rangeLabel.innerText = "Đang xem: Tất cả thời gian";
-                kpiReviewsLabel.innerText = "Tổng lượt đánh giá";
             } else if (startVal === endVal) {
                 rangeLabel.innerText = `Ngày: ${formatDateVN(startVal)}`;
-                kpiReviewsLabel.innerText = `Đánh giá ngày ${formatDateVN(startVal)}`;
             } else {
                 rangeLabel.innerText = `Từ ${formatDateVN(startVal || "...")} đến ${formatDateVN(endVal || "...")}`;
-                kpiReviewsLabel.innerText = "Lượt đánh giá (Trong kỳ)";
             }
         }
 
-        document.getElementById("kpiReviews").innerText = filteredFeedbacks.length;
-        const badgeEl = document.getElementById("dailySummaryBadge");
-        if (badgeEl) badgeEl.innerText = `${filteredFeedbacks.length} đánh giá trong kỳ`;
+        // 1. TÍNH TOÁN 6 KPI DOANH NGHIỆP
+        const totalProds = adminProductsCache.length;
+        const activeProds = adminProductsCache.filter(p => p.status === "Đang bán").length;
+        const outProds = adminProductsCache.filter(p => p.stockQuantity === 0).length;
+        const totalInventoryValue = adminProductsCache.reduce((sum, p) => sum + (p.price * p.stockQuantity), 0);
+        const totalStockUnits = adminProductsCache.reduce((sum, p) => sum + p.stockQuantity, 0);
+
+        if (document.getElementById("kpiProducts")) document.getElementById("kpiProducts").innerText = totalProds;
+        if (document.getElementById("kpiProductsSub")) document.getElementById("kpiProductsSub").innerText = `${activeProds} Đang bán · ${outProds} Hết hàng`;
+        if (document.getElementById("kpiInventoryVal")) document.getElementById("kpiInventoryVal").innerText = totalInventoryValue.toLocaleString("vi-VN") + " ₫";
+        if (document.getElementById("kpiSuppliers")) document.getElementById("kpiSuppliers").innerText = suppliersList.length;
+        if (document.getElementById("kpiReviews")) document.getElementById("kpiReviews").innerText = filteredFeedbacks.length;
 
         const avg = filteredFeedbacks.length > 0
             ? (filteredFeedbacks.reduce((sum, f) => sum + f.rating, 0) / filteredFeedbacks.length).toFixed(1)
-            : "0.0";
-        document.getElementById("kpiAvgStar").innerText = `Điểm TB: ${avg} / 5.0`;
+            : "5.0";
+        if (document.getElementById("kpiAvgStarText")) document.getElementById("kpiAvgStarText").innerText = `Điểm TB: ${avg} / 5.0 ★`;
+        if (document.getElementById("kpiAvgStar")) document.getElementById("kpiAvgStar").innerText = `Điểm TB: ${avg} / 5.0`;
 
-        // 1. Biểu đồ theo ngày
+        const positiveCount = filteredFeedbacks.filter(f => f.rating >= 4).length;
+        const posRate = filteredFeedbacks.length > 0
+            ? ((positiveCount / filteredFeedbacks.length) * 100).toFixed(1)
+            : "100.0";
+        if (document.getElementById("kpiPosRate")) document.getElementById("kpiPosRate").innerText = `${posRate}%`;
+
+        if (document.getElementById("dailySummaryBadge")) {
+            document.getElementById("dailySummaryBadge").innerText = `${filteredFeedbacks.length} đánh giá trong kỳ`;
+        }
+        if (document.getElementById("stockSummaryBadge")) {
+            document.getElementById("stockSummaryBadge").innerText = `Tổng tồn: ${totalStockUnits} cái`;
+        }
+
+        // 2. BIỂU ĐỒ 1: DIỄN BIẾN THEO NGÀY (LINE + BAR)
         let dateKeys = [];
         if (startVal && endVal && startVal <= endVal) {
             let cur = new Date(startVal + "T00:00:00");
@@ -228,23 +254,23 @@ async function loadReviewAnalytics() {
                     datasets: [
                         {
                             type: "line",
-                            label: "Số lượt đánh giá trong ngày",
+                            label: "Lượt đánh giá sản phẩm",
                             data: dailyReviewCounts,
-                            borderColor: "#1e3a8a",
-                            backgroundColor: "rgba(30, 58, 138, 0.12)",
+                            borderColor: "#2563eb",
+                            backgroundColor: "rgba(37, 99, 235, 0.12)",
                             borderWidth: 2.5,
-                            pointBackgroundColor: "#1e3a8a",
-                            pointRadius: 4,
-                            tension: 0.25,
+                            pointBackgroundColor: "#1d4ed8",
+                            pointRadius: 4.5,
+                            tension: 0.3,
                             fill: true
                         },
                         {
                             type: "bar",
-                            label: "Tài khoản đăng ký mới",
+                            label: "Tài khoản mới đăng ký",
                             data: dailyAccountCounts,
-                            backgroundColor: "#65a30d",
+                            backgroundColor: "#059669",
                             borderRadius: 4,
-                            barThickness: 22
+                            barThickness: 20
                         }
                     ]
                 },
@@ -258,7 +284,7 @@ async function loadReviewAnalytics() {
             });
         }
 
-        // 2. Biểu đồ cột 1-5 sao
+        // 3. BIỂU ĐỒ 2: CỘT MỨC SAO 1-5
         const starCounts = [1, 2, 3, 4, 5].map(star => filteredFeedbacks.filter(f => f.rating === star).length);
         const barCanvas = document.getElementById("ratingBarChart");
         if (barCanvas && typeof Chart !== "undefined") {
@@ -271,8 +297,8 @@ async function loadReviewAnalytics() {
                     datasets: [{
                         label: "Số lượt đánh giá",
                         data: starCounts,
-                        backgroundColor: ["#b91c1c", "#d97706", "#eab308", "#1e3a8a", "#65a30d"],
-                        borderRadius: 4,
+                        backgroundColor: ["#dc2626", "#ea580c", "#f59e0b", "#2563eb", "#059669"],
+                        borderRadius: 5,
                         barThickness: 32
                     }]
                 },
@@ -286,7 +312,36 @@ async function loadReviewAnalytics() {
             });
         }
 
-        // 3. Biểu đồ tròn sản phẩm
+        // 4. BIỂU ĐỒ 3: CƠ CẤU THEO DANH MỤC
+        const catMap = {};
+        adminProductsCache.forEach(p => {
+            const cat = p.categoryName || "Khác";
+            catMap[cat] = (catMap[cat] || 0) + 1;
+        });
+
+        const catCanvas = document.getElementById("categoryChart");
+        if (catCanvas && typeof Chart !== "undefined") {
+            const ctxCat = catCanvas.getContext("2d");
+            if (categoryChartInstance) categoryChartInstance.destroy();
+            categoryChartInstance = new Chart(ctxCat, {
+                type: "doughnut",
+                data: {
+                    labels: Object.keys(catMap).length > 0 ? Object.keys(catMap) : ["Chưa có dữ liệu"],
+                    datasets: [{
+                        data: Object.keys(catMap).length > 0 ? Object.values(catMap) : [1],
+                        backgroundColor: ["#2563eb", "#059669", "#7c3aed", "#d97706", "#0284c7"]
+                    }]
+                },
+                options: {
+                    animation: false,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: "bottom" } }
+                }
+            });
+        }
+
+        // 5. BIỂU ĐỒ 4: TỶ LỆ ĐÁNH GIÁ THEO SẢN PHẨM
         const prodMap = {};
         filteredFeedbacks.forEach(f => {
             const name = f.productName || "Khác";
@@ -304,8 +359,8 @@ async function loadReviewAnalytics() {
                     datasets: [{
                         data: Object.keys(prodMap).length > 0 ? Object.values(prodMap) : [1],
                         backgroundColor: Object.keys(prodMap).length > 0
-                            ? ["#1e3a8a", "#65a30d", "#0284c7", "#d97706", "#4f46e5"]
-                            : ["#e5e7eb"]
+                            ? ["#1d4ed8", "#059669", "#0284c7", "#ea580c", "#6366f1", "#10b981", "#f59e0b"]
+                            : ["#e2e8f0"]
                     }]
                 },
                 options: {
@@ -317,7 +372,35 @@ async function loadReviewAnalytics() {
             });
         }
 
-        // 4. Bảng danh sách phản hồi
+        // 6. BIỂU ĐỒ 5: TÌNH TRẠNG PHÂN BỔ TỒN KHO
+        const highStock = adminProductsCache.filter(p => p.stockQuantity >= 20).length;
+        const normalStock = adminProductsCache.filter(p => p.stockQuantity >= 10 && p.stockQuantity < 20).length;
+        const lowStock = adminProductsCache.filter(p => p.stockQuantity > 0 && p.stockQuantity < 10).length;
+        const zeroStock = adminProductsCache.filter(p => p.stockQuantity === 0).length;
+
+        const stockCanvas = document.getElementById("stockStatusChart");
+        if (stockCanvas && typeof Chart !== "undefined") {
+            const ctxStock = stockCanvas.getContext("2d");
+            if (stockChartInstance) stockChartInstance.destroy();
+            stockChartInstance = new Chart(ctxStock, {
+                type: "doughnut",
+                data: {
+                    labels: ["Dồi dào (≥20)", "Tiêu chuẩn (10-19)", "Sắp hết (1-9)", "Hết hàng (0)"],
+                    datasets: [{
+                        data: [highStock, normalStock, lowStock, zeroStock],
+                        backgroundColor: ["#059669", "#2563eb", "#ea580c", "#dc2626"]
+                    }]
+                },
+                options: {
+                    animation: false,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: "bottom" } }
+                }
+            });
+        }
+
+        // 7. BẢNG DANH SÁCH PHẢN HỒI THEO THỜI GIAN
         const countEl = document.getElementById("tableCountText");
         if (countEl) countEl.innerText = `Hiển thị ${filteredFeedbacks.length} kết quả`;
 
@@ -326,8 +409,8 @@ async function loadReviewAnalytics() {
             if (filteredFeedbacks.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="6" style="text-align:center; color:var(--text-muted); padding:18px;">
-                            Không có đánh giá nào trong khoảng ngày đã chọn.
+                        <td colspan="6" style="text-align:center; color:var(--text-muted); padding:20px;">
+                            Không có đánh giá nào trong khoảng thời gian đã chọn.
                         </td>
                     </tr>
                 `;
@@ -337,7 +420,12 @@ async function loadReviewAnalytics() {
                         <td><span class="badge badge-info">${formatDateTimeVN(f.createdAt)}</span></td>
                         <td><b>${f.customerName}</b></td>
                         <td>${f.productName}</td>
-                        <td><b>${f.rating} / 5</b></td>
+                        <td>
+                            <span class="star-rating-box">
+                                <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                <span>${f.rating}.0 / 5</span>
+                            </span>
+                        </td>
                         <td>${f.comment}</td>
                         <td><span class="badge ${f.status.includes('Đã') ? 'badge-active' : 'badge-locked'}">${f.status}</span></td>
                     </tr>
@@ -350,52 +438,129 @@ async function loadReviewAnalytics() {
 }
 
 // =========================================================
-// 2. QUẢN LÝ SẢN PHẨM & DANH MỤC
+// 2. QUẢN LÝ SẢN PHẨM & KHO HÀNG (CRUD VIA MODAL)
 // =========================================================
 async function loadCategoriesAndSuppliers() {
     try {
-        const cats = await (await fetch(`${API}/categories`)).json();
-        const sups = await (await fetch(`${API}/suppliers`)).json();
+        categoriesList = await (await fetch(`${API}/categories`)).json();
+        suppliersList = await (await fetch(`${API}/suppliers`)).json();
 
-        const fCat = document.getElementById("fCategory"),
-              pCat = document.getElementById("pCat"),
-              editCat = document.getElementById("editProdCat");
-
-        if (fCat && pCat && editCat) {
-            const curFCat = fCat.value;
-            fCat.innerHTML = `<option value="">Tất cả danh mục</option>`;
-            pCat.innerHTML = "";
-            editCat.innerHTML = "";
-
-            cats.forEach(c => {
-                const opt = `<option value="${c.categoryId}">${c.categoryName}</option>`;
-                fCat.innerHTML += opt;
-                pCat.innerHTML += opt;
-                editCat.innerHTML += opt;
-            });
-            fCat.value = curFCat;
+        // Populate filter dropdowns
+        const fCat = document.getElementById("fCategory");
+        if (fCat) {
+            fCat.innerHTML = `<option value="">Tất cả danh mục</option>` +
+                categoriesList.map(c => `<option value="${c.categoryId}">${c.categoryName}</option>`).join("");
         }
 
-        const fSup = document.getElementById("fSupplier"),
-              pSup = document.getElementById("pSup"),
-              editSup = document.getElementById("editProdSup");
+        const fSup = document.getElementById("fSupplier");
+        if (fSup) {
+            fSup.innerHTML = `<option value="">Tất cả nhà cung cấp</option>` +
+                suppliersList.map(s => `<option value="${s.supplierId}">${s.supplierName}</option>`).join("");
+        }
 
-        if (fSup && pSup && editSup) {
-            const curFSup = fSup.value;
-            fSup.innerHTML = `<option value="">Tất cả nhà cung cấp</option>`;
-            pSup.innerHTML = "";
-            editSup.innerHTML = "";
+        // Populate modal dropdowns
+        const mCat = document.getElementById("mProdCat");
+        if (mCat) {
+            mCat.innerHTML = categoriesList.map(c => `<option value="${c.categoryId}">${c.categoryName}</option>`).join("");
+        }
 
-            sups.forEach(s => {
-                const opt = `<option value="${s.supplierId}">${s.supplierName}</option>`;
-                fSup.innerHTML += opt;
-                pSup.innerHTML += opt;
-                editSup.innerHTML += opt;
-            });
-            fSup.value = curFSup;
+        const mSup = document.getElementById("mProdSup");
+        if (mSup) {
+            mSup.innerHTML = suppliersList.map(s => `<option value="${s.supplierId}">${s.supplierName}</option>`).join("");
         }
     } catch (e) {
         console.error("Lỗi loadCategoriesAndSuppliers:", e);
+    }
+}
+
+async function loadProducts() {
+    try {
+        const keyword = document.getElementById("fKeyword")?.value.trim() || "";
+        const catId = document.getElementById("fCategory")?.value || "";
+        const supId = document.getElementById("fSupplier")?.value || "";
+        const status = document.getElementById("fStatus")?.value || "";
+        const minPrice = document.getElementById("fMinPrice")?.value.trim() || "";
+        const maxPrice = document.getElementById("fMaxPrice")?.value.trim() || "";
+        const sort = document.getElementById("fSort")?.value || "";
+
+        const params = new URLSearchParams();
+        if (keyword) params.append("keyword", keyword);
+        if (catId) params.append("categoryId", catId);
+        if (supId) params.append("supplierId", supId);
+        if (status) params.append("status", status);
+        if (minPrice) params.append("minPrice", minPrice);
+        if (maxPrice) params.append("maxPrice", maxPrice);
+        if (sort) params.append("sortBy", sort);
+
+        const res = await fetch(`${API}/products?${params.toString()}`);
+        if (!res.ok) return;
+        adminProductsCache = await res.json();
+
+        const countBadge = document.getElementById("productCountBadge");
+        if (countBadge) countBadge.innerText = `Đang hiển thị ${adminProductsCache.length} sản phẩm`;
+
+        const tbody = document.getElementById("productTable");
+        if (!tbody) return;
+
+        if (adminProductsCache.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="9" style="text-align:center; padding:24px; color:var(--text-muted);">
+                        Không tìm thấy sản phẩm nào khớp với bộ lọc hiện tại.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = adminProductsCache.map(p => {
+            const imgUrl = p.imageUrl || DEFAULT_IMG;
+            let stockBadge = "";
+            if (p.stockQuantity === 0) {
+                stockBadge = `<span class="badge badge-stock-out">Hết hàng (0)</span>`;
+            } else if (p.stockQuantity < 10) {
+                stockBadge = `<span class="badge badge-stock-low">Sắp hết (${p.stockQuantity} ${p.unit || 'cái'})</span>`;
+            } else {
+                stockBadge = `<span class="badge badge-stock-high">Còn hàng (${p.stockQuantity} ${p.unit || 'cái'})</span>`;
+            }
+
+            const ratingVal = Number(p.avgRating ?? p.averageRating ?? 5.0).toFixed(1);
+            const revCount = p.reviewCount ?? p.totalReviews ?? 0;
+
+            return `
+                <tr>
+                    <td>
+                        <img src="${imgUrl}" class="prod-thumb" alt="Product" onerror="this.src='${DEFAULT_IMG}'">
+                    </td>
+                    <td><span class="badge-tag" style="font-family:monospace; font-weight:700;">${p.productCode}</span></td>
+                    <td>
+                        <div style="font-weight:700; color:var(--text-primary); font-size:13.5px;">${p.ProductName || p.productName}</div>
+                        <div style="font-size:11.5px; color:var(--text-muted); margin-top:2px;">Trạng thái: <b>${p.status}</b></div>
+                    </td>
+                    <td><span class="badge badge-info">${p.categoryName || "-"}</span></td>
+                    <td>${p.supplierName || "-"}</td>
+                    <td style="text-align:right; font-weight:800; color:#1d4ed8; font-size:14px;">
+                        ${Number(p.price).toLocaleString("vi-VN")} ₫
+                    </td>
+                    <td>${stockBadge}</td>
+                    <td>
+                        <span class="star-rating-box">
+                            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                            <span>${ratingVal}</span>
+                            <span style="color:var(--text-muted); font-size:11px;">(${revCount})</span>
+                        </span>
+                    </td>
+                    <td style="text-align:center;">
+                        <div style="display:inline-flex; gap:6px;">
+                            <button class="btn" style="padding:5px 10px; font-size:12px;" onclick="openEditProductModal(${p.productId})">Sửa</button>
+                            <button class="btn btn-danger" style="padding:5px 10px; font-size:12px;" onclick="deleteProduct(${p.productId})">Xóa</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+    } catch (e) {
+        console.error("Lỗi loadProducts:", e);
     }
 }
 
@@ -404,82 +569,25 @@ function resetProductFilter() {
     document.getElementById("fCategory").value = "";
     document.getElementById("fSupplier").value = "";
     document.getElementById("fStatus").value = "";
-    document.getElementById("fMinPrice").value = "";
-    document.getElementById("fMaxPrice").value = "";
+    if (document.getElementById("fMinPrice")) document.getElementById("fMinPrice").value = "";
+    if (document.getElementById("fMaxPrice")) document.getElementById("fMaxPrice").value = "";
     document.getElementById("fSort").value = "";
     loadProducts();
 }
 
-async function loadProducts() {
-    try {
-        const params = new URLSearchParams({
-            keyword: document.getElementById("fKeyword")?.value.trim() || "",
-            categoryId: document.getElementById("fCategory")?.value || "",
-            supplierId: document.getElementById("fSupplier")?.value || "",
-            status: document.getElementById("fStatus")?.value || "",
-            minPrice: document.getElementById("fMinPrice")?.value || "",
-            maxPrice: document.getElementById("fMaxPrice")?.value || "",
-            sortBy: document.getElementById("fSort")?.value || ""
-        });
-        const res = await fetch(`${API}/products?${params}`);
-        if (!res.ok) return;
-        adminProductsCache = await res.json();
-        document.getElementById("kpiProducts").innerText = adminProductsCache.length;
+// PRODUCT MODAL HANDLERS
+function openAddProductModal() {
+    editingProductId = null;
+    document.getElementById("productModalTitle").innerText = "Thêm sản phẩm mới vào hệ thống";
+    document.getElementById("mProdCode").value = "";
+    document.getElementById("mProdName").value = "";
+    document.getElementById("mProdPrice").value = "";
+    document.getElementById("mProdStock").value = "10";
+    document.getElementById("mProdStatus").value = "Đang bán";
+    document.getElementById("mProdImage").value = "";
+    document.getElementById("modalProdPreviewImg").src = DEFAULT_IMG;
 
-        document.getElementById("productTable").innerHTML = adminProductsCache.map(p => {
-            const badgeClass = p.status === "Đang bán" ? "badge-active" : "badge-locked";
-            return `
-            <tr>
-                <td><img src="${p.imageUrl || DEFAULT_IMG}" class="prod-thumb" alt="${p.productName}" onerror="this.src='${DEFAULT_IMG}'"></td>
-                <td><b>${p.productCode}</b></td>
-                <td><b>${p.productName}</b></td>
-                <td>${p.categoryName}</td>
-                <td>${p.supplierName}</td>
-                <td><b>${Number(p.price).toLocaleString()} đ</b></td>
-                <td><b>${p.stockQuantity}</b> <span class="badge ${badgeClass}" style="margin-left:4px;">${p.status}</span></td>
-                <td><b>${Number(p.avgRating ?? 5).toFixed(1)} / 5</b> (${p.reviewCount ?? 0})</td>
-                <td style="display:flex; gap:6px;">
-                    <button class="btn" onclick="openEditProductModal(${p.productId})">Sửa</button>
-                    <button class="btn btn-danger" onclick="deleteProduct(${p.productId})">Xóa</button>
-                </td>
-            </tr>
-            `;
-        }).join("");
-    } catch (e) {
-        console.error("Lỗi loadProducts:", e);
-    }
-}
-
-async function createProduct() {
-    const code = document.getElementById("pCode").value.trim();
-    const name = document.getElementById("pName").value.trim();
-    if (!code || !name) return alert("Vui lòng nhập mã và tên sản phẩm.");
-
-    const stock = Number(document.getElementById("pStock").value || 0);
-    const body = {
-        productCode: code,
-        productName: name,
-        categoryId: Number(document.getElementById("pCat").value),
-        supplierId: Number(document.getElementById("pSup").value),
-        price: Number(document.getElementById("pPrice").value || 0),
-        costPrice: Number(document.getElementById("pPrice").value || 0) * 0.8,
-        stockQuantity: stock,
-        unit: "Cái",
-        status: stock > 0 ? "Đang bán" : "Hết hàng",
-        imageUrl: document.getElementById("pImage").value.trim()
-    };
-    const res = await fetch(`${API}/products`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-    const data = await res.json();
-    if (!res.ok) return alert(data.message || "Lỗi thêm sản phẩm.");
-
-    document.getElementById("pCode").value = "";
-    document.getElementById("pName").value = "";
-    document.getElementById("pPrice").value = "";
-    document.getElementById("pStock").value = "";
-    document.getElementById("pImage").value = "";
-
-    await loadProducts();
-    notifyDataChanged("products");
+    document.getElementById("productModal").classList.add("show");
 }
 
 function openEditProductModal(productId) {
@@ -487,84 +595,154 @@ function openEditProductModal(productId) {
     if (!p) return;
 
     editingProductId = p.productId;
-    document.getElementById("editProdCode").value = p.productCode;
-    document.getElementById("editProdName").value = p.productName;
-    document.getElementById("editProdCat").value = p.categoryId;
-    document.getElementById("editProdSup").value = p.supplierId;
-    document.getElementById("editProdPrice").value = p.price;
-    document.getElementById("editProdStock").value = p.stockQuantity;
-    document.getElementById("editProdStatus").value = p.status || "Đang bán";
-    document.getElementById("editProdImage").value = p.imageUrl || "";
-    document.getElementById("editProdPreviewImg").src = p.imageUrl || DEFAULT_IMG;
+    document.getElementById("productModalTitle").innerText = `Chỉnh sửa sản phẩm: ${p.productCode}`;
+    document.getElementById("mProdCode").value = p.productCode || "";
+    document.getElementById("mProdName").value = p.ProductName || p.productName || "";
+    document.getElementById("mProdCat").value = p.categoryId;
+    document.getElementById("mProdSup").value = p.supplierId;
+    document.getElementById("mProdPrice").value = p.price;
+    document.getElementById("mProdStock").value = p.stockQuantity;
+    document.getElementById("mProdStatus").value = p.status;
+    document.getElementById("mProdImage").value = p.imageUrl || "";
+    document.getElementById("modalProdPreviewImg").src = p.imageUrl || DEFAULT_IMG;
 
-    document.getElementById("editProductModal").classList.add("show");
+    document.getElementById("productModal").classList.add("show");
 }
 
-function closeEditProductModal() {
-    document.getElementById("editProductModal").classList.remove("show");
+function closeProductModal() {
+    document.getElementById("productModal").classList.remove("show");
 }
 
-async function saveEditProduct() {
-    const code = document.getElementById("editProdCode").value.trim();
-    const name = document.getElementById("editProdName").value.trim();
-    if (!code || !name) return alert("Mã và tên sản phẩm không được để trống.");
+async function saveProductModal() {
+    const code = document.getElementById("mProdCode").value.trim();
+    const name = document.getElementById("mProdName").value.trim();
+    const price = Number(document.getElementById("mProdPrice").value || 0);
+    const stock = Number(document.getElementById("mProdStock").value || 0);
+    const catId = Number(document.getElementById("mProdCat").value);
+    const supId = Number(document.getElementById("mProdSup").value);
+    const status = document.getElementById("mProdStatus").value;
+    const imageUrl = document.getElementById("mProdImage").value.trim();
 
-    const price = Number(document.getElementById("editProdPrice").value || 0);
-    const stock = Number(document.getElementById("editProdStock").value || 0);
-    const status = document.getElementById("editProdStatus").value;
+    if (!code || !name) {
+        return alert("Vui lòng nhập đầy đủ Mã sản phẩm và Tên sản phẩm.");
+    }
+    if (price <= 0) {
+        return alert("Vui lòng nhập giá bán lớn hơn 0 VNĐ.");
+    }
 
-    const body = {
+    const payload = {
         productCode: code,
         productName: name,
-        categoryId: Number(document.getElementById("editProdCat").value),
-        supplierId: Number(document.getElementById("editProdSup").value),
+        categoryId: catId,
+        supplierId: supId,
         price: price,
-        costPrice: price * 0.8,
         stockQuantity: stock,
         unit: "Cái",
         status: status,
-        imageUrl: document.getElementById("editProdImage").value.trim()
+        imageUrl: imageUrl || DEFAULT_IMG
     };
 
-    const res = await fetch(`${API}/products/${editingProductId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-    });
-    const data = await res.json();
-    if (!res.ok) return alert(data.message || "Lỗi cập nhật sản phẩm.");
+    try {
+        let res;
+        if (editingProductId) {
+            res = await fetch(`${API}/products/${editingProductId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+        } else {
+            res = await fetch(`${API}/products`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+        }
 
-    closeEditProductModal();
-    await loadProducts();
-    notifyDataChanged("products");
-    alert(data.message);
+        const data = await res.json();
+        if (!res.ok) {
+            return alert(data.message || "Không thể lưu sản phẩm.");
+        }
+
+        alert(data.message || "Lưu thông tin sản phẩm thành công!");
+        closeProductModal();
+        await refreshAllAdminDataSilently();
+        notifyDataChanged("products");
+    } catch (err) {
+        alert("Lỗi kết nối máy chủ: " + err.message);
+    }
 }
 
 async function deleteProduct(id) {
-    if (!confirm("Xác nhận xóa sản phẩm này?")) return;
-    await fetch(`${API}/products/${id}`, { method: "DELETE" });
-    await loadProducts();
-    notifyDataChanged("products");
+    if (!confirm("Xác nhận xóa sản phẩm này khỏi hệ thống?")) return;
+    try {
+        const res = await fetch(`${API}/products/${id}`, { method: "DELETE" });
+        const data = await res.json();
+        alert(data.message || "Đã xóa sản phẩm.");
+        await refreshAllAdminDataSilently();
+        notifyDataChanged("products");
+    } catch (err) {
+        alert("Lỗi khi xóa: " + err.message);
+    }
+}
+
+function exportProductsCsv() {
+    if (!adminProductsCache || adminProductsCache.length === 0) {
+        return alert("Không có dữ liệu sản phẩm để xuất.");
+    }
+    let csv = "Mã SP,Tên sản phẩm,Danh mục,Nhà cung cấp,Giá bán (VND),Tồn kho,Trạng thái\n";
+    adminProductsCache.forEach(p => {
+        csv += `"${p.productCode}","${(p.ProductName || p.productName).replace(/"/g, '""')}","${p.categoryName || ''}","${p.supplierName || ''}",${p.price},${p.stockQuantity},"${p.status}"\n`;
+    });
+
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `DS_San_Pham_SGU_${toLocalIsoDate(new Date())}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 // =========================================================
-// 3. QUẢN LÝ NHÀ CUNG CẤP
+// 3. QUẢN LÝ NHÀ CUNG CẤP (CRUD VIA MODAL)
 // =========================================================
 async function loadSuppliers() {
     try {
-        const kw = document.getElementById("sSearchKeyword") ? document.getElementById("sSearchKeyword").value.trim() : "";
-        const res = await fetch(`${API}/suppliers?keyword=${encodeURIComponent(kw)}`);
+        const keyword = document.getElementById("sSearchKeyword")?.value.trim().toLowerCase() || "";
+        const res = await fetch(`${API}/suppliers`);
         if (!res.ok) return;
-        const list = await res.json();
-        document.getElementById("kpiSuppliers").innerText = list.length;
+        suppliersList = await res.json();
 
-        document.getElementById("supplierTable").innerHTML = list.map(s => `
+        const filtered = suppliersList.filter(s => {
+            if (!keyword) return true;
+            return (s.supplierCode && s.supplierCode.toLowerCase().includes(keyword)) ||
+                   (s.supplierName && s.supplierName.toLowerCase().includes(keyword)) ||
+                   (s.address && s.address.toLowerCase().includes(keyword));
+        });
+
+        const tbody = document.getElementById("supplierTable");
+        if (!tbody) return;
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:18px; color:var(--text-muted);">Không tìm thấy nhà cung cấp nào.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = filtered.map(s => `
             <tr>
-                <td><b>${s.supplierCode}</b></td>
-                <td><b>${s.supplierName}</b></td>
+                <td><span class="badge-tag" style="font-family:monospace; font-weight:700;">${s.supplierCode}</span></td>
+                <td><b style="color:var(--text-primary);">${s.supplierName}</b></td>
+                <td>${s.contactName || "-"}</td>
                 <td>${s.phone || "-"}</td>
+                <td>${s.email || "-"}</td>
                 <td>${s.address || "-"}</td>
-                <td><button class="btn btn-danger" onclick="deleteSupplier(${s.supplierId})">Xóa</button></td>
+                <td style="text-align:center;">
+                    <div style="display:inline-flex; gap:6px;">
+                        <button class="btn" style="padding:4px 9px; font-size:12px;" onclick="openEditSupplierModal(${s.supplierId})">Sửa</button>
+                        <button class="btn btn-danger" style="padding:4px 9px; font-size:12px;" onclick="deleteSupplier(${s.supplierId})">Xóa</button>
+                    </div>
+                </td>
             </tr>
         `).join("");
     } catch (e) {
@@ -572,46 +750,111 @@ async function loadSuppliers() {
     }
 }
 
-async function createSupplier() {
-    const code = document.getElementById("sCode").value.trim();
-    const name = document.getElementById("sName").value.trim();
-    if (!code || !name) return alert("Vui lòng nhập mã và tên nhà cung cấp.");
+function openAddSupplierModal() {
+    editingSupplierId = null;
+    document.getElementById("supplierModalTitle").innerText = "Thêm đối tác nhà cung cấp mới";
+    document.getElementById("mSupCode").value = "";
+    document.getElementById("mSupName").value = "";
+    document.getElementById("mSupContact").value = "";
+    document.getElementById("mSupPhone").value = "";
+    document.getElementById("mSupEmail").value = "";
+    document.getElementById("mSupAddress").value = "";
+    document.getElementById("supplierModal").classList.add("show");
+}
+
+function openEditSupplierModal(supId) {
+    const s = suppliersList.find(x => x.supplierId === supId);
+    if (!s) return;
+    editingSupplierId = s.supplierId;
+    document.getElementById("supplierModalTitle").innerText = `Chỉnh sửa nhà cung cấp: ${s.supplierCode}`;
+    document.getElementById("mSupCode").value = s.supplierCode || "";
+    document.getElementById("mSupName").value = s.supplierName || "";
+    document.getElementById("mSupContact").value = s.contactName || "";
+    document.getElementById("mSupPhone").value = s.phone || "";
+    document.getElementById("mSupEmail").value = s.email || "";
+    document.getElementById("mSupAddress").value = s.address || "";
+    document.getElementById("supplierModal").classList.add("show");
+}
+
+function closeSupplierModal() {
+    document.getElementById("supplierModal").classList.remove("show");
+}
+
+async function saveSupplierModal() {
+    const code = document.getElementById("mSupCode").value.trim();
+    const name = document.getElementById("mSupName").value.trim();
+    const phone = document.getElementById("mSupPhone").value.trim();
+    const contact = document.getElementById("mSupContact").value.trim();
+    const email = document.getElementById("mSupEmail").value.trim();
+    const address = document.getElementById("mSupAddress").value.trim();
+
+    if (!code || !name) return alert("Vui lòng nhập Mã và Tên nhà cung cấp.");
 
     const body = {
         supplierCode: code,
         supplierName: name,
-        phone: document.getElementById("sPhone").value.trim(),
-        address: document.getElementById("sAddress").value.trim()
+        contactName: contact,
+        phone: phone,
+        email: email,
+        address: address
     };
-    await fetch(`${API}/suppliers`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-    document.getElementById("sCode").value = "";
-    document.getElementById("sName").value = "";
-    document.getElementById("sPhone").value = "";
-    document.getElementById("sAddress").value = "";
-    await loadSuppliers();
-    await loadCategoriesAndSuppliers();
-    notifyDataChanged("suppliers");
+
+    try {
+        let res;
+        if (editingSupplierId) {
+            res = await fetch(`${API}/suppliers/${editingSupplierId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            });
+        } else {
+            res = await fetch(`${API}/suppliers`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            });
+        }
+        const data = await res.json();
+        if (!res.ok) {
+            return alert(data.message || "Không thể lưu thông tin nhà cung cấp.");
+        }
+        alert(data.message || "Lưu nhà cung cấp thành công!");
+        closeSupplierModal();
+        await loadSuppliers();
+        await loadCategoriesAndSuppliers();
+        notifyDataChanged("suppliers");
+    } catch (err) {
+        alert("Lỗi lưu nhà cung cấp: " + err.message);
+    }
 }
 
 async function deleteSupplier(id) {
     if (!confirm("Xác nhận xóa nhà cung cấp này?")) return;
-    await fetch(`${API}/suppliers/${id}`, { method: "DELETE" });
-    await loadSuppliers();
-    await loadCategoriesAndSuppliers();
-    notifyDataChanged("suppliers");
+    try {
+        const res = await fetch(`${API}/suppliers/${id}`, { method: "DELETE" });
+        const data = await res.json();
+        if (!res.ok) {
+            return alert(data.message || "Không thể xóa nhà cung cấp.");
+        }
+        alert(data.message || "Đã xóa nhà cung cấp.");
+        await loadSuppliers();
+        await loadCategoriesAndSuppliers();
+        notifyDataChanged("suppliers");
+    } catch (err) {
+        alert("Lỗi khi xóa nhà cung cấp: " + err.message);
+    }
 }
 
 // =========================================================
-// 4. QUẢN LÝ TÀI KHOẢN & PHÂN QUYỀN (CHỈ ADMIN, MANAGER, CUSTOMER)
+// 4. QUẢN LÝ TÀI KHOẢN & PHÂN QUYỀN
 // =========================================================
 async function loadRoles() {
     try {
-        const res = await fetch(`${API}/accounts/roles`);
-        if (!res.ok) return;
-        const allRoles = await res.json();
-        const allowed = ["Admin", "Manager", "Customer"];
-        rolesList = allRoles.filter(r => allowed.includes(r.roleName));
-        document.getElementById("aRole").innerHTML = rolesList.map(r => `<option value="${r.roleId}">${r.roleName}</option>`).join("");
+        rolesList = await (await fetch(`${API}/accounts/roles`)).json();
+        const mRole = document.getElementById("mAccRole");
+        if (mRole) {
+            mRole.innerHTML = rolesList.map(r => `<option value="${r.roleId}">${r.roleName} - ${r.description || ''}</option>`).join("");
+        }
     } catch (e) {
         console.error("Lỗi loadRoles:", e);
     }
@@ -622,83 +865,175 @@ async function loadAccounts() {
         const res = await fetch(`${API}/accounts`);
         if (!res.ok) return;
         allAccountsCache = await res.json();
-        document.getElementById("kpiAccounts").innerText = allAccountsCache.length;
 
-        document.getElementById("accountTable").innerHTML = allAccountsCache.map(a => {
-            const isSelf = currentUser && a.accountId === currentUser.accountId;
+        if (document.getElementById("kpiAccounts")) {
+            document.getElementById("kpiAccounts").innerText = allAccountsCache.length;
+        }
 
-            return `
-            <tr>
-                <td>${a.accountId}</td>
-                <td><b>${a.username}</b> ${isSelf ? '<span class="badge badge-active">Đang đăng nhập</span>' : ''}</td>
-                <td>${a.fullName}</td>
-                <td>${a.email || "-"}</td>
-                <td>
-                    <select onchange="changeRole(${a.accountId}, this.value)">
-                        ${rolesList.map(r => `<option value="${r.roleId}" ${r.roleId === a.roleId ? "selected" : ""}>${r.roleName}</option>`).join("")}
-                    </select>
-                </td>
-                <td>
-                    <button class="btn btn-danger" onclick="deleteAccount(${a.accountId}, ${isSelf})">
-                        ${isSelf ? 'Tự xóa TK' : 'Xóa'}
-                    </button>
-                </td>
-            </tr>
-            `;
-        }).join("");
+        renderFilteredAccounts();
     } catch (e) {
         console.error("Lỗi loadAccounts:", e);
     }
 }
 
-async function createAccount() {
-    const username = document.getElementById("aUser").value.trim();
-    const fullName = document.getElementById("aName").value.trim();
-    if (!username || !fullName) return alert("Vui lòng nhập Username và Họ tên.");
+function filterAccountsByRole(role, btn) {
+    currentAccountRoleFilter = role;
+    document.querySelectorAll("#tabAccounts .filter-toolbar button").forEach(b => b.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+    renderFilteredAccounts();
+}
+
+function renderFilteredAccounts() {
+    const tbody = document.getElementById("accountTable");
+    if (!tbody) return;
+
+    const filtered = allAccountsCache.filter(a => {
+        if (currentAccountRoleFilter === "all") return true;
+        return a.roleName === currentAccountRoleFilter;
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:18px; color:var(--text-muted);">Không có tài khoản nào thuộc nhóm này.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(a => {
+        let roleSelectHtml = "";
+        if (rolesList && rolesList.length > 0) {
+            const options = rolesList.map(r =>
+                `<option value="${r.roleId}" ${r.roleId === a.roleId || r.roleName === a.roleName ? "selected" : ""}>${r.roleName}</option>`
+            ).join("");
+            roleSelectHtml = `
+                <select onchange="changeAccountRole(${a.accountId}, this.value)" style="padding:4px 8px; font-size:12px; font-weight:600; border-radius:4px; border:1px solid var(--brand-border); background:#f8fafc; width:auto; cursor:pointer;">
+                    ${options}
+                </select>
+            `;
+        } else {
+            let roleBadgeColor = "badge-info";
+            if (a.roleName === "Admin") roleBadgeColor = "badge-locked";
+            else if (a.roleName === "Manager") roleBadgeColor = "badge-active";
+            roleSelectHtml = `<span class="badge ${roleBadgeColor}">${a.roleName}</span>`;
+        }
+
+        return `
+            <tr>
+                <td>#${a.accountId}</td>
+                <td>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div class="user-avatar-circle" style="width:26px; height:26px; font-size:10px; background:#1e293b;">
+                            ${(a.username || "U").substring(0, 2).toUpperCase()}
+                        </div>
+                        <b>${a.username}</b>
+                    </div>
+                </td>
+                <td>${a.fullName}</td>
+                <td>${a.email || "-"}</td>
+                <td>${a.phone || "-"}</td>
+                <td>${roleSelectHtml}</td>
+                <td><span class="badge ${a.isActive ? 'badge-active' : 'badge-locked'}">${a.isActive ? 'Hoạt động' : 'Đã khóa'}</span></td>
+                <td style="text-align:center;">
+                    <div style="display:inline-flex; gap:6px;">
+                        <button class="btn btn-warning" style="padding:4px 9px; font-size:12px;" onclick="toggleAccountLock(${a.accountId})">
+                            ${a.isActive ? 'Khóa' : 'Mở khóa'}
+                        </button>
+                        <button class="btn btn-danger" style="padding:4px 9px; font-size:12px;" onclick="deleteAccount(${a.accountId})">Xóa</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
+
+async function changeAccountRole(accountId, newRoleId) {
+    try {
+        const res = await fetch(`${API}/accounts/${accountId}/role`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ roleId: Number(newRoleId) })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            await loadAccounts();
+            return alert(data.message || "Không thể cập nhật phân quyền.");
+        }
+        alert(data.message || "Đã cập nhật phân quyền tài khoản thành công!");
+        await loadAccounts();
+        notifyDataChanged("accounts");
+    } catch (err) {
+        alert("Lỗi khi phân quyền: " + err.message);
+        await loadAccounts();
+    }
+}
+
+function openAddAccountModal() {
+    document.getElementById("mAccUser").value = "";
+    document.getElementById("mAccFullName").value = "";
+    document.getElementById("mAccEmail").value = "";
+    document.getElementById("mAccPhone").value = "";
+    document.getElementById("accountModal").classList.add("show");
+}
+
+function closeAccountModal() {
+    document.getElementById("accountModal").classList.remove("show");
+}
+
+async function saveAccountModal() {
+    const user = document.getElementById("mAccUser").value.trim();
+    const name = document.getElementById("mAccFullName").value.trim();
+    const email = document.getElementById("mAccEmail").value.trim();
+    const phone = document.getElementById("mAccPhone").value.trim();
+    const roleId = Number(document.getElementById("mAccRole").value);
+
+    if (!user || !name) return alert("Vui lòng nhập Tên đăng nhập và Họ tên.");
 
     const body = {
-        username,
-        fullName,
-        email: document.getElementById("aEmail").value.trim(),
-        roleId: Number(document.getElementById("aRole").value)
+        username: user,
+        password: "123456",
+        fullName: name,
+        email: email,
+        phone: phone,
+        roleId: roleId
     };
-    const res = await fetch(`${API}/accounts`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-    const data = await res.json();
-    if (!res.ok) return alert(data.message || "Lỗi tạo tài khoản.");
-    document.getElementById("aUser").value = "";
-    document.getElementById("aName").value = "";
-    document.getElementById("aEmail").value = "";
-    await loadAccounts();
-    notifyDataChanged("accounts");
+
+    try {
+        const res = await fetch(`${API}/accounts`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        alert(data.message || "Tạo tài khoản thành công!");
+        closeAccountModal();
+        await loadAccounts();
+        notifyDataChanged("accounts");
+    } catch (err) {
+        alert("Lỗi tạo tài khoản: " + err.message);
+    }
 }
 
-async function changeRole(accountId, roleId) {
-    const res = await fetch(`${API}/accounts/${accountId}/role`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ roleId: Number(roleId) })
-    });
-    const data = await res.json();
-    alert(data.message);
-    await loadAccounts();
-    notifyDataChanged("accounts");
+async function toggleAccountLock(id) {
+    try {
+        const res = await fetch(`${API}/accounts/${id}/toggle-status`, { method: "PUT" });
+        const data = await res.json();
+        alert(data.message || "Đã cập nhật trạng thái tài khoản.");
+        await loadAccounts();
+        notifyDataChanged("accounts");
+    } catch (err) {
+        alert("Lỗi đổi trạng thái tài khoản: " + err.message);
+    }
 }
 
-async function deleteAccount(id, isSelf) {
-    const msg = isSelf
-        ? "Bạn đang xóa tài khoản Admin đang đăng nhập của chính mình. Sau khi xóa hệ thống sẽ đăng xuất. Tiếp tục?"
-        : "Xác nhận xóa tài khoản này?";
-
-    if (!confirm(msg)) return;
-
-    const res = await fetch(`${API}/accounts/${id}`, { method: "DELETE" });
-    const data = await res.json();
-    if (!res.ok) return alert(data.message || "Không thể xóa tài khoản.");
-
-    alert(data.message);
-    notifyDataChanged("accounts");
-    if (isSelf) logout();
-    else loadAccounts();
+async function deleteAccount(id) {
+    if (!confirm("Xác nhận xóa tài khoản này khỏi hệ thống?")) return;
+    try {
+        const res = await fetch(`${API}/accounts/${id}`, { method: "DELETE" });
+        const data = await res.json();
+        alert(data.message || "Đã xóa tài khoản.");
+        await loadAccounts();
+        notifyDataChanged("accounts");
+    } catch (err) {
+        alert("Lỗi khi xóa tài khoản: " + err.message);
+    }
 }
 
 function logout() {

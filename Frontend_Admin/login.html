@@ -9,22 +9,25 @@
 <body>
     <div class="auth-wrapper">
         <div class="auth-card">
+            <div class="auth-brand-badge">SGU TECH ENTERPRISE</div>
             <div class="auth-header">
-                <h2>HỆ THỐNG QUẢN TRỊ NỘI BỘ</h2>
-                <p>Đăng nhập dành cho Quản trị viên (Admin) & Quản lý CRM</p>
+                <h2>CỔNG QUẢN TRỊ NỘI BỘ</h2>
+                <p>Đăng nhập bảo mật dành cho Quản trị viên (Admin) & Quản lý CRM</p>
             </div>
 
-            <div style="margin-bottom: 14px;">
-                <label for="username">Tài khoản đăng nhập</label>
-                <input type="text" id="username" placeholder="Nhập tên tài khoản (admin / quanly)">
-            </div>
+            <form id="adminLoginForm" onsubmit="event.preventDefault(); handleLogin();">
+                <div style="margin-bottom: 14px;">
+                    <label for="username">Tài khoản đăng nhập</label>
+                    <input type="text" id="username" placeholder="Nhập tên tài khoản (admin / quanly)" autocomplete="username" required autofocus>
+                </div>
 
-            <div style="margin-bottom: 20px;">
-                <label for="password">Mật khẩu</label>
-                <input type="password" id="password" value="123456">
-            </div>
+                <div style="margin-bottom: 20px;">
+                    <label for="password">Mật khẩu</label>
+                    <input type="password" id="password" placeholder="Nhập mật khẩu" autocomplete="current-password" required>
+                </div>
 
-            <button class="btn" style="width: 100%; padding: 10px;" onclick="handleLogin()">Đăng nhập</button>
+                <button type="submit" class="btn" style="width: 100%; padding: 10px;">Đăng nhập</button>
+            </form>
 
             <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-color); text-align: center; font-size: 13px;">
                 Khách hàng mua sắm: <a href="customer_login.html">Chuyển sang trang Khách hàng</a>
@@ -34,23 +37,28 @@
 
     <script>
         const API_URL = "http://localhost:5000/api/admin/auth/login";
+
         async function handleLogin() {
             const username = document.getElementById("username").value.trim();
             const password = document.getElementById("password").value.trim();
             if (!username || !password) return alert("Vui lòng nhập đầy đủ tài khoản và mật khẩu.");
 
-            const res = await fetch(API_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password })
-            });
-            const data = await res.json();
-            if (!res.ok) return alert(data.message || "Đăng nhập thất bại.");
+            try {
+                const res = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                if (!res.ok) return alert(data.message || "Đăng nhập thất bại.");
 
-            localStorage.setItem("currentUser", JSON.stringify(data));
-            if (data.roleName === "Admin") window.location.href = "admin.html";
-            else if (data.roleName === "Manager") window.location.href = "manager_crm.html";
-            else window.location.href = "customer_login.html";
+                localStorage.setItem("currentUser", JSON.stringify(data));
+                if (data.roleName === "Admin") window.location.href = "admin.html";
+                else if (data.roleName === "Manager") window.location.href = "manager_crm.html";
+                else window.location.href = "customer_login.html";
+            } catch (err) {
+                alert("Không thể kết nối đến máy chủ Backend (http://localhost:5000). Vui lòng đảm bảo bạn đã chạy lệnh 'dotnet run' tại thư mục Backend!");
+            }
         }
     </script>
 </body>

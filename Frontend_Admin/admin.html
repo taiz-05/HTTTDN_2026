@@ -9,103 +9,184 @@
 </head>
 <body>
     <div class="app-layout">
+        <!-- SIDEBAR CHUẨN DOANH NGHIỆP SAAS -->
         <aside class="app-sidebar">
             <div class="sidebar-header">
-                <h1>HỆ THỐNG ADMIN</h1>
-                <span>Quản trị Máy chủ & Dữ liệu</span>
+                <div class="sidebar-logo-badge">SGU</div>
+                <div>
+                    <div class="sidebar-brand-title">SGU TECH JSC</div>
+                    <div class="sidebar-brand-sub">Enterprise Core System</div>
+                </div>
             </div>
 
             <nav class="sidebar-nav">
-                <button class="nav-item active" onclick="switchTab('tabDashboard', this)">1. Tổng quan & Thống kê</button>
-                <button class="nav-item" onclick="switchTab('tabProducts', this)">2. Quản lý Sản phẩm</button>
-                <button class="nav-item" onclick="switchTab('tabSuppliers', this)">3. Quản lý Nhà cung cấp</button>
-                <button class="nav-item" onclick="switchTab('tabAccounts', this)">4. Tài khoản & Phân quyền</button>
+                <div class="nav-section-title">Nghiệp vụ Quản trị</div>
+                
+                <button class="nav-item active" onclick="switchTab('tabDashboard', this)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+                    <span>1. Tổng quan & Thống kê</span>
+                </button>
+
+                <button class="nav-item" onclick="switchTab('tabProducts', this)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                    <span>2. Quản lý Sản phẩm</span>
+                </button>
+
+                <button class="nav-item" onclick="switchTab('tabSuppliers', this)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M19 21v-4"/><path d="M19 17a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v4"/><path d="M3 7l9-4 9 4v4H3V7z"/><line x1="14" y1="9" x2="14" y2="9"/><line x1="10" y1="9" x2="10" y2="9"/></svg>
+                    <span>3. Quản lý Nhà cung cấp</span>
+                </button>
+
+                <button class="nav-item" onclick="switchTab('tabAccounts', this)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <span>4. Tài khoản & Phân quyền</span>
+                </button>
             </nav>
 
             <div class="sidebar-footer">
-                <button class="btn btn-danger" style="width: 100%;" onclick="logout()">Đăng xuất</button>
+                <div class="sidebar-footer-info">
+                    <span>Phiên bản v2.6 Pro</span>
+                    <span>Admin Server</span>
+                </div>
+                <button class="btn btn-danger" style="width: 100%; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="logout()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    <span>Đăng xuất hệ thống</span>
+                </button>
             </div>
         </aside>
 
+        <!-- KHUNG NỘI DUNG CHÍNH -->
         <div class="app-main">
+            <!-- TOPBAR TRỰC TUYẾN -->
             <div class="app-topbar">
-                <div class="topbar-title">Phân hệ Quản trị Hệ thống (Admin Server)</div>
-                <div class="user-info">
-                    <span id="adminName">Quản trị viên</span>
+                <div class="topbar-left">
+                    <span class="topbar-server-pill">Máy chủ: Trực tuyến (Port 5000)</span>
+                    <span class="topbar-title">Phân hệ Quản trị Hệ thống Doanh nghiệp</span>
+                </div>
+                <div class="topbar-right">
+                    <button class="btn btn-warning" onclick="refreshAllAdminDataSilently()" title="Đồng bộ & Làm mới dữ liệu" style="display:flex; align-items:center; gap:6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                        <span>Làm mới</span>
+                    </button>
+                    <div class="user-badge-wrap">
+                        <div class="user-avatar-circle">AD</div>
+                        <span class="user-name-text" id="adminName">Quản trị viên Hệ thống</span>
+                    </div>
                 </div>
             </div>
 
             <div class="app-content">
-                <!-- TAB 1: TỔNG QUAN & THỐNG KÊ THEO NGÀY -->
+                <!-- =========================================================
+                     TAB 1: TỔNG QUAN & THỐNG KÊ DOANH NGHIỆP
+                     ========================================================= -->
                 <div id="tabDashboard" class="tab-content">
-                    <!-- BỘ LỌC THỐNG KÊ THEO NGÀY -->
-                    <div class="card" style="padding: 16px 20px;">
-                        <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:14px;">
-                            <div style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
-                                <div>
-                                    <label>Khoảng thời gian thống kê</label>
-                                    <select id="statRangePreset" onchange="onStatPresetChange()" style="min-width:170px;">
-                                        <option value="7days" selected>7 ngày gần nhất</option>
-                                        <option value="today">Hôm nay</option>
-                                        <option value="30days">30 ngày gần nhất</option>
-                                        <option value="all">Tất cả thời gian</option>
-                                        <option value="custom">Tùy chọn ngày...</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label>Từ ngày</label>
-                                    <input type="date" id="statStartDate" onchange="onCustomDateInput()">
-                                </div>
-                                <div>
-                                    <label>Đến ngày</label>
-                                    <input type="date" id="statEndDate" onchange="onCustomDateInput()">
-                                </div>
-                                <button class="btn" onclick="loadReviewAnalytics()">Lọc thống kê</button>
-                                <button class="btn btn-warning" onclick="resetDateFilter()">Xem tất cả</button>
-                            </div>
-                            <div>
-                                <span class="badge badge-info" id="statDateRangeLabel" style="font-size:12.5px; padding:6px 10px;">Đang xem: 7 ngày gần nhất</span>
-                            </div>
+                    <div class="page-header">
+                        <div>
+                            <h2 class="page-header-title">Trung tâm Điều hành & Thống kê Doanh nghiệp</h2>
+                            <p class="page-header-sub">Báo cáo số liệu kinh doanh, cơ cấu kho hàng & tương tác đánh giá khách hàng theo thời gian thực</p>
                         </div>
                     </div>
 
-                    <!-- 4 THẺ CHỈ SỐ TỔNG QUAN -->
-                    <div class="stat-grid">
-                        <div class="stat-box">
-                            <div class="stat-label">Tổng sản phẩm</div>
-                            <div class="stat-value" id="kpiProducts">0</div>
+                    <!-- BỘ LỌC THỜI GIAN THỐNG KÊ (MỤC II.3) -->
+                    <div class="filter-toolbar" style="margin-bottom: 20px;">
+                        <span style="font-weight:700; color:var(--text-secondary); font-size:12.5px; display:flex; align-items:center; gap:6px;">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            Khoảng thời gian:
+                        </span>
+                        <select id="statRangePreset" onchange="onStatPresetChange()">
+                            <option value="7days" selected>7 ngày gần nhất</option>
+                            <option value="today">Hôm nay</option>
+                            <option value="30days">30 ngày gần nhất</option>
+                            <option value="all">Tất cả thời gian</option>
+                            <option value="custom">Tùy chọn ngày...</option>
+                        </select>
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <span style="font-size:12px; color:var(--text-muted);">Từ:</span>
+                            <input type="date" id="statStartDate" onchange="onCustomDateInput()" style="width:auto;">
                         </div>
-                        <div class="stat-box green">
-                            <div class="stat-label">Nhà cung cấp</div>
-                            <div class="stat-value" id="kpiSuppliers">0</div>
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <span style="font-size:12px; color:var(--text-muted);">Đến:</span>
+                            <input type="date" id="statEndDate" onchange="onCustomDateInput()" style="width:auto;">
                         </div>
-                        <div class="stat-box">
-                            <div class="stat-label" id="kpiReviewsLabel">Lượt đánh giá (Trong kỳ)</div>
-                            <div class="stat-value" id="kpiReviews">0</div>
+                        <button class="btn" onclick="loadReviewAnalytics()">Áp dụng lọc</button>
+                        <button class="btn btn-warning" onclick="resetDateFilter()">Xem tất cả</button>
+                        <span class="badge badge-info" id="statDateRangeLabel" style="margin-left:auto;">Đang xem: 7 ngày gần nhất</span>
+                    </div>
+
+                    <!-- 6 THẺ CHỈ SỐ DOANH NGHIỆP TOÀN DIỆN -->
+                    <div class="stat-grid-6">
+                        <div class="kpi-card" style="border-top: 3px solid #2563eb;">
+                            <div class="kpi-card-header">
+                                <span class="kpi-card-label">Sản phẩm lưu kho</span>
+                                <span class="kpi-card-icon" style="background:#eff6ff; color:#2563eb;">📦</span>
+                            </div>
+                            <div class="kpi-card-val" id="kpiProducts">12</div>
+                            <div class="kpi-card-sub" id="kpiProductsSub">11 Đang bán · 1 Hết hàng</div>
                         </div>
-                        <div class="stat-box green">
-                            <div class="stat-label">Tài khoản hệ thống</div>
-                            <div class="stat-value" id="kpiAccounts">0</div>
+
+                        <div class="kpi-card" style="border-top: 3px solid #059669;">
+                            <div class="kpi-card-header">
+                                <span class="kpi-card-label">Tổng giá trị kho</span>
+                                <span class="kpi-card-icon" style="background:#ecfdf5; color:#059669;">💰</span>
+                            </div>
+                            <div class="kpi-card-val" id="kpiInventoryVal" style="font-size:17.5px;">542.800.000 ₫</div>
+                            <div class="kpi-card-sub" id="kpiInventoryValSub">Tổng giá trị tồn kho niêm yết</div>
+                        </div>
+
+                        <div class="kpi-card" style="border-top: 3px solid #7c3aed;">
+                            <div class="kpi-card-header">
+                                <span class="kpi-card-label">Đối tác cung cấp</span>
+                                <span class="kpi-card-icon" style="background:#f5f3ff; color:#7c3aed;">🏢</span>
+                            </div>
+                            <div class="kpi-card-val" id="kpiSuppliers">5</div>
+                            <div class="kpi-card-sub">5 đối tác phần cứng chiến lược</div>
+                        </div>
+
+                        <div class="kpi-card" style="border-top: 3px solid #ea580c;">
+                            <div class="kpi-card-header">
+                                <span class="kpi-card-label" id="kpiReviewsLabel">Lượt đánh giá</span>
+                                <span class="kpi-card-icon" style="background:#fff7ed; color:#ea580c;">⭐</span>
+                            </div>
+                            <div class="kpi-card-val" id="kpiReviews">10</div>
+                            <div class="kpi-card-sub" id="kpiAvgStarText">Điểm TB: 4.8 / 5.0 ★</div>
+                        </div>
+
+                        <div class="kpi-card" style="border-top: 3px solid #0284c7;">
+                            <div class="kpi-card-header">
+                                <span class="kpi-card-label">Tài khoản người dùng</span>
+                                <span class="kpi-card-icon" style="background:#f0f9ff; color:#0284c7;">👥</span>
+                            </div>
+                            <div class="kpi-card-val" id="kpiAccounts">8</div>
+                            <div class="kpi-card-sub">7 Hoạt động · 1 Đã khóa</div>
+                        </div>
+
+                        <div class="kpi-card" style="border-top: 3px solid #10b981;">
+                            <div class="kpi-card-header">
+                                <span class="kpi-card-label">Hài lòng tích cực</span>
+                                <span class="kpi-card-icon" style="background:#ecfdf5; color:#10b981;">📈</span>
+                            </div>
+                            <div class="kpi-card-val" id="kpiPosRate">90.0%</div>
+                            <div class="kpi-card-sub">Tỷ lệ đánh giá 4 - 5 sao</div>
                         </div>
                     </div>
 
-                    <!-- BIỂU ĐỒ DIỄN BIẾN THEO NGÀY -->
+                    <!-- BIỂU ĐỒ 1: DIỄN BIẾN THEO THỜI GIAN -->
                     <div class="card">
                         <div class="card-title">
-                            <span>Biểu đồ thống kê số lượng đánh giá & tài khoản mới theo ngày</span>
-                            <span class="badge badge-active" id="dailySummaryBadge">0 đánh giá trong kỳ</span>
+                            <span>Biểu đồ diễn biến lượt phản hồi đánh giá & Tài khoản mới đăng ký theo ngày</span>
+                            <span class="badge badge-active" id="dailySummaryBadge">10 đánh giá trong kỳ</span>
                         </div>
-                        <div class="chart-container" style="height: 260px;">
+                        <div class="chart-container" style="height: 270px;">
                             <canvas id="dailyTrendChart"></canvas>
                         </div>
                     </div>
 
-                    <!-- 2 BIỂU ĐỒ CHI TIẾT THEO MỨC SAO & SẢN PHẨM -->
+                    <!-- BIỂU ĐỒ 2 & 3: CƠ CẤU ĐIỂM SỐ & DANH MỤC SẢN PHẨM -->
                     <div class="charts-row">
                         <div class="card" style="margin-bottom:0;">
                             <div class="card-title">
-                                <span>Thống kê số lượng đánh giá theo mức điểm (1 - 5 sao)</span>
-                                <span class="badge badge-info" id="kpiAvgStar">Điểm TB: 5.0</span>
+                                <span>Phân bố điểm đánh giá độ hài lòng (1 - 5 sao)</span>
+                                <span class="badge badge-info" id="kpiAvgStar">Điểm TB: 4.8</span>
                             </div>
                             <div class="chart-container">
                                 <canvas id="ratingBarChart"></canvas>
@@ -114,10 +195,33 @@
 
                         <div class="card" style="margin-bottom:0;">
                             <div class="card-title">
-                                <span>Tỷ lệ đánh giá theo từng sản phẩm</span>
+                                <span>Cơ cấu danh mục sản phẩm trong kho</span>
+                                <span class="badge badge-info">4 Danh mục</span>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="categoryChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BIỂU ĐỒ 4 & TÌNH TRẠNG TỒN KHO -->
+                    <div class="charts-row" style="margin-top:20px;">
+                        <div class="card" style="margin-bottom:0;">
+                            <div class="card-title">
+                                <span>Tỷ lệ tương tác & phản hồi theo từng sản phẩm</span>
                             </div>
                             <div class="chart-container">
                                 <canvas id="productReviewChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="card" style="margin-bottom:0;">
+                            <div class="card-title">
+                                <span>Tình trạng phân bổ tồn kho hàng hóa</span>
+                                <span class="badge badge-active" id="stockSummaryBadge">Tổng tồn: 265 cái</span>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="stockStatusChart"></canvas>
                             </div>
                         </div>
                     </div>
@@ -125,8 +229,8 @@
                     <!-- BẢNG CHI TIẾT ĐÁNH GIÁ KÈM NGÀY GIỜ -->
                     <div class="card" style="margin-top:20px;">
                         <div class="card-title">
-                            <span>Danh sách phản hồi & đánh giá sản phẩm theo thời gian</span>
-                            <span style="font-size:12.5px; color:var(--text-muted); font-weight:500;" id="tableCountText">Hiển thị 0 kết quả</span>
+                            <span>Nhật ký phản hồi & đánh giá của khách hàng theo thời gian thực</span>
+                            <span style="font-size:12.5px; color:var(--text-muted); font-weight:600;" id="tableCountText">Hiển thị 10 kết quả</span>
                         </div>
                         <div class="table-wrap">
                             <table>
@@ -135,9 +239,9 @@
                                         <th>Thời gian (Ngày/Giờ)</th>
                                         <th>Khách hàng</th>
                                         <th>Sản phẩm</th>
-                                        <th>Điểm đánh giá</th>
+                                        <th>Mức điểm</th>
                                         <th>Nội dung nhận xét</th>
-                                        <th>Trạng thái</th>
+                                        <th>Trạng thái phản hồi</th>
                                     </tr>
                                 </thead>
                                 <tbody id="recentReviewsTable"></tbody>
@@ -146,104 +250,85 @@
                     </div>
                 </div>
 
-                <!-- TAB 2: QUẢN LÝ SẢN PHẨM -->
+                <!-- =========================================================
+                     TAB 2: QUẢN LÝ SẢN PHẨM & KHO HÀNG (CHUẨN SAAS - KHÔNG FORM RƯỜNG RÀ)
+                     ========================================================= -->
                 <div id="tabProducts" class="tab-content" style="display:none;">
-                    <div class="card">
-                        <div class="card-title">Tìm kiếm nâng cao, Lọc & Sắp xếp Sản phẩm</div>
-                        <div class="grid-form">
-                            <div>
-                                <label>Từ khóa</label>
-                                <input type="text" id="fKeyword" placeholder="Mã hoặc tên sản phẩm...">
-                            </div>
-                            <div>
-                                <label>Danh mục</label>
-                                <select id="fCategory"><option value="">Tất cả danh mục</option></select>
-                            </div>
-                            <div>
-                                <label>Nhà cung cấp</label>
-                                <select id="fSupplier"><option value="">Tất cả nhà cung cấp</option></select>
-                            </div>
-                            <div>
-                                <label>Trạng thái</label>
-                                <select id="fStatus">
-                                    <option value="">Tất cả trạng thái</option>
-                                    <option value="Đang bán">Đang bán</option>
-                                    <option value="Hết hàng">Hết hàng</option>
-                                    <option value="Ngừng kinh doanh">Ngừng kinh doanh</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label>Giá từ (VNĐ)</label>
-                                <input type="number" id="fMinPrice" placeholder="0">
-                            </div>
-                            <div>
-                                <label>Giá đến (VNĐ)</label>
-                                <input type="number" id="fMaxPrice" placeholder="50000000">
-                            </div>
-                            <div>
-                                <label>Sắp xếp theo</label>
-                                <select id="fSort">
-                                    <option value="">Mới cập nhật</option>
-                                    <option value="price_asc">Giá tăng dần</option>
-                                    <option value="price_desc">Giá giảm dần</option>
-                                    <option value="name_asc">Tên sản phẩm (A-Z)</option>
-                                    <option value="stock_desc">Tồn kho giảm dần</option>
-                                </select>
-                            </div>
+                    <div class="page-header">
+                        <div>
+                            <h2 class="page-header-title">Quản lý Danh mục & Tồn kho Sản phẩm</h2>
+                            <p class="page-header-sub">Quản lý danh sách sản phẩm, bảng giá niêm yết, nhà cung cấp và theo dõi số lượng tồn kho</p>
                         </div>
-                        <div style="display:flex; gap:8px;">
-                            <button class="btn" onclick="loadProducts()">Tìm kiếm & Lọc</button>
-                            <button class="btn btn-warning" onclick="resetProductFilter()">Đặt lại bộ lọc</button>
+                        <div class="page-header-actions">
+                            <button class="btn btn-warning" onclick="exportProductsCsv()" style="display:flex; align-items:center; gap:6px;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                <span>Xuất danh sách (CSV)</span>
+                            </button>
+                            <button class="btn btn-success" onclick="openAddProductModal()" style="display:flex; align-items:center; gap:6px;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                <span>Thêm sản phẩm mới</span>
+                            </button>
                         </div>
                     </div>
 
-                    <div class="card">
-                        <div class="card-title">Thêm sản phẩm mới</div>
-                        <div class="grid-form">
-                            <div>
-                                <label>Mã sản phẩm</label>
-                                <input type="text" id="pCode" placeholder="VD: SP010">
-                            </div>
-                            <div>
-                                <label>Tên sản phẩm</label>
-                                <input type="text" id="pName" placeholder="Nhập tên sản phẩm">
-                            </div>
-                            <div>
-                                <label>Danh mục</label>
-                                <select id="pCat"></select>
-                            </div>
-                            <div>
-                                <label>Nhà cung cấp</label>
-                                <select id="pSup"></select>
-                            </div>
-                            <div>
-                                <label>Đơn giá bán (VNĐ)</label>
-                                <input type="number" id="pPrice" placeholder="0">
-                            </div>
-                            <div>
-                                <label>Số lượng tồn</label>
-                                <input type="number" id="pStock" placeholder="0">
-                            </div>
-                            <div>
-                                <label>Đường dẫn ảnh (URL)</label>
-                                <input type="text" id="pImage" placeholder="https://...">
-                            </div>
+                    <!-- BỘ LỌC TÌM KIẾM NÂNG CAO, LỌC & SẮP XẾP -->
+                    <div class="filter-toolbar">
+                        <div class="search-box-wrap" style="min-width: 210px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input type="text" id="fKeyword" placeholder="Tìm theo mã hoặc tên sản phẩm..." oninput="loadProducts()">
                         </div>
-                        <button class="btn btn-success" onclick="createProduct()">Thêm sản phẩm</button>
 
-                        <div class="table-wrap">
+                        <select id="fCategory" onchange="loadProducts()">
+                            <option value="">Tất cả danh mục</option>
+                        </select>
+
+                        <select id="fSupplier" onchange="loadProducts()">
+                            <option value="">Tất cả nhà cung cấp</option>
+                        </select>
+
+                        <select id="fStatus" onchange="loadProducts()">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="Đang bán">Đang bán</option>
+                            <option value="Hết hàng">Hết hàng</option>
+                            <option value="Ngừng kinh doanh">Ngừng kinh doanh</option>
+                        </select>
+
+                        <input type="number" id="fMinPrice" placeholder="Giá từ (VNĐ)" style="width: 130px;" oninput="loadProducts()">
+                        <input type="number" id="fMaxPrice" placeholder="Giá đến (VNĐ)" style="width: 130px;" oninput="loadProducts()">
+
+                        <select id="fSort" onchange="loadProducts()">
+                            <option value="">Mới cập nhật</option>
+                            <option value="price_asc">Giá tăng dần</option>
+                            <option value="price_desc">Giá giảm dần</option>
+                            <option value="stock_desc">Tồn kho nhiều nhất</option>
+                            <option value="name_asc">Tên sản phẩm (A-Z)</option>
+                        </select>
+
+                        <button class="btn btn-warning" onclick="resetProductFilter()" title="Khôi phục bộ lọc">
+                            ↺ Đặt lại
+                        </button>
+                    </div>
+
+                    <!-- BẢNG DỮ LIỆU SẢN PHẨM TRỰC DIỆN -->
+                    <div class="card" style="padding: 16px 20px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                            <span style="font-weight:700; color:var(--text-primary); font-size:14px;">Bảng thông tin sản phẩm</span>
+                            <span class="badge badge-info" id="productCountBadge">Đang hiển thị 12 sản phẩm</span>
+                        </div>
+
+                        <div class="table-wrap" style="margin-top:0;">
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Ảnh</th>
-                                        <th>Mã SP</th>
+                                        <th style="width: 65px;">Ảnh</th>
+                                        <th style="width: 90px;">Mã SP</th>
                                         <th>Tên sản phẩm</th>
                                         <th>Danh mục</th>
                                         <th>Nhà cung cấp</th>
-                                        <th>Giá bán</th>
+                                        <th style="text-align: right;">Đơn giá bán</th>
                                         <th>Tồn kho & Trạng thái</th>
                                         <th>Đánh giá TB</th>
-                                        <th>Thao tác</th>
+                                        <th style="text-align: center; width: 130px;">Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody id="productTable"></tbody>
@@ -252,44 +337,43 @@
                     </div>
                 </div>
 
-                <!-- TAB 3: QUẢN LÝ NHÀ CUNG CẤP -->
+                <!-- =========================================================
+                     TAB 3: QUẢN LÝ NHÀ CUNG CẤP & ĐỐI TÁC
+                     ========================================================= -->
                 <div id="tabSuppliers" class="tab-content" style="display:none;">
-                    <div class="card">
-                        <div class="card-title">Tìm kiếm & Quản lý Nhà cung cấp</div>
-                        <div style="display:flex; gap:10px; margin-bottom:18px; max-width:480px;">
-                            <input type="text" id="sSearchKeyword" placeholder="Nhập mã hoặc tên nhà cung cấp...">
-                            <button class="btn" onclick="loadSuppliers()">Tìm kiếm</button>
+                    <div class="page-header">
+                        <div>
+                            <h2 class="page-header-title">Quản lý Đối tác & Nhà cung cấp</h2>
+                            <p class="page-header-sub">Danh sách các nhà sản xuất, đại diện phân phối phần cứng và linh kiện công nghệ chính hãng</p>
                         </div>
-
-                        <div class="grid-form" style="border-top:1px solid #e5e7eb; padding-top:14px;">
-                            <div>
-                                <label>Mã nhà cung cấp</label>
-                                <input type="text" id="sCode" placeholder="VD: NCC004">
-                            </div>
-                            <div>
-                                <label>Tên nhà cung cấp</label>
-                                <input type="text" id="sName" placeholder="Tên công ty phân phối">
-                            </div>
-                            <div>
-                                <label>Số điện thoại</label>
-                                <input type="text" id="sPhone" placeholder="Số điện thoại">
-                            </div>
-                            <div>
-                                <label>Địa chỉ</label>
-                                <input type="text" id="sAddress" placeholder="Địa chỉ trụ sở">
-                            </div>
+                        <div class="page-header-actions">
+                            <button class="btn btn-success" onclick="openAddSupplierModal()" style="display:flex; align-items:center; gap:6px;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                <span>Thêm nhà cung cấp</span>
+                            </button>
                         </div>
-                        <button class="btn btn-success" onclick="createSupplier()">Thêm nhà cung cấp</button>
+                    </div>
 
-                        <div class="table-wrap">
+                    <div class="filter-toolbar">
+                        <div class="search-box-wrap" style="max-width:400px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input type="text" id="sSearchKeyword" placeholder="Nhập mã, tên hoặc địa chỉ nhà cung cấp..." oninput="loadSuppliers()">
+                        </div>
+                        <button class="btn" onclick="loadSuppliers()">Tìm kiếm</button>
+                    </div>
+
+                    <div class="card" style="padding: 16px 20px;">
+                        <div class="table-wrap" style="margin-top:0;">
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Mã NCC</th>
-                                        <th>Tên nhà cung cấp</th>
+                                        <th style="width: 110px;">Mã NCC</th>
+                                        <th>Tên công ty phân phối</th>
+                                        <th>Người đại diện liên hệ</th>
                                         <th>Điện thoại</th>
-                                        <th>Địa chỉ</th>
-                                        <th>Thao tác</th>
+                                        <th>Email</th>
+                                        <th>Địa chỉ trụ sở</th>
+                                        <th style="text-align: center; width: 130px;">Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody id="supplierTable"></tbody>
@@ -298,40 +382,44 @@
                     </div>
                 </div>
 
-                <!-- TAB 4: TÀI KHOẢN & PHÂN QUYỀN -->
+                <!-- =========================================================
+                     TAB 4: TÀI KHOẢN & PHÂN QUYỀN HỆ THỐNG
+                     ========================================================= -->
                 <div id="tabAccounts" class="tab-content" style="display:none;">
-                    <div class="card">
-                        <div class="card-title">Quản lý Tài khoản & Phân quyền Hệ thống</div>
-                        <div class="grid-form">
-                            <div>
-                                <label>Tên đăng nhập</label>
-                                <input type="text" id="aUser" placeholder="Username">
-                            </div>
-                            <div>
-                                <label>Họ và tên</label>
-                                <input type="text" id="aName" placeholder="Họ và tên người dùng">
-                            </div>
-                            <div>
-                                <label>Email</label>
-                                <input type="email" id="aEmail" placeholder="Địa chỉ email">
-                            </div>
-                            <div>
-                                <label>Vai trò (Role)</label>
-                                <select id="aRole"></select>
-                            </div>
+                    <div class="page-header">
+                        <div>
+                            <h2 class="page-header-title">Quản trị Tài khoản & Phân quyền Hệ thống</h2>
+                            <p class="page-header-sub">Kiểm soát danh tính, phân quyền vai trò (Admin, CRM Manager, Khách hàng) và quản trị trạng thái tài khoản</p>
                         </div>
-                        <button class="btn btn-success" onclick="createAccount()">Tạo tài khoản mới (Mật khẩu mặc định: 123456)</button>
+                        <div class="page-header-actions">
+                            <button class="btn btn-success" onclick="openAddAccountModal()" style="display:flex; align-items:center; gap:6px;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                <span>Cấp tài khoản mới</span>
+                            </button>
+                        </div>
+                    </div>
 
-                        <div class="table-wrap">
+                    <div class="filter-toolbar">
+                        <span style="font-weight:700; color:var(--text-secondary); font-size:12.5px;">Phân loại vai trò:</span>
+                        <button class="btn btn-warning active" onclick="filterAccountsByRole('all', this)" id="btnRoleAll">Tất cả</button>
+                        <button class="btn btn-warning" onclick="filterAccountsByRole('Admin', this)">Quản trị viên (Admin)</button>
+                        <button class="btn btn-warning" onclick="filterAccountsByRole('Manager', this)">Quản lý CRM</button>
+                        <button class="btn btn-warning" onclick="filterAccountsByRole('Customer', this)">Khách hàng</button>
+                    </div>
+
+                    <div class="card" style="padding: 16px 20px;">
+                        <div class="table-wrap" style="margin-top:0;">
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Tên đăng nhập</th>
+                                        <th style="width: 60px;">ID</th>
+                                        <th>Người dùng</th>
                                         <th>Họ và tên</th>
                                         <th>Email</th>
-                                        <th>Phân quyền</th>
-                                        <th>Thao tác</th>
+                                        <th>Số điện thoại</th>
+                                        <th>Vai trò hệ thống</th>
+                                        <th>Trạng thái truy cập</th>
+                                        <th style="text-align: center; width: 160px;">Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody id="accountTable"></tbody>
@@ -343,56 +431,58 @@
         </div>
     </div>
 
-    <!-- POP-UP MODAL CHỈNH SỬA SẢN PHẨM -->
-    <div class="modal-overlay" id="editProductModal" onclick="if(event.target===this) closeEditProductModal()">
-        <div class="modal-box" style="max-width: 600px;">
+    <!-- =========================================================
+         POP-UP MODAL: THÊM & SỬA SẢN PHẨM CHUYÊN NGHIỆP
+         ========================================================= -->
+    <div class="modal-overlay" id="productModal" onclick="if(event.target===this) closeProductModal()">
+        <div class="modal-box" style="max-width: 680px;">
             <div class="modal-header">
-                <h3>Chỉnh sửa thông tin sản phẩm</h3>
-                <button class="modal-close" onclick="closeEditProductModal()">×</button>
+                <h3 id="productModalTitle">Thêm sản phẩm mới</h3>
+                <button class="modal-close" onclick="closeProductModal()">×</button>
             </div>
             <div class="modal-body">
-                <div class="modal-product-summary">
-                    <img id="editProdPreviewImg" src="" alt="Preview" onerror="this.src='https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400'">
+                <div style="display:flex; gap:16px; align-items:center; margin-bottom:16px; padding:12px; background:#f8fafc; border:1px solid var(--brand-border); border-radius:var(--radius-sm);">
+                    <img id="modalProdPreviewImg" src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400" alt="Preview" style="width:80px; height:65px; object-fit:cover; border-radius:6px; border:1px solid #cbd5e1;" onerror="this.src='https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400'">
                     <div style="flex:1;">
-                        <label>Đường dẫn hình ảnh (URL)</label>
-                        <input type="text" id="editProdImage" placeholder="https://..." oninput="document.getElementById('editProdPreviewImg').src = this.value">
+                        <label>Đường dẫn hình ảnh sản phẩm (URL)</label>
+                        <input type="text" id="mProdImage" placeholder="https://..." oninput="document.getElementById('modalProdPreviewImg').src = this.value">
                     </div>
                 </div>
 
                 <div class="grid-form" style="grid-template-columns: 1fr 2fr;">
                     <div>
-                        <label>Mã sản phẩm</label>
-                        <input type="text" id="editProdCode">
+                        <label>Mã sản phẩm *</label>
+                        <input type="text" id="mProdCode" placeholder="VD: SP013">
                     </div>
                     <div>
-                        <label>Tên sản phẩm</label>
-                        <input type="text" id="editProdName">
+                        <label>Tên sản phẩm *</label>
+                        <input type="text" id="mProdName" placeholder="Nhập tên sản phẩm đầy đủ">
                     </div>
                 </div>
 
                 <div class="grid-form" style="grid-template-columns: 1fr 1fr;">
                     <div>
-                        <label>Danh mục</label>
-                        <select id="editProdCat"></select>
+                        <label>Danh mục sản phẩm *</label>
+                        <select id="mProdCat"></select>
                     </div>
                     <div>
-                        <label>Nhà cung cấp</label>
-                        <select id="editProdSup"></select>
+                        <label>Nhà cung cấp đối tác *</label>
+                        <select id="mProdSup"></select>
                     </div>
                 </div>
 
                 <div class="grid-form" style="grid-template-columns: 1fr 1fr 1fr;">
                     <div>
-                        <label>Giá bán (VNĐ)</label>
-                        <input type="number" id="editProdPrice">
+                        <label>Giá bán niêm yết (VNĐ) *</label>
+                        <input type="number" id="mProdPrice" placeholder="0">
                     </div>
                     <div>
-                        <label>Số lượng tồn kho</label>
-                        <input type="number" id="editProdStock">
+                        <label>Số lượng tồn kho *</label>
+                        <input type="number" id="mProdStock" placeholder="0">
                     </div>
                     <div>
                         <label>Trạng thái kinh doanh</label>
-                        <select id="editProdStatus">
+                        <select id="mProdStatus">
                             <option value="Đang bán">Đang bán</option>
                             <option value="Hết hàng">Hết hàng</option>
                             <option value="Ngừng kinh doanh">Ngừng kinh doanh</option>
@@ -401,8 +491,111 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-warning" onclick="closeEditProductModal()">Hủy</button>
-                <button class="btn btn-success" onclick="saveEditProduct()">Lưu cập nhật</button>
+                <button class="btn btn-warning" onclick="closeProductModal()">Hủy bỏ</button>
+                <button class="btn btn-success" onclick="saveProductModal()">Lưu thông tin</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         POP-UP MODAL: THÊM & SỬA NHÀ CUNG CẤP
+         ========================================================= -->
+    <div class="modal-overlay" id="supplierModal" onclick="if(event.target===this) closeSupplierModal()">
+        <div class="modal-box" style="max-width: 540px;">
+            <div class="modal-header">
+                <h3 id="supplierModalTitle">Thêm đối tác nhà cung cấp</h3>
+                <button class="modal-close" onclick="closeSupplierModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="grid-form" style="grid-template-columns: 1fr 2fr;">
+                    <div>
+                        <label>Mã nhà cung cấp *</label>
+                        <input type="text" id="mSupCode" placeholder="VD: NCC006">
+                    </div>
+                    <div>
+                        <label>Tên nhà cung cấp *</label>
+                        <input type="text" id="mSupName" placeholder="Tên công ty phân phối">
+                    </div>
+                </div>
+
+                <div class="grid-form" style="grid-template-columns: 1fr 1fr;">
+                    <div>
+                        <label>Người đại diện liên hệ</label>
+                        <input type="text" id="mSupContact" placeholder="Họ tên đại diện">
+                    </div>
+                    <div>
+                        <label>Số điện thoại *</label>
+                        <input type="text" id="mSupPhone" placeholder="Số điện thoại">
+                    </div>
+                </div>
+
+                <div class="grid-form" style="grid-template-columns: 1fr;">
+                    <div>
+                        <label>Email liên hệ</label>
+                        <input type="email" id="mSupEmail" placeholder="contact@company.vn">
+                    </div>
+                </div>
+
+                <div class="grid-form" style="grid-template-columns: 1fr;">
+                    <div>
+                        <label>Địa chỉ trụ sở</label>
+                        <input type="text" id="mSupAddress" placeholder="Địa chỉ chi tiết">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-warning" onclick="closeSupplierModal()">Hủy bỏ</button>
+                <button class="btn btn-success" onclick="saveSupplierModal()">Lưu nhà cung cấp</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         POP-UP MODAL: THÊM TÀI KHOẢN MỚI
+         ========================================================= -->
+    <div class="modal-overlay" id="accountModal" onclick="if(event.target===this) closeAccountModal()">
+        <div class="modal-box" style="max-width: 520px;">
+            <div class="modal-header">
+                <h3>Cấp tài khoản người dùng mới</h3>
+                <button class="modal-close" onclick="closeAccountModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="grid-form" style="grid-template-columns: 1fr 1fr;">
+                    <div>
+                        <label>Tên đăng nhập *</label>
+                        <input type="text" id="mAccUser" placeholder="Username">
+                    </div>
+                    <div>
+                        <label>Vai trò hệ thống *</label>
+                        <select id="mAccRole"></select>
+                    </div>
+                </div>
+
+                <div class="grid-form" style="grid-template-columns: 1fr;">
+                    <div>
+                        <label>Họ và tên người dùng *</label>
+                        <input type="text" id="mAccFullName" placeholder="Nhập họ và tên">
+                    </div>
+                </div>
+
+                <div class="grid-form" style="grid-template-columns: 1fr 1fr;">
+                    <div>
+                        <label>Địa chỉ Email</label>
+                        <input type="email" id="mAccEmail" placeholder="user@sgutech.vn">
+                    </div>
+                    <div>
+                        <label>Số điện thoại</label>
+                        <input type="text" id="mAccPhone" placeholder="090...">
+                    </div>
+                </div>
+
+                <div style="padding:10px 12px; background:#f0f9ff; border:1px solid #bae6fd; border-radius:4px; font-size:12px; color:#0369a1; margin-top:6px;">
+                    ℹ️ Mật khẩu ban đầu được thiết lập mặc định là: <b>123456</b>. Người dùng có thể đổi sau khi đăng nhập.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-warning" onclick="closeAccountModal()">Hủy bỏ</button>
+                <button class="btn btn-success" onclick="saveAccountModal()">Tạo tài khoản</button>
             </div>
         </div>
     </div>

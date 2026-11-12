@@ -14,15 +14,20 @@ Xây dựng Hệ thống Thông tin Quản trị Doanh nghiệp Thương mại &
 - Thành viên 5: [Họ tên] - MSSV: [MSSV] - Khối lượng: 100% (Kiểm thử, Báo cáo Word, Hướng dẫn sử dụng)
 
 3. CẤU TRÚC THƯ MỤC NỘP BÀI:
-- /Database/HTTTDN_DB.sql       : Script khởi tạo 9 bảng CSDL, dữ liệu demo và kịch bản Backup/Restore.
-- /Backend/HTTTDN.AdminApi      : Mã nguồn ASP.NET Core Web API (.NET 8.0) chạy tại cổng 5000.
-- /Frontend_Admin               : Mã nguồn giao diện HTML5, CSS3, JS tách biệt 3 cổng.
-- /Report/BaoCao_HTTTDN_CRM.pdf : Báo cáo đồ án hoàn chỉnh.
+- /Database/HTTTDN_DB.sql             : Script khởi tạo 9 bảng CSDL, dữ liệu demo và kịch bản Backup/Restore.
+- /Backend/HTTTDN.AdminApi            : Mã nguồn ASP.NET Core Web API (.NET 8.0) chạy tại cổng 5000.
+- /Frontend_Admin                     : Mã nguồn giao diện HTML5, CSS3, JS tách biệt 3 cổng (Admin, CRM Manager, Customer).
+- /Report/BAO_CAO_DO_AN_HTTTDN.docx   : File Báo cáo đồ án Microsoft Word hoàn chỉnh theo đúng quy định của Khoa CNTT - SGU.
+- /Report/BAO_CAO_DO_AN_HTTTDN.md     : File Báo cáo định dạng Markdown.
+- /start_demo.bat                     : File khởi chạy nhanh toàn bộ hệ thống chỉ với 1 cú nhấp chuột.
 
 4. HƯỚNG DẪN CÀI ĐẶT & CHẠY CHƯƠNG TRÌNH:
-- Bước 1: Mở SQL Server Management Studio (SSMS), kết nối tới Server ".\SQLEXPRESS" và chạy toàn bộ file "/Database/HTTTDN_DB.sql".
-- Bước 2: Mở Terminal tại "/Backend/HTTTDN.AdminApi", chạy lệnh "dotnet run" (Server chạy ở http://localhost:5000).
-- Bước 3: Mở thư mục "/Frontend_Admin" bằng VS Code, chạy Live Server tại file "login.html" (http://127.0.0.1:5500/login.html).
+- Cách 1 (Chạy nhanh tự động với SQLite tích hợp sẵn):
+  + Nhấp đúp vào file "start_demo.bat" ở thư mục gốc, hoặc mở Terminal tại "/Backend/HTTTDN.AdminApi" và chạy lệnh "dotnet run" (Server chạy ở http://localhost:5000, tự động tạo CSDL và nạp sẵn dữ liệu mẫu).
+  + Mở "/Frontend_Admin/login.html" (dành cho Admin & Quản lý CRM) hoặc "/Frontend_Admin/customer_login.html" (dành cho Khách hàng).
+- Cách 2 (Chạy với Microsoft SQL Server):
+  + Mở SQL Server Management Studio (SSMS), chạy toàn bộ file "/Database/HTTTDN_DB.sql".
+  + Trong "/Backend/HTTTDN.AdminApi/appsettings.json", đổi "UseSqlServer": true rồi chạy "dotnet run".
 
 5. TÀI KHOẢN DEMO ĐỂ CHẤM ĐIỂM:
 - Cổng Quản trị hệ thống (Admin) : Username: admin      | Password: 123456

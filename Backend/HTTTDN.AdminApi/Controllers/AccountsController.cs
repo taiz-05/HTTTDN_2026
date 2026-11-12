@@ -40,6 +40,7 @@ namespace HTTTDN.AdminApi.Controllers
 
         // Chỉ trả về đúng 3 quyền: Admin, Manager, Customer
         [HttpGet("roles")]
+        [HttpGet("/api/admin/roles")]
         public async Task<IActionResult> GetRoles()
         {
             var allowedRoles = new[] { "Admin", "Manager", "Customer" };
@@ -58,9 +59,9 @@ namespace HTTTDN.AdminApi.Controllers
             var acc = new Account
             {
                 Username = dto.Username.Trim(),
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(string.IsNullOrWhiteSpace(dto.Password) ? "123456" : dto.Password),
                 FullName = dto.FullName.Trim(),
-                Email = dto.Email,
+                Email = string.IsNullOrWhiteSpace(dto.Email) ? $"{dto.Username.Trim().ToLower()}@sgutech.vn" : dto.Email.Trim(),
                 Phone = dto.Phone,
                 RoleId = dto.RoleId,
                 IsActive = true,
@@ -68,6 +69,24 @@ namespace HTTTDN.AdminApi.Controllers
             };
             _context.Accounts.Add(acc);
             await _context.SaveChangesAsync();
+
+            var role = await _context.Roles.FindAsync(dto.RoleId);
+            if (role != null && role.RoleName == "Customer")
+            {
+                if (!await _context.CustomerProfiles.AnyAsync(p => p.AccountId == acc.AccountId))
+                {
+                    _context.CustomerProfiles.Add(new CustomerProfile
+                    {
+                        AccountId = acc.AccountId,
+                        Age = 22,
+                        Gender = "Nam",
+                        Address = "TP. Hồ Chí Minh",
+                        Interest = "Lập trình"
+                    });
+                    await _context.SaveChangesAsync();
+                }
+            }
+
             return Ok(new { message = "Tạo tài khoản thành công!" });
         }
 
@@ -80,7 +99,41 @@ namespace HTTTDN.AdminApi.Controllers
 
             acc.RoleId = dto.RoleId;
             await _context.SaveChangesAsync();
+
+            var role = await _context.Roles.FindAsync(dto.RoleId);
+            if (role != null && role.RoleName == "Customer")
+            {
+                if (!await _context.CustomerProfiles.AnyAsync(p => p.AccountId == acc.AccountId))
+                {
+                    _context.CustomerProfiles.Add(new CustomerProfile
+                    {
+                        AccountId = acc.AccountId,
+                        Age = 22,
+                        Gender = "Nam",
+                        Address = "TP. Hồ Chí Minh",
+                        Interest = "Lập trình"
+                    });
+                    await _context.SaveChangesAsync();
+                }
+            }
+
             return Ok(new { message = "Cập nhật phân quyền thành công!" });
+        }
+
+        // Cho phép Admin khóa / mở khóa tài khoản
+        [HttpPut("{id}/toggle-status")]
+        public async Task<IActionResult> ToggleStatus(int id)
+        {
+            var acc = await _context.Accounts.FindAsync(id);
+            if (acc == null) return NotFound(new { message = "Không tìm thấy tài khoản!" });
+
+            acc.IsActive = !acc.IsActive;
+            await _context.SaveChangesAsync();
+            return Ok(new
+            {
+                message = acc.IsActive ? "Đã mở khóa tài khoản thành công!" : "Đã khóa tài khoản thành công!",
+                isActive = acc.IsActive
+            });
         }
 
         // Cho phép Admin xóa bất kỳ Admin khác hoặc tài khoản khác

@@ -86,6 +86,16 @@ namespace HTTTDN.AdminApi.Controllers
             var account = await _context.Accounts.FindAsync(id);
             if (account == null) return NotFound(new { message = "Không tìm thấy khách hàng." });
 
+            // Xóa dữ liệu liên quan để tránh xung đột khóa ngoại SQL Server
+            var profiles = await _context.CustomerProfiles.Where(p => p.AccountId == id).ToListAsync();
+            if (profiles.Any()) _context.CustomerProfiles.RemoveRange(profiles);
+
+            var feedbacks = await _context.Feedbacks.Where(f => f.AccountId == id).ToListAsync();
+            if (feedbacks.Any()) _context.Feedbacks.RemoveRange(feedbacks);
+
+            var responses = await _context.SurveyResponses.Where(r => r.AccountId == id).ToListAsync();
+            if (responses.Any()) _context.SurveyResponses.RemoveRange(responses);
+
             _context.Accounts.Remove(account);
             await _context.SaveChangesAsync();
             return Ok(new { message = "Đã xóa khách hàng thành công." });

@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "D:\\HTTTDN_New\\Backend\\HTTTDN.AdminApi\\HTTTDN.AdminApi.csproj": {}
+    "D:\\HTTTDN_2026\\Backend\\HTTTDN.AdminApi\\HTTTDN.AdminApi.csproj": {}
   },
   "projects": {
-    "D:\\HTTTDN_New\\Backend\\HTTTDN.AdminApi\\HTTTDN.AdminApi.csproj": {
+    "D:\\HTTTDN_2026\\Backend\\HTTTDN.AdminApi\\HTTTDN.AdminApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\HTTTDN_New\\Backend\\HTTTDN.AdminApi\\HTTTDN.AdminApi.csproj",
+        "projectUniqueName": "D:\\HTTTDN_2026\\Backend\\HTTTDN.AdminApi\\HTTTDN.AdminApi.csproj",
         "projectName": "HTTTDN.AdminApi",
-        "projectPath": "D:\\HTTTDN_New\\Backend\\HTTTDN.AdminApi\\HTTTDN.AdminApi.csproj",
-        "packagesPath": "C:\\Users\\PREDATOR\\.nuget\\packages\\",
-        "outputPath": "D:\\HTTTDN_New\\Backend\\HTTTDN.AdminApi\\obj\\",
+        "projectPath": "D:\\HTTTDN_2026\\Backend\\HTTTDN.AdminApi\\HTTTDN.AdminApi.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "D:\\HTTTDN_2026\\Backend\\HTTTDN.AdminApi\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\PREDATOR\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -24,7 +24,6 @@
         },
         "frameworks": {
           "net8.0": {
-            "framework": "net8.0",
             "targetAlias": "net8.0",
             "projectReferences": {}
           }
@@ -38,12 +37,10 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "10.0.400"
+        }
       },
       "frameworks": {
         "net8.0": {
-          "framework": "net8.0",
           "targetAlias": "net8.0",
           "dependencies": {
             "BCrypt.Net-Next": {
@@ -51,6 +48,10 @@
               "version": "[4.0.3, )"
             },
             "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[8.0.8, )"
+            },
+            "Microsoft.EntityFrameworkCore.Sqlite": {
               "target": "Package",
               "version": "[8.0.8, )"
             },
@@ -78,7 +79,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.402/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.428/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

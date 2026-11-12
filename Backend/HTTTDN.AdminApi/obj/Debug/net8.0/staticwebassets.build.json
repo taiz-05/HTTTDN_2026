@@ -1,1 +1,11 @@
-{"Version":1,"Hash":"FURbjnzqv8AJIhRWyzNVAbe/fora/Iee7+u6ECtK27U=","Source":"HTTTDN.AdminApi","BasePath":"/","Mode":"Root","ManifestType":"Build","ReferencedProjectsConfiguration":[],"DiscoveryPatterns":[],"Assets":[],"Endpoints":[]}
+{
+  "Version": 1,
+  "Hash": "I3bHN5+5e3HZRE7sLdA+QtKYUKPdve5sIfbhkebcMec=",
+  "Source": "HTTTDN.AdminApi",
+  "BasePath": "_content/HTTTDN.AdminApi",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
