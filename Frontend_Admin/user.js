@@ -62,8 +62,10 @@ async function initCustomerPortal() {
     try {
         const prof = await (await fetch(`${CUS_API}/profile/${currentCus.accountId}`)).json();
         if (document.getElementById("pFullName")) document.getElementById("pFullName").value = prof.fullName || currentCus.fullName;
+        if (document.getElementById("pEmailDisplay") && prof.email) document.getElementById("pEmailDisplay").value = prof.email;
         if (document.getElementById("pPhone")) document.getElementById("pPhone").value = prof.phone || "";
         if (document.getElementById("pAge")) document.getElementById("pAge").value = prof.age || 20;
+        if (document.getElementById("pGender")) document.getElementById("pGender").value = prof.gender || "Nam";
         if (document.getElementById("pAddress")) document.getElementById("pAddress").value = prof.address || "";
         if (document.getElementById("pInterest")) document.getElementById("pInterest").value = prof.interest || "Gaming";
         if (document.getElementById("profCardInterestTag")) document.getElementById("profCardInterestTag").innerText = prof.interest || "Gaming";
@@ -187,9 +189,9 @@ function renderProductCards(list) {
                     <div style="display:flex; align-items:center; gap:5px; margin-bottom:14px;">
                         <span class="star-rating-box">
                             <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                            <span>${Number(p.averageRating ?? 5).toFixed(1)} / 5</span>
+                            <span>${Number(p.avgRating ?? p.averageRating ?? 5).toFixed(1)} / 5</span>
                         </span>
-                        <span style="font-size:11.5px; color:var(--text-muted);">(${p.totalReviews ?? 0} đánh giá)</span>
+                        <span style="font-size:11.5px; color:var(--text-muted);">(${p.reviewCount ?? p.totalReviews ?? 0} đánh giá)</span>
                     </div>
                 </div>
                 <button class="btn btn-primary" style="width:100%; padding:9px; font-size:13px; display:inline-flex; align-items:center; justify-content:center; gap:6px;" onclick="openReviewModal(${p.productId})">
@@ -459,8 +461,10 @@ async function submitModalSurvey() {
 // =========================================================
 async function updateProfile() {
     const fullName = document.getElementById("pFullName").value.trim();
+    const email = document.getElementById("pEmailDisplay")?.value.trim() || "";
     const phone = document.getElementById("pPhone").value.trim();
     const age = Number(document.getElementById("pAge").value || 20);
+    const gender = document.getElementById("pGender")?.value || "Nam";
     const address = document.getElementById("pAddress").value.trim();
     const interest = document.getElementById("pInterest").value;
 
@@ -468,8 +472,10 @@ async function updateProfile() {
 
     const body = {
         fullName,
+        email,
         phone,
         age,
+        gender,
         address,
         interest
     };

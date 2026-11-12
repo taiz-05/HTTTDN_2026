@@ -21,7 +21,8 @@ namespace HTTTDN.AdminApi.Controllers
             [FromQuery] decimal? minPrice,
             [FromQuery] decimal? maxPrice,
             [FromQuery] string? status,
-            [FromQuery] string? sortBy)
+            [FromQuery] string? sortBy,
+            [FromQuery] string? sort)
         {
             var query = _context.Products
                 .Include(p => p.Category)
@@ -46,7 +47,8 @@ namespace HTTTDN.AdminApi.Controllers
             if (!string.IsNullOrWhiteSpace(status))
                 query = query.Where(p => p.Status == status);
 
-            query = sortBy switch
+            var activeSort = !string.IsNullOrWhiteSpace(sortBy) ? sortBy : sort;
+            query = activeSort switch
             {
                 "price_asc" => query.OrderBy(p => p.Price),
                 "price_desc" => query.OrderByDescending(p => p.Price),
@@ -73,7 +75,9 @@ namespace HTTTDN.AdminApi.Controllers
                 p.Status,
                 ImageUrl = string.IsNullOrEmpty(p.ImageUrl) ? defaultImg : p.ImageUrl,
                 ReviewCount = _context.Feedbacks.Count(f => f.ProductId == p.ProductId),
-                AvgRating = _context.Feedbacks.Where(f => f.ProductId == p.ProductId).Select(f => (double?)f.Rating).Average() ?? 5.0
+                TotalReviews = _context.Feedbacks.Count(f => f.ProductId == p.ProductId),
+                AvgRating = _context.Feedbacks.Where(f => f.ProductId == p.ProductId).Select(f => (double?)f.Rating).Average() ?? 5.0,
+                AverageRating = _context.Feedbacks.Where(f => f.ProductId == p.ProductId).Select(f => (double?)f.Rating).Average() ?? 5.0
             }).ToListAsync();
 
             return Ok(result);

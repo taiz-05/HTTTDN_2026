@@ -3652,11 +3652,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "d:\\HTTTDN_2026\\Backend\\HTTTDN.AdminApi\\HTTTDN.AdminApi.csproj",
+      "projectUniqueName": "D:\\HTTTDN_2026\\Backend\\HTTTDN.AdminApi\\HTTTDN.AdminApi.csproj",
       "projectName": "HTTTDN.AdminApi",
-      "projectPath": "d:\\HTTTDN_2026\\Backend\\HTTTDN.AdminApi\\HTTTDN.AdminApi.csproj",
+      "projectPath": "D:\\HTTTDN_2026\\Backend\\HTTTDN.AdminApi\\HTTTDN.AdminApi.csproj",
       "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-      "outputPath": "d:\\HTTTDN_2026\\Backend\\HTTTDN.AdminApi\\obj\\",
+      "outputPath": "D:\\HTTTDN_2026\\Backend\\HTTTDN.AdminApi\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -3724,7 +3724,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.427/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.428/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

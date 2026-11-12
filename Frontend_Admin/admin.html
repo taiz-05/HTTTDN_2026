@@ -44,16 +44,6 @@
             </nav>
 
             <div class="sidebar-footer">
-                <div class="quick-switch-wrap">
-                    <a href="manager_crm.html" class="quick-switch-btn" title="Chuyển sang Phân hệ Quản lý Khách hàng">
-                        <span>Phân hệ CRM</span>
-                        <span>↗</span>
-                    </a>
-                    <a href="user.html" class="quick-switch-btn" title="Chuyển sang Cổng mua sắm & Đánh giá Khách hàng">
-                        <span>Cổng Khách hàng</span>
-                        <span>🛒</span>
-                    </a>
-                </div>
                 <div class="sidebar-footer-info">
                     <span>Phiên bản v2.6 Pro</span>
                     <span>Admin Server</span>
@@ -281,9 +271,9 @@
                         </div>
                     </div>
 
-                    <!-- BỘ LỌC TÌM KIẾM MỘT HÀNG GỌN GÀNG -->
+                    <!-- BỘ LỌC TÌM KIẾM NÂNG CAO, LỌC & SẮP XẾP -->
                     <div class="filter-toolbar">
-                        <div class="search-box-wrap">
+                        <div class="search-box-wrap" style="min-width: 210px;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                             <input type="text" id="fKeyword" placeholder="Tìm theo mã hoặc tên sản phẩm..." oninput="loadProducts()">
                         </div>
@@ -302,6 +292,9 @@
                             <option value="Hết hàng">Hết hàng</option>
                             <option value="Ngừng kinh doanh">Ngừng kinh doanh</option>
                         </select>
+
+                        <input type="number" id="fMinPrice" placeholder="Giá từ (VNĐ)" style="width: 130px;" oninput="loadProducts()">
+                        <input type="number" id="fMaxPrice" placeholder="Giá đến (VNĐ)" style="width: 130px;" oninput="loadProducts()">
 
                         <select id="fSort" onchange="loadProducts()">
                             <option value="">Mới cập nhật</option>

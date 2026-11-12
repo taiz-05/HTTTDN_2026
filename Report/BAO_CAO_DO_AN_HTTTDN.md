@@ -315,7 +315,35 @@ Hệ thống được thiết kế chuẩn hóa gồm **9 bảng quan hệ chặ
 
 ---
 
-### 2. Kịch bản Sao lưu và Phục hồi Cơ sở Dữ liệu (Backup & Restore - 5 điểm)
+### 2. Thiết kế Giao diện & Giải thích Chi tiết Chức năng Phần mềm (Mục I.3.b - 5 điểm)
+
+Hệ thống được thiết kế theo kiến trúc **tách biệt hoàn toàn (Strict Role Separation)** giữa Cổng Quản trị nội bộ và Cổng Khách hàng, tuân thủ chuẩn giao diện phần mềm doanh nghiệp hiện đại (Enterprise SaaS):
+
+1. **Giao diện Đăng nhập Nội bộ (`login.html`) & Đăng nhập/Đăng ký Khách hàng (`customer_login.html`):**
+   - **Tách biệt cổng truy cập:** Nhân sự nội bộ (`Admin`, `CRM Manager`) đăng nhập tại `login.html`; Khách hàng mua sắm đăng nhập hoặc tự đăng ký tài khoản tại `customer_login.html` (không hiển thị bất kỳ liên kết nào dẫn vào trang quản trị nội bộ).
+   - **Cơ chế hoạt động:** Hỗ trợ nhấn phím `Enter` tại ô tài khoản/mật khẩu hoặc nhấn nút `Đăng nhập`. Backend kiểm tra mật khẩu mã hóa `BCrypt`, kiểm tra trạng thái khóa (`IsActive`) và tự động điều hướng theo đúng `RoleName`.
+
+2. **Giao diện Phân hệ Quản trị Hệ thống - Admin Server (`admin.html` - Mục II.2):**
+   - **Tab 1 - Tổng quan & Thống kê Doanh nghiệp:** Hiển thị 6 chỉ số KPI thời gian thực (Sản phẩm lưu kho, Tổng giá trị kho niêm yết, Đối tác cung cấp, Lượt đánh giá, Tài khoản người dùng, Tỷ lệ hài lòng tích cực), bộ lọc theo khoảng thời gian (Hôm nay, 7 ngày, 30 ngày, Tùy chọn ngày) và 5 biểu đồ trực quan (`Chart.js`) cùng nhật ký phản hồi chi tiết.
+   - **Tab 2 - Quản lý Danh mục & Tồn kho Sản phẩm:** Hỗ trợ **Xem, Tìm kiếm từ khóa, Tìm kiếm nâng cao & Lọc đa tiêu chí** (theo Danh mục, Nhà cung cấp, Trạng thái kinh doanh, Khoảng giá từ `minPrice` đến `maxPrice`), **Sắp xếp** (Giá tăng/giảm dần, Tồn kho nhiều nhất, Tên A-Z), Xuất file báo cáo CSV, và Thêm/Sửa/Xóa sản phẩm qua hộp thoại Modal.
+   - **Tab 3 - Quản lý Đối tác & Nhà cung cấp:** Tìm kiếm theo mã, tên công ty hoặc địa chỉ; Thêm mới, Chỉnh sửa thông tin và Xóa nhà cung cấp (có kiểm tra toàn vẹn khóa ngoại với hàng hóa trong kho).
+   - **Tab 4 - Quản trị Tài khoản & Phân quyền (`Accounts & Roles`):** Lọc tài khoản theo vai trò (`Admin`, `Manager`, `Customer`), cấp tài khoản mới, **phân quyền trực tiếp** bằng menu chọn vai trò (`PUT /api/admin/accounts/{id}/role`), Khóa/Mở khóa truy cập và Xóa tài khoản.
+
+3. **Giao diện Phân hệ Quản lý Quan hệ Khách hàng - CRM Manager (`manager_crm.html` - Mục III.4.1):**
+   - **Tab 1 - Quản lý Hồ sơ Khách hàng (Mục 4.1.1 – 4.1.3):** Tìm kiếm, lọc khách hàng theo nhóm độ tuổi (`<20`, `20-30`, `>30`) và sở thích tiêu dùng (`Gaming`, `Văn phòng`, `Đồ họa`, `Lập trình`); Thêm hồ sơ khách hàng mới, Khóa/Mở khóa tài khoản khách hàng và Xóa khách hàng.
+   - **Tab 2 - Tiếp nhận & Giải đáp Phản hồi (Mục 4.1.4):** Thống kê 4 chỉ số phản hồi (Tổng phản hồi, Đã giải đáp, Chờ giải đáp, Điểm hài lòng TB), biểu đồ phân bố 1–5 sao, và chức năng gửi nội dung giải đáp chính thức từ Quản lý CRM tới từng đánh giá của khách hàng.
+   - **Tab 3 - Báo cáo Độ tuổi & Sở thích Khách hàng (Mục 4.1.5):** Tự động tính toán tỷ lệ phần trăm các nhóm tuổi và nhóm sở thích, hiển thị thanh tiến độ trực quan và đưa ra **Khuyến nghị Chiến lược Nhập hàng** cho Ban Giám đốc.
+   - **Tab 4 - Khảo sát Thị trường & Thăm dò Sản phẩm mới (Mục 4.1.6 – 4.1.7):** Cho phép Quản lý phát hành bài khảo sát sản phẩm dự kiến nhập (kèm giá dự kiến và thời hạn hiệu lực), tạm khóa/mở khảo sát, và xem **Bảng thống kê kết quả khảo sát** (Tổng lượt phản hồi, điểm quan tâm trung bình, cơ cấu ý định mua: *Rất muốn mua / Đang cân nhắc / Không mua*, và danh sách ý kiến chi tiết).
+
+4. **Giao diện Cổng Trải nghiệm Khách hàng (`user.html` - Mục III.4.3):**
+   - **Tab 1 - Danh mục Sản phẩm:** Hiển thị lưới sản phẩm kèm trạng thái tồn kho, điểm sao trung bình, lọc nhanh theo danh mục và tìm kiếm tức thì.
+   - **Tab 2 - Đánh giá Sản phẩm & Phản hồi Cộng đồng:** Khách hàng chọn mức sao (1–5 sao), gửi nhận xét về sản phẩm và theo dõi câu trả lời giải đáp từ Quản lý CRM.
+   - **Tab 3 - Khảo sát Sản phẩm mới:** Khách hàng nhận các bài khảo sát đang mở từ doanh nghiệp, chấm điểm mức độ quan tâm, chọn ý định mua sắm và gửi góp ý về mức giá/tính năng.
+   - **Tab 4 - Hồ sơ Cá nhân:** Khách hàng xem thẻ thành viên và chỉnh sửa thông tin cá nhân (Họ tên, Email, SĐT, Độ tuổi, Giới tính, Sở thích, Địa chỉ); mọi thay đổi được đồng bộ tức thì sang báo cáo nhân khẩu học của Quản lý CRM.
+
+---
+
+### 3. Kịch bản Sao lưu và Phục hồi Cơ sở Dữ liệu (Backup & Restore - Mục II.1 - 5 điểm)
 
 Doanh nghiệp xây dựng quy chế sao lưu an toàn CSDL trên Microsoft SQL Server như sau:
 1. **Sao lưu toàn phần (Full Backup):** Thực hiện định kỳ vào 00:00 Chủ Nhật hàng tuần:

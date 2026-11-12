@@ -170,9 +170,12 @@ namespace HTTTDN.AdminApi.Controllers
             var acc = await _context.Accounts.FindAsync(accountId);
             if (acc == null) return NotFound();
 
-            acc.FullName = dto.FullName;
-            acc.Email = dto.Email;
-            acc.Phone = dto.Phone;
+            if (!string.IsNullOrWhiteSpace(dto.FullName))
+                acc.FullName = dto.FullName.Trim();
+            if (!string.IsNullOrWhiteSpace(dto.Email))
+                acc.Email = dto.Email.Trim();
+            if (dto.Phone != null)
+                acc.Phone = dto.Phone.Trim();
 
             var profile = await _context.CustomerProfiles.FirstOrDefaultAsync(p => p.AccountId == accountId);
             if (profile == null)
@@ -181,10 +184,17 @@ namespace HTTTDN.AdminApi.Controllers
                 _context.CustomerProfiles.Add(profile);
             }
 
-            profile.Age = dto.Age;
-            profile.Gender = dto.Gender;
-            profile.Address = dto.Address;
-            profile.Interest = dto.Interest;
+            if (dto.Age > 0)
+                profile.Age = dto.Age;
+            if (!string.IsNullOrWhiteSpace(dto.Gender))
+                profile.Gender = dto.Gender;
+            else if (string.IsNullOrWhiteSpace(profile.Gender))
+                profile.Gender = "Nam";
+
+            if (dto.Address != null)
+                profile.Address = dto.Address.Trim();
+            if (!string.IsNullOrWhiteSpace(dto.Interest))
+                profile.Interest = dto.Interest;
 
             await _context.SaveChangesAsync();
             return Ok(new { message = "Cập nhật thông tin hồ sơ thành công!" });

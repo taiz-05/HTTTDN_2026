@@ -479,6 +479,8 @@ async function loadProducts() {
         const catId = document.getElementById("fCategory")?.value || "";
         const supId = document.getElementById("fSupplier")?.value || "";
         const status = document.getElementById("fStatus")?.value || "";
+        const minPrice = document.getElementById("fMinPrice")?.value.trim() || "";
+        const maxPrice = document.getElementById("fMaxPrice")?.value.trim() || "";
         const sort = document.getElementById("fSort")?.value || "";
 
         const params = new URLSearchParams();
@@ -486,7 +488,9 @@ async function loadProducts() {
         if (catId) params.append("categoryId", catId);
         if (supId) params.append("supplierId", supId);
         if (status) params.append("status", status);
-        if (sort) params.append("sort", sort);
+        if (minPrice) params.append("minPrice", minPrice);
+        if (maxPrice) params.append("maxPrice", maxPrice);
+        if (sort) params.append("sortBy", sort);
 
         const res = await fetch(`${API}/products?${params.toString()}`);
         if (!res.ok) return;
@@ -520,6 +524,9 @@ async function loadProducts() {
                 stockBadge = `<span class="badge badge-stock-high">Còn hàng (${p.stockQuantity} ${p.unit || 'cái'})</span>`;
             }
 
+            const ratingVal = Number(p.avgRating ?? p.averageRating ?? 5.0).toFixed(1);
+            const revCount = p.reviewCount ?? p.totalReviews ?? 0;
+
             return `
                 <tr>
                     <td>
@@ -539,8 +546,8 @@ async function loadProducts() {
                     <td>
                         <span class="star-rating-box">
                             <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                            <span>${p.averageRating ? p.averageRating.toFixed(1) : "5.0"}</span>
-                            <span style="color:var(--text-muted); font-size:11px;">(${p.totalReviews || 0})</span>
+                            <span>${ratingVal}</span>
+                            <span style="color:var(--text-muted); font-size:11px;">(${revCount})</span>
                         </span>
                     </td>
                     <td style="text-align:center;">
@@ -562,6 +569,8 @@ function resetProductFilter() {
     document.getElementById("fCategory").value = "";
     document.getElementById("fSupplier").value = "";
     document.getElementById("fStatus").value = "";
+    if (document.getElementById("fMinPrice")) document.getElementById("fMinPrice").value = "";
+    if (document.getElementById("fMaxPrice")) document.getElementById("fMaxPrice").value = "";
     document.getElementById("fSort").value = "";
     loadProducts();
 }
@@ -806,6 +815,9 @@ async function saveSupplierModal() {
             });
         }
         const data = await res.json();
+        if (!res.ok) {
+            return alert(data.message || "Không thể lưu thông tin nhà cung cấp.");
+        }
         alert(data.message || "Lưu nhà cung cấp thành công!");
         closeSupplierModal();
         await loadSuppliers();
@@ -821,6 +833,9 @@ async function deleteSupplier(id) {
     try {
         const res = await fetch(`${API}/suppliers/${id}`, { method: "DELETE" });
         const data = await res.json();
+        if (!res.ok) {
+            return alert(data.message || "Không thể xóa nhà cung cấp.");
+        }
         alert(data.message || "Đã xóa nhà cung cấp.");
         await loadSuppliers();
         await loadCategoriesAndSuppliers();
@@ -835,7 +850,7 @@ async function deleteSupplier(id) {
 // =========================================================
 async function loadRoles() {
     try {
-        rolesList = await (await fetch(`${API}/roles`)).json();
+        rolesList = await (await fetch(`${API}/accounts/roles`)).json();
         const mRole = document.getElementById("mAccRole");
         if (mRole) {
             mRole.innerHTML = rolesList.map(r => `<option value="${r.roleId}">${r.roleName} - ${r.description || ''}</option>`).join("");
@@ -883,9 +898,22 @@ function renderFilteredAccounts() {
     }
 
     tbody.innerHTML = filtered.map(a => {
-        let roleBadgeColor = "badge-info";
-        if (a.roleName === "Admin") roleBadgeColor = "badge-locked";
-        else if (a.roleName === "Manager") roleBadgeColor = "badge-active";
+        let roleSelectHtml = "";
+        if (rolesList && rolesList.length > 0) {
+            const options = rolesList.map(r =>
+                `<option value="${r.roleId}" ${r.roleId === a.roleId || r.roleName === a.roleName ? "selected" : ""}>${r.roleName}</option>`
+            ).join("");
+            roleSelectHtml = `
+                <select onchange="changeAccountRole(${a.accountId}, this.value)" style="padding:4px 8px; font-size:12px; font-weight:600; border-radius:4px; border:1px solid var(--brand-border); background:#f8fafc; width:auto; cursor:pointer;">
+                    ${options}
+                </select>
+            `;
+        } else {
+            let roleBadgeColor = "badge-info";
+            if (a.roleName === "Admin") roleBadgeColor = "badge-locked";
+            else if (a.roleName === "Manager") roleBadgeColor = "badge-active";
+            roleSelectHtml = `<span class="badge ${roleBadgeColor}">${a.roleName}</span>`;
+        }
 
         return `
             <tr>
@@ -901,7 +929,7 @@ function renderFilteredAccounts() {
                 <td>${a.fullName}</td>
                 <td>${a.email || "-"}</td>
                 <td>${a.phone || "-"}</td>
-                <td><span class="badge ${roleBadgeColor}">${a.roleName}</span></td>
+                <td>${roleSelectHtml}</td>
                 <td><span class="badge ${a.isActive ? 'badge-active' : 'badge-locked'}">${a.isActive ? 'Hoạt động' : 'Đã khóa'}</span></td>
                 <td style="text-align:center;">
                     <div style="display:inline-flex; gap:6px;">
@@ -914,6 +942,27 @@ function renderFilteredAccounts() {
             </tr>
         `;
     }).join("");
+}
+
+async function changeAccountRole(accountId, newRoleId) {
+    try {
+        const res = await fetch(`${API}/accounts/${accountId}/role`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ roleId: Number(newRoleId) })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            await loadAccounts();
+            return alert(data.message || "Không thể cập nhật phân quyền.");
+        }
+        alert(data.message || "Đã cập nhật phân quyền tài khoản thành công!");
+        await loadAccounts();
+        notifyDataChanged("accounts");
+    } catch (err) {
+        alert("Lỗi khi phân quyền: " + err.message);
+        await loadAccounts();
+    }
 }
 
 function openAddAccountModal() {

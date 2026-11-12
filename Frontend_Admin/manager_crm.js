@@ -390,6 +390,20 @@ async function loadDemographics() {
         const f20_30 = Math.round((data.ageStats.from20To30 / total) * 100);
         const o30 = Math.round((data.ageStats.over30 / total) * 100);
 
+        const youngRatio = Math.round(((data.ageStats.under20 + data.ageStats.from20To30) / total) * 100);
+        if (document.getElementById("dominantAgeVal")) {
+            document.getElementById("dominantAgeVal").innerText = `18 - 30 tuổi (${youngRatio}%)`;
+        }
+        if (document.getElementById("dominantInterestVal") && data.interestStats && data.interestStats.length > 0) {
+            const sortedInt = [...data.interestStats].sort((a, b) => b.count - a.count);
+            if (sortedInt.length >= 2) {
+                const topTwoPct = (Number(sortedInt[0].percentage) + Number(sortedInt[1].percentage)).toFixed(1).replace(/\.0$/, "");
+                document.getElementById("dominantInterestVal").innerText = `${sortedInt[0].interest} & ${sortedInt[1].interest} (${topTwoPct}%)`;
+            } else {
+                document.getElementById("dominantInterestVal").innerText = `${sortedInt[0].interest} (${sortedInt[0].percentage}%)`;
+            }
+        }
+
         document.getElementById("ageReportBox").innerHTML = `
             <div style="margin-bottom:12px;">
                 <div style="display:flex; justify-content:space-between; font-weight:600; font-size:13px;">
