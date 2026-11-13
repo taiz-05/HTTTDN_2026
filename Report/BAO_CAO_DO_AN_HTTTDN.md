@@ -108,111 +108,70 @@ Doanh nghiệp SGU Tech hoạt động phân phối thiết bị công nghệ. H
 
 ---
 
-### 2. Sơ đồ Phân rã Chức năng (BFD - Business Function Diagram)
+### 2. Sơ đồ Phân rã Chức năng (BFD - Business Function Diagram) (2 điểm)
 
-```
-                    HỆ THỐNG THÔNG TIN DOANH NGHIỆP SGU TECH
-                                       |
-    +----------------------------------+----------------------------------+
-    |                                  |                                  |
-1.0 ADMIN SERVER                   2.0 NGƯỜI QUẢN LÝ                  3.0 KHÁCH HÀNG
-(Tách biệt các phân hệ khác)           |                                  |
-    |                                  |-- 2.1 Thêm một khách hàng mới    |-- 3.1 Đăng ký tài khoản KH
-    |-- 1.1 Thêm mới Account           |-- 2.2 Xóa khách hàng             |-- 3.2 Đăng nhập
-    |-- 1.2 Xóa & Khóa/Mở Account      |-- 2.3 Khóa tài khoản khách hàng  |-- 3.3 Chỉnh sửa thông tin
-    |-- 1.3 Phân quyền cho Account     |-- 2.4 Tiếp nhận phản hồi KH      |-- 3.4 Gửi phản hồi sản phẩm
-    |-- 1.4 Sao lưu & Phục hồi CSDL    |-- 2.5 Báo cáo độ tuổi & sở thích |-- 3.5 Nhận & thực hiện khảo sát
-                                       |-- 2.6 Tạo khảo sát gửi TK KH
-                                       |-- 2.7 Thống kê kết quả khảo sát
-```
+![Sơ đồ Phân rã Chức năng BFD](images/bfd_diagram.png)
+
+*Hình 2.1: Sơ đồ Phân rã Chức năng (Business Function Diagram - BFD) Hệ thống SGU Tech*
+
+**Giải thích chi tiết 3 phân hệ chức năng:**
+1. **1.0 Phân hệ Admin Server:** Quản trị kỹ thuật tập trung gồm: Thêm tài khoản mới (1.1), Xóa & Khóa/Mở tài khoản (1.2), Phân quyền trực tiếp Role (1.3), Tách biệt hoàn toàn cổng quản lý nhân sự, kho, bán hàng và lược bỏ xem/lọc SP/NCC theo yêu cầu đề bài; Quản lý kịch bản sao lưu & phục hồi CSDL (1.4).
+2. **2.0 Phân hệ Người Quản lý (CRM):** Thực hiện đầy đủ 7 nghiệp vụ: Thêm một khách hàng mới (2.1), Xóa khách hàng (2.2), Khóa tài khoản khách hàng (2.3), Tiếp nhận & giải đáp phản hồi (2.4), Báo cáo nhân khẩu học độ tuổi & sở thích (2.5), Tạo bảng khảo sát gửi đến TK khách hàng (2.6) và Thống kê kết quả khảo sát (2.7).
+3. **3.0 Phân hệ Cổng Khách hàng (Portal):** Thực hiện 5 chức năng: Đăng ký tài khoản (3.1), Đăng nhập (3.2), Chỉnh sửa thông tin cá nhân (3.3), Gửi phản hồi sản phẩm kèm bộ lọc thông minh (3.4) và Nhận/thực hiện khảo sát sản phẩm mới 5 tiêu chí (3.5).
 
 ---
 
-### 3. Sơ đồ Ngữ cảnh (Context Diagram)
+### 3. Sơ đồ Ngữ cảnh (Context Diagram - DFD Mức 0 Cảnh) (2 điểm)
 
-* **Tác nhân ngoài (External Entities):**
-  1. `Quản trị viên (Admin)`
-  2. `Người quản lý (CRM Manager)`
-  3. `Khách hàng (Customer)`
+![Sơ đồ Ngữ cảnh Context Diagram](images/context_diagram.png)
 
-```mermaid
-flowchart TD
-    Admin["Quản trị viên (Admin)"]
-    Manager["Người quản lý CRM (Manager)"]
-    Customer["Khách hàng (Customer)"]
-    System(("HỆ THỐNG THÔNG TIN DOANH NGHIỆP (SGU TECH)"))
+*Hình 2.2: Sơ đồ Ngữ cảnh (Context Diagram) Hệ thống Thông tin Doanh nghiệp SGU Tech*
 
-    Admin -- "Thông tin tài khoản, phân quyền, dữ liệu SP/NCC" --> System
-    System -- "Báo cáo người dùng, trạng thái hệ thống, log sao lưu" --> Admin
-
-    Manager -- "Khảo sát mới, câu trả lời phản hồi, lệnh khóa KH" --> System
-    System -- "Báo cáo độ tuổi/sở thích, thống kê khảo sát, danh sách phản hồi" --> Manager
-
-    Customer -- "Đăng ký/Đăng nhập, gửi phản hồi SP, nộp kết quả khảo sát" --> System
-    System -- "Danh mục sản phẩm, phản hồi từ QL, khảo sát mới" --> Customer
-```
+**Mô tả các luồng thông tin vào/ra với 3 tác nhân ngoài:**
+* **Quản trị viên (Admin Server):**
+  - *Luồng vào:* Thông tin tạo tài khoản, lệnh phân quyền (Role Assignment), lệnh khóa/xóa tài khoản.
+  - *Luồng ra:* Trạng thái tài khoản, báo cáo phân quyền, nhật ký sao lưu và trạng thái an toàn CSDL.
+* **Người quản lý CRM (Manager):**
+  - *Luồng vào:* Hồ sơ khách hàng mới, lệnh khóa/xóa khách hàng, nội dung giải đáp phản hồi sản phẩm, bài khảo sát sản phẩm mới kèm thời hạn kết thúc.
+  - *Luồng ra:* Danh sách phản hồi cần giải đáp, báo cáo phân loại độ tuổi & sở thích, bảng thống kê tỷ lệ ý định mua và điểm đánh giá trung bình.
+* **Khách hàng (Customer):**
+  - *Luồng vào:* Thông tin đăng ký tài khoản, hồ sơ cá nhân cập nhật, đánh giá sản phẩm (1–5 sao và nhận xét), kết quả trả lời khảo sát 5 chiều.
+  - *Luồng ra:* Thông báo xác thực đăng nhập, danh mục sản phẩm kinh doanh, câu trả lời giải đáp từ Quản lý và danh sách phiếu khảo sát sản phẩm mới.
 
 ---
 
-### 4. Sơ đồ Luồng Dữ liệu Mức Đỉnh (Level 0 DFD)
+### 4. Sơ đồ Luồng Dữ liệu Mức Đỉnh (Level 0 DFD) (4 điểm)
 
-* **Các kho dữ liệu (Data Stores):**
-  - `D1: KHO TÀI KHOẢN & PHÂN QUYỀN (Accounts, Roles)`
-  - `D2: KHO HỒ SƠ KHÁCH HÀNG (CustomerProfiles)`
-  - `D3: KHO SẢN PHẨM & ĐỐI TÁC (Products, Categories, Suppliers)`
-  - `D4: KHO PHẢN HỒI ĐÁNH GIÁ (Feedbacks)`
-  - `D5: KHO KHẢO SÁT & Ý KIẾN (Surveys, SurveyResponses)`
+![Sơ đồ Luồng Dữ liệu Mức Đỉnh Level 0 DFD](images/dfd_level0_diagram.png)
 
-```mermaid
-flowchart LR
-    Admin["Admin"]
-    Manager["Quản lý CRM"]
-    Customer["Khách hàng"]
+*Hình 2.3: Sơ đồ Luồng Dữ liệu Mức Đỉnh (Level 0 DFD) với 5 Tiến trình và 5 Kho dữ liệu (D1–D5)*
 
-    P1["1.0 Quản trị Hệ thống & Phân quyền"]
-    P2["2.0 Quản lý Quan hệ Khách hàng"]
-    P3["3.0 Tiếp nhận & Xử lý Phản hồi"]
-    P4["4.0 Quản lý Khảo sát Sản phẩm mới"]
-    P5["5.0 Tương tác Khách hàng & Cổng thông tin"]
+**Mô tả ma trận 5 Tiến trình và 5 Kho dữ liệu:**
 
-    D1[("D1: Tài khoản & Quyền")]
-    D2[("D2: Hồ sơ Khách hàng")]
-    D3[("D3: Sản phẩm & NCC")]
-    D4[("D4: Phản hồi Đánh giá")]
-    D5[("D5: Khảo sát & Kết quả")]
-
-    Admin -->|Thông tin tài khoản/role| P1
-    P1 <--> D1
-    P1 <--> D3
-
-    Manager -->|Quản lý hồ sơ KH| P2
-    P2 <--> D2
-    P2 <--> D1
-
-    Customer -->|Gửi phản hồi SP| P3
-    P3 --> D4
-    Manager -->|Trả lời phản hồi| P3
-    P3 --> D4
-    D4 -->|Xem đánh giá & giải đáp| Customer
-
-    Manager -->|Tạo khảo sát có hạn| P4
-    P4 --> D5
-    D5 -->|Thống kê tỷ lệ mua| Manager
-    D5 -->|Danh sách khảo sát mới| Customer
-    Customer -->|Nộp câu trả lời| P4
-
-    Customer -->|Đăng ký, sửa thông tin| P5
-    P5 <--> D1
-    P5 <--> D2
-    D3 -->|Danh mục sản phẩm| P5
-    P5 --> Customer
-```
+| Tiến trình / Kho DL | Tên thành phần | Tác nhân tương tác | Kho dữ liệu liên quan | Mô tả nghiệp vụ dữ liệu |
+| :--- | :--- | :--- | :--- | :--- |
+| **Tiến trình 1.0** | Quản trị Hệ thống & Phân quyền | Admin Server | D1: Accounts & Roles | Thêm tài khoản, gán quyền Role, khóa và xóa an toàn khóa ngoại. |
+| **Tiến trình 2.0** | Quản lý Khách hàng & Báo cáo | Người quản lý CRM | D1, D2: CustomerProfiles | Thêm/Xóa/Khóa KH; kết xuất biểu đồ cơ cấu độ tuổi và sở thích tiêu dùng. |
+| **Tiến trình 3.0** | Tiếp nhận & Giải đáp Phản hồi | Khách hàng, Quản lý CRM | D3: Products, D4: Feedbacks | Ghi nhận đánh giá 1-5 sao của KH; lưu nội dung giải đáp từ Quản lý CRM. |
+| **Tiến trình 4.0** | Khảo sát Sản phẩm Mới & Thống kê | Người quản lý CRM, Khách hàng | D5: Surveys & Responses | Phát hành khảo sát có thời hạn; thu thập câu trả lời và tính toán thống kê. |
+| **Tiến trình 5.0** | Cổng Tương tác Khách hàng | Khách hàng | D1, D2, D3, D4, D5 | Xử lý đăng ký, đăng nhập, tra cứu sản phẩm và chỉnh sửa hồ sơ cá nhân. |
+| **Kho D1** | Kho Tài khoản & Phân quyền | Admin, Quản lý, KH | Bảng Accounts, Roles | Lưu trữ định danh người dùng và vai trò bảo mật. |
+| **Kho D2** | Kho Hồ sơ Khách hàng | Quản lý CRM, KH | Bảng CustomerProfiles | Lưu trữ dữ liệu nhân khẩu học: tuổi, giới tính, sở thích, địa chỉ. |
+| **Kho D3** | Kho Hàng hóa & Đối tác | Khách hàng, Admin | Products, Categories, Suppliers | Lưu trữ thông tin sản phẩm công nghệ và danh mục kinh doanh. |
+| **Kho D4** | Kho Đánh giá Phản hồi | Khách hàng, Quản lý CRM | Bảng Feedbacks | Lưu trữ nội dung đánh giá 1-5 sao và phản hồi từ phía doanh nghiệp. |
+| **Kho D5** | Kho Khảo sát & Ý kiến thị trường | Quản lý CRM, KH | Surveys, SurveyResponses | Lưu trữ các bài khảo sát sản phẩm mới và kết quả phản hồi của khách hàng. |
 
 ---
 
 ## PHẦN III: THIẾT KẾ HỆ THỐNG THÔNG TIN (10 ĐIỂM)
 
-### 1. Thiết kế Cơ sở Dữ liệu & Bảng Từ điển Dữ liệu (Data Dictionary)
+### 1. Thiết kế Cơ sở Dữ liệu Quan hệ Thực thể & Bảng Từ điển Dữ liệu (5 điểm)
+
+Dựa trên 5 kho dữ liệu D1 – D5 đã phân tích ở sơ đồ DFD mức đỉnh, Cơ sở dữ liệu của Hệ thống Thông tin Doanh nghiệp SGU Tech được chuẩn hóa đạt dạng chuẩn 3 (3NF) gồm 8 bảng quan hệ thực thể chặt chẽ:
+
+![Lược đồ CSDL Quan hệ Thực thể ERD](images/erd_diagram.png)
+
+*Hình 3.1: Lược đồ Cơ sở Dữ liệu Quan hệ Thực thể (Relational Schema / ERD) Chuẩn hóa 3NF*
 
 Hệ thống được thiết kế chuẩn hóa gồm **9 bảng quan hệ chặt chẽ**:
 
@@ -315,31 +274,56 @@ Hệ thống được thiết kế chuẩn hóa gồm **9 bảng quan hệ chặ
 
 ---
 
-### 2. Thiết kế Giao diện & Giải thích Chi tiết Chức năng Phần mềm (Mục I.3.b - 5 điểm)
+### 2. Thiết kế Giao diện, Hình ảnh Minh chứng và Giới thiệu Chi tiết Chức năng (Mục I.3.b - 5 điểm)
 
-Hệ thống được thiết kế theo kiến trúc **tách biệt hoàn toàn (Strict Role Separation)** giữa Cổng Quản trị nội bộ và Cổng Khách hàng, tuân thủ chuẩn giao diện phần mềm doanh nghiệp hiện đại (Enterprise SaaS):
+Hệ thống được thiết kế theo kiến trúc chuẩn doanh nghiệp công nghệ hiện đại (Enterprise Architecture), lấy cảm hứng từ phong cách tập đoàn VNG Corporation với tông màu thương hiệu cam công nghệ (`#FF5B00`), xanh doanh nghiệp (`#1E3A8A`), bố cục thẻ card thoáng đạt, trực quan và **tách biệt hoàn toàn (Strict Role Separation)** giữa các vai trò:
 
-1. **Giao diện Đăng nhập Nội bộ (`login.html`) & Đăng nhập/Đăng ký Khách hàng (`customer_login.html`):**
-   - **Tách biệt cổng truy cập:** Nhân sự nội bộ (`Admin`, `CRM Manager`) đăng nhập tại `login.html`; Khách hàng mua sắm đăng nhập hoặc tự đăng ký tài khoản tại `customer_login.html` (không hiển thị bất kỳ liên kết nào dẫn vào trang quản trị nội bộ).
-   - **Cơ chế hoạt động:** Hỗ trợ nhấn phím `Enter` tại ô tài khoản/mật khẩu hoặc nhấn nút `Đăng nhập`. Backend kiểm tra mật khẩu mã hóa `BCrypt`, kiểm tra trạng thái khóa (`IsActive`) và tự động điều hướng theo đúng `RoleName`.
+#### 1. Giao diện Phân hệ Quản trị Hệ thống - Admin Server (`admin.html` - Mục II.2):
+* **Nguyên tắc thiết kế tách biệt:** Giao diện Admin Server hoàn toàn tách biệt với giao diện của Quản lý Nhân sự (HR), Quản lý Kho (Warehouse), Quản lý Bán hàng (Sales) và Người Quản lý Khách hàng (Manager). Chức năng xem/tìm kiếm/lọc sản phẩm và nhà cung cấp đã được lược bỏ khỏi Admin theo đúng yêu cầu đề bài.
+* **Chức năng thực hiện:** Admin quản lý danh sách toàn bộ tài khoản; bảng quản trị thông minh gộp thông tin người dùng vào cột định danh chuyên nghiệp; hỗ trợ Thêm mới account (kèm phân quyền), Phân quyền trực tiếp bằng Dropdown phân vai trò (`PUT /api/admin/accounts/{id}/role`), Khóa/Mở khóa tài khoản ngay lập tức và Xóa tài khoản an toàn toàn vẹn dữ liệu.
 
-2. **Giao diện Phân hệ Quản trị Hệ thống - Admin Server (`admin.html` - Mục II.2):**
-   - **Tách biệt hoàn toàn:** Giao diện của Admin Server tách biệt hoàn toàn với giao diện của quản lý nhân sự (`HR`), quản lý kho (`Warehouse`), quản lý bán hàng (`Sales`) và người quản lý khách hàng (`Manager`). Chức năng xem/lọc sản phẩm, nhà cung cấp được lược bỏ khỏi Admin Server theo đúng yêu cầu đề bài.
-   - **Tab 1 - Thêm, Xóa & Phân quyền Account:** Hiển thị thống kê số lượng Account, biểu mẫu trực tiếp thêm Account mới kèm phân quyền, thanh tìm kiếm/lọc theo quyền (`Admin`, `Manager`, `Customer`, `HR`, `Warehouse`, `Sales`) và bảng quản lý Account cho phép **Phân quyền trực tiếp** (`PUT /api/admin/accounts/{id}/role`), **Khóa / Mở khóa Account** và **Xóa Account**.
-   - **Tab 2 - Danh mục Quyền & Phân tách Hệ thống:** Hiển thị bảng ma trận phân tách 6 nhóm quyền và nguyên tắc tách biệt giao diện Admin Server với các phân hệ nghiệp vụ.
+![Giao diện Admin Server](images/ui_admin_server.jpg)
+*Hình 3.2: Giao diện Phân hệ Quản trị Hệ thống - Admin Server (Quản lý tài khoản, phân quyền, khóa và xóa)*
 
-3. **Giao diện Người quản lý (`manager_crm.html` - Mục III.4.1):**
-   - **Tab 1 - Thêm, Xóa & Khóa TK Khách hàng:** Thực hiện đầy đủ 3 chức năng: **(1) Thêm một khách hàng mới**, **(2) Xóa khách hàng**, **(3) Khóa tài khoản khách hàng** (hoặc mở khóa), kèm bộ lọc theo nhóm tuổi và sở thích.
-   - **Tab 2 - Tiếp nhận phản hồi khách hàng:** Thực hiện chức năng **(4) Tiếp nhận phản hồi của khách hàng**, xem thống kê điểm đánh giá 1–5 sao và gửi câu trả lời giải đáp tới khách hàng.
-   - **Tab 3 - Báo cáo KH: Độ tuổi & Sở thích:** Thực hiện chức năng **(5) Báo cáo về khách hàng, tỷ lệ độ tuổi, sở thích** với 2 biểu đồ `Chart.js` (Tỷ lệ Độ tuổi `<20`, `20-30`, `>30` và Tỷ lệ Sở thích `Gaming`, `Văn phòng`, `Đồ họa`, `Lập trình`) cùng bảng chi tiết.
-   - **Tab 4 - Tạo khảo sát & Gửi đến TK KH:** Thực hiện chức năng **(6) Tạo bảng khảo sát và gửi đến tài khoản khách hàng**, cho phép chọn danh sách tài khoản khách hàng nhận khảo sát và theo dõi số lượng tài khoản đã nhận.
-   - **Tab 5 - Thống kê kết quả khảo sát:** Thực hiện chức năng **(7) Thống kê kết quả khảo sát** trên một tab độc lập với biểu đồ Tỷ lệ ý định mua, Phân bố điểm 1–5 và bảng chi tiết câu trả lời của từng tài khoản khách hàng.
+#### 2. Giao diện Phân hệ Người Quản lý CRM (`manager_crm.html` - Mục III.4.1):
+Thực hiện trọn vẹn 7 chức năng theo đúng yêu cầu của Người quản lý:
+1. **Thêm một khách hàng mới:** Form thêm khách hàng nhập họ tên, username, mật khẩu, SĐT, email, độ tuổi, giới tính và sở thích tiêu dùng.
+2. **Xóa khách hàng:** Nút xóa an toàn, dọn dẹp các ràng buộc khóa ngoại liên quan.
+3. **Khóa tài khoản khách hàng:** Nút khóa/mở khóa tức thì trạng thái `IsActive` để chặn đăng nhập khi có vi phạm.
+4. **Tiếp nhận phản hồi của khách hàng:** Theo dõi đánh giá 1-5 sao của khách hàng theo từng mã sản phẩm; nhập nội dung giải đáp chính thức từ quản lý.
+5. **Báo cáo khách hàng, tỷ lệ độ tuổi & sở thích:** Tự động thống kê với 2 biểu đồ trực quan Chart.js (Độ tuổi: `<20`, `20-30`, `>30`; Sở thích: `Gaming`, `Văn phòng`, `Đồ họa`, `Lập trình`).
+6. **Tạo bảng khảo sát gửi đến TK khách hàng:** Phát hành bài khảo sát kèm mô tả, giá dự kiến và thời hạn; phân phối tự động tới tài khoản khách hàng.
+7. **Thống kê kết quả khảo sát:** Tab độc lập hiển thị biểu đồ phân bố điểm quan tâm 1-5 sao, tỷ lệ ý định mua sắm và bảng chi tiết câu trả lời.
 
-4. **Giao diện Khách hàng (`customer_login.html` & `user.html` - Mục III.4.3):**
-   - **Chức năng (1) Đăng ký tài khoản khách hàng & (2) Đăng nhập (`customer_login.html`):** Cho phép khách hàng đăng ký tài khoản mới và đăng nhập vào cổng khách hàng tách biệt.
-   - **Tab 1 - (4) Gửi phản hồi về sản phẩm (`user.html`):** Biểu mẫu gửi phản hồi trực tiếp về sản phẩm (chọn sản phẩm, chấm 1–5 sao, nhập nhận xét), danh sách sản phẩm và bảng theo dõi phản hồi kèm giải đáp từ Người quản lý.
-   - **Tab 2 - (5) Nhận khảo sát & Thực hiện (`user.html`):** Hiển thị danh sách các bảng khảo sát do Người quản lý gửi đến tài khoản khách hàng, nút **Thực hiện khảo sát** và kết quả đã trả lời của khách hàng.
-   - **Tab 3 - (3) Chỉnh sửa thông tin (`user.html`):** Cho phép khách hàng chỉnh sửa Họ tên, Số điện thoại, Email, Độ tuổi, Giới tính, Sở thích và Địa chỉ.
+![Giao diện Người Quản lý CRM](images/ui_manager_crm.png)
+*Hình 3.3: Giao diện Người Quản lý CRM (Quản lý khách hàng, theo dõi chỉ số và thực hiện 7 nghiệp vụ CRM)*
+
+#### 3. Giao diện Trang chủ Cổng Khách hàng & Cổng Đăng nhập / Đăng ký (`user.html` & `customer_login.html`):
+* **Trang chủ phong cách VNG Corporation:** Hero Banner nhận diện thương hiệu công nghệ hiện đại; bộ 3 Thẻ điều hướng danh tiếng (Sản phẩm - Products, Khảo sát - People, Đánh giá - Impacts) giúp khách hàng truy cập nhanh các dịch vụ.
+* **Đăng ký & Đăng nhập tối giản:** Giao diện đăng nhập và đăng ký được thiết kế riêng biệt tại `customer_login.html`, form tinh gọn, trực quan, hỗ trợ khách hàng tạo tài khoản chỉ trong vài giây.
+
+![Giao diện Trang chủ Cổng Khách hàng](images/ui_guide_user_full.png)
+*Hình 3.4: Giao diện Trang chủ Cổng Khách hàng SGU Tech Store (Thiết kế phong cách VNG với 3 thẻ điều hướng thương hiệu)*
+
+![Cổng Đăng nhập & Đăng ký Khách hàng](images/ui_guide_cust_login.png)
+*Hình 3.5: Cổng Đăng nhập & Đăng ký Khách hàng tối giản, chuyên nghiệp*
+
+#### 4. Giao diện Gửi Phản hồi Sản phẩm & Bộ lọc Thông minh (`user.html` - Mục III.4.3 - Chức năng 4):
+* **Gửi đánh giá chất lượng:** Khách hàng chọn sản phẩm, chấm điểm 1–5 sao và nhập nhận xét chi tiết.
+* **Bộ lọc phản hồi thông minh (Smart Filter Toolbar):** Thay thế hoàn toàn dropdown truyền thống bằng thanh công cụ tìm kiếm trực tiếp + các nút lọc danh mục (Laptop, Màn hình, Bàn phím, Linh kiện) + nút lọc đánh giá 5★ và phản hồi đã được Quản lý giải đáp.
+
+![Giao diện Gửi phản hồi sản phẩm và Bộ lọc thông minh](images/ui_customer_feedback.jpg)
+*Hình 3.6: Giao diện Gửi phản hồi sản phẩm và Bộ lọc đánh giá thông minh*
+
+#### 5. Biểu mẫu Thực hiện Khảo sát 5 Tiêu chí & Chỉnh sửa Thông tin Cá nhân (`user.html` - Mục III.4.3 - Chức năng 3 & 5):
+* **Phiếu khảo sát thị trường 5 chiều chuyên sâu:** Gồm 5 tiêu chí khảo sát toàn diện: (1) Thang điểm quan tâm 1-5 sao dạng Card tương tác; (2) Đánh giá mức giá (Rẻ, Hợp lý, Hơi cao, Quá đắt); (3) Chọn tính năng mong đợi dạng thẻ Chip; (4) Ý định mua & Thời điểm xuống tiền; (5) Mức giá sẵn sàng chi trả kèm góp ý chi tiết.
+* **Chỉnh sửa thông tin tài khoản:** Khách hàng dễ dàng xem thẻ thành viên và cập nhật Họ tên, SĐT, Email, Tuổi, Giới tính, Sở thích và Địa chỉ.
+
+![Biểu mẫu Khảo sát sản phẩm mới](images/ui_customer_survey.jpg)
+*Hình 3.7: Biểu mẫu Khảo sát sản phẩm mới với 5 tiêu chí thăm dò thị trường chuyên nghiệp*
+
+![Giao diện Chỉnh sửa thông tin hồ sơ cá nhân](images/ui_customer_profile.jpg)
+*Hình 3.8: Giao diện Chỉnh sửa thông tin hồ sơ cá nhân của khách hàng*
 
 ---
 
@@ -389,23 +373,58 @@ Doanh nghiệp xây dựng quy chế sao lưu an toàn CSDL trên Microsoft SQL 
   - Mở thư mục `/Frontend_Admin` bằng Visual Studio Code.
   - Chuột phải vào file `login.html`, chọn **Open with Live Server** (chạy tại cổng 5500).
 
-### 3. Hướng dẫn Sử dụng Chi tiết Theo Vai trò
-1. **Dành cho Quản trị viên (Admin):**
-   - Đăng nhập tại `login.html` với tài khoản `admin` / `123456`.
-   - Xem tổng quan các chỉ số KPI doanh nghiệp, kiểm tra danh mục sản phẩm và nhà cung cấp.
-   - Quản lý tài khoản: Thêm tài khoản mới, chọn quyền, bấm nút **Khóa TK** để khóa người dùng vi phạm, bấm **Xóa** để xóa tài khoản.
-2. **Dành cho Người quản lý CRM (Manager):**
-   - Đăng nhập tại `login.html` với tài khoản `quanly` / `123456`.
-   - Tab 1: Quản lý khách hàng, theo dõi trạng thái hoạt động.
-   - Tab 2: Xem danh sách phản hồi, phân tích biểu đồ hài lòng 1–5 sao. Bấm nút **Phản hồi** để giải đáp bình luận của khách hàng.
-   - Tab 3: Xem báo cáo thống kê khách hàng theo nhóm độ tuổi và cơ cấu sở thích tiêu dùng.
-   - Tab 4: Tạo bài khảo sát thăm dò thị trường (đặt tên sản phẩm, giá dự kiến, thời hạn). Bấm nút **Thống kê** để xem chi tiết kết quả.
-3. **Dành cho Khách hàng (Customer):**
-   - Đăng nhập hoặc đăng ký tại `customer_login.html` (Mẫu: `khachhang1` / `123456`).
-   - Tab 1: Xem danh mục sản phẩm, bấm **Đánh giá & Xem nhận xét** để chấm sao và viết cảm nghĩ.
-   - Tab 2: Xem lại câu trả lời chính thức từ Quản lý CRM.
-   - Tab 3: Làm bài khảo sát sản phẩm chuẩn bị ra mắt.
-   - Tab 4: Cập nhật thông tin cá nhân.
+### 3. Hướng dẫn Sử dụng Chi tiết Theo Vai trò (Minh họa 100% bằng Hình ảnh Thực tế của Đồ án)
+
+Dưới đây là tài liệu hướng dẫn vận hành chi tiết cho 3 nhóm đối tượng người dùng, minh họa bằng ảnh chụp thực tế từ các phân hệ của đồ án:
+
+#### 3.1. Hướng dẫn Vận hành Dành cho Quản trị viên (Admin Server):
+* **Bước 1 - Đăng nhập nội bộ:** Quản trị viên mở trang `login.html`, nhập tài khoản `admin` và mật khẩu `123456`. Hệ thống kiểm tra mật khẩu mã hóa BCrypt và điều hướng vào Cổng Quản trị.
+
+![Cổng Đăng nhập Quản trị Nội bộ](images/ui_guide_login.png)
+*Hình 4.1: Cổng Đăng nhập Hệ thống Quản trị Nội bộ dành riêng cho Admin và Quản lý*
+
+* **Bước 2 - Thao tác Quản trị Tài khoản & Phân quyền:** Trên giao diện `admin.html`, Quản trị viên theo dõi 4 thẻ chỉ số KPI, bấm nút "+ Thêm tài khoản" để cấp tài khoản mới, chọn quyền trực tiếp từ Dropdown (Admin, Manager, Customer, HR, Warehouse, Sales), bấm "Khóa" để tạm ngưng truy cập hoặc bấm "Xóa Account" để thu hồi tài khoản.
+
+![Giao diện Tác nghiệp Admin Server](images/ui_guide_admin.png)
+*Hình 4.2: Giao diện Tác nghiệp của Admin Server — Quản lý Danh sách Tài khoản & Phân quyền trực tiếp*
+
+#### 3.2. Hướng dẫn Vận hành Dành cho Người Quản lý (CRM Manager):
+* **Bước 1 - Đăng nhập phân hệ CRM:** Người quản lý đăng nhập tại `login.html` với tài khoản `quanly` / `123456`. Hệ thống tự động phân luồng và mở giao diện `manager_crm.html`.
+* **Bước 2 - Thực hiện 7 Nghiệp vụ CRM:**
+  - *Tab 1 (Hồ sơ Khách hàng):* Thực hiện: (1) Bấm nút "+ Thêm một khách hàng mới" để nhập hồ sơ thành viên; (2) Bấm "Xóa" để xóa khách hàng; (3) Bấm "Khóa" để chặn đăng nhập tài khoản vi phạm.
+  - *Tab 2 (Tiếp nhận Phản hồi):* (4) Xem phản hồi đánh giá sản phẩm 1–5 sao của khách hàng, nhập câu trả lời giải đáp chính thức từ doanh nghiệp.
+  - *Tab 3 (Báo cáo Nhân khẩu học):* (5) Xem biểu đồ tỷ lệ độ tuổi (<20, 20-30, >30) và tỷ lệ sở thích (Gaming, Văn phòng, Đồ họa, Lập trình).
+  - *Tab 4 (Khảo sát Thị trường):* (6) Bấm "+ Tạo khảo sát mới", nhập tên sản phẩm, giá dự kiến, thời hạn kết thúc để tự động phân phối phiếu khảo sát tới tài khoản khách hàng.
+  - *Tab 5 (Thống kê Kết quả):* (7) Theo dõi trực quan tỷ lệ ý định mua sắm, điểm số quan tâm trung bình và danh sách ý kiến đóng góp của khách hàng.
+
+![Giao diện Người Quản lý CRM](images/ui_manager_crm.png)
+*Hình 4.3: Giao diện Người Quản lý CRM — Thực hiện 7 nghiệp vụ quản lý khách hàng và thống kê*
+
+#### 3.3. Hướng dẫn Sử dụng Dành cho Khách hàng (Customer Portal):
+* **Bước 1 - Đăng ký & Đăng nhập:** Khách hàng truy cập `customer_login.html` (tách biệt hoàn toàn cổng nội bộ). Khách hàng có thể tự đăng ký tài khoản với form tối giản hoặc đăng nhập bằng tài khoản `khachhang1` / `123456`.
+
+![Cổng Đăng nhập và Đăng ký Khách hàng](images/ui_guide_cust_login.png)
+*Hình 4.4: Cổng Đăng nhập và Đăng ký Tài khoản Khách hàng SGU Tech Store*
+
+* **Bước 2 - Trải nghiệm Trang chủ SGU Tech Store:** Giao diện trang chủ `user.html` được thiết kế theo phong cách doanh nghiệp công nghệ VNG với Hero Banner nhận diện và 3 Thẻ điều hướng danh tiếng (Products - People - Impacts).
+
+![Giao diện Trang chủ Cổng Khách hàng](images/ui_guide_user_full.png)
+*Hình 4.5: Giao diện Trang chủ Cổng Khách hàng SGU Tech Store (Phong cách Tập đoàn VNG)*
+
+* **Bước 3 - Gửi Đánh giá Sản phẩm & Bộ lọc Thông minh:** Khách hàng chọn sản phẩm, chấm 1–5 sao và gửi nhận xét. Bảng theo dõi phản hồi tích hợp Smart Filter Toolbar giúp lọc nhanh theo danh mục (Laptop, Màn hình, Bàn phím, Linh kiện) hoặc lọc đánh giá 5★ và xem lời giải đáp từ Người quản lý.
+
+![Thao tác Gửi phản hồi sản phẩm](images/ui_customer_feedback.jpg)
+*Hình 4.6: Thao tác Gửi phản hồi sản phẩm và Theo dõi lời giải đáp từ Người quản lý*
+
+* **Bước 4 - Thực hiện Khảo sát Sản phẩm Mới 5 Tiêu chí:** Khi doanh nghiệp phát hành khảo sát, khách hàng bấm "Thực hiện khảo sát" để tham gia đánh giá theo 5 tiêu chí: Điểm quan tâm 1-5, Đánh giá mức giá, Chọn tính năng mong đợi dạng thẻ Chip, Ý định mua sắm & thời điểm, Mức giá sẵn sàng chi trả kèm góp ý.
+
+![Thao tác Thực hiện khảo sát](images/ui_customer_survey.jpg)
+*Hình 4.7: Thao tác Thực hiện bảng khảo sát sản phẩm mới với 5 tiêu chí thăm dò thị trường*
+
+* **Bước 5 - Chỉnh sửa Thông tin Hồ sơ Cá nhân:** Khách hàng xem thẻ thành viên và cập nhật Họ tên, SĐT, Email, Tuổi, Giới tính, Sở thích và Địa chỉ. Dữ liệu này tự động đồng bộ sang báo cáo nhân khẩu học của Người quản lý CRM.
+
+![Chỉnh sửa thông tin hồ sơ cá nhân](images/ui_customer_profile.jpg)
+*Hình 4.8: Thao tác Chỉnh sửa thông tin hồ sơ cá nhân của khách hàng*
 
 ---
 

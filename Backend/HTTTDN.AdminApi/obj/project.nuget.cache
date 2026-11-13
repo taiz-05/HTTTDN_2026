@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "G1USRRH7pqU=",
+  "dgSpecHash": "OwYM6PPcuGc=",
   "success": true,
-  "projectFilePath": "d:\\HTTTDN_2026\\Backend\\HTTTDN.AdminApi\\HTTTDN.AdminApi.csproj",
+  "projectFilePath": "D:\\HTTTDN_2026\\Backend\\HTTTDN.AdminApi\\HTTTDN.AdminApi.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Admin\\.nuget\\packages\\azure.core\\1.35.0\\azure.core.1.35.0.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\azure.identity\\1.10.3\\azure.identity.1.10.3.nupkg.sha512",
