@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\HTTTDN_2026\\Backend\\HTTTDN.AdminApi\\HTTTDN.AdminApi.csproj": {}
+    "d:\\HTTTDN_2026\\Backend\\HTTTDN.AdminApi\\HTTTDN.AdminApi.csproj": {}
   },
   "projects": {
-    "D:\\HTTTDN_2026\\Backend\\HTTTDN.AdminApi\\HTTTDN.AdminApi.csproj": {
+    "d:\\HTTTDN_2026\\Backend\\HTTTDN.AdminApi\\HTTTDN.AdminApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\HTTTDN_2026\\Backend\\HTTTDN.AdminApi\\HTTTDN.AdminApi.csproj",
+        "projectUniqueName": "d:\\HTTTDN_2026\\Backend\\HTTTDN.AdminApi\\HTTTDN.AdminApi.csproj",
         "projectName": "HTTTDN.AdminApi",
-        "projectPath": "D:\\HTTTDN_2026\\Backend\\HTTTDN.AdminApi\\HTTTDN.AdminApi.csproj",
+        "projectPath": "d:\\HTTTDN_2026\\Backend\\HTTTDN.AdminApi\\HTTTDN.AdminApi.csproj",
         "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-        "outputPath": "D:\\HTTTDN_2026\\Backend\\HTTTDN.AdminApi\\obj\\",
+        "outputPath": "d:\\HTTTDN_2026\\Backend\\HTTTDN.AdminApi\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config"

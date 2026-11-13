@@ -45,8 +45,37 @@ function switchCustomerTab(sectionId, btn) {
     document.querySelectorAll(".cus-section").forEach(sec => sec.style.display = "none");
     document.querySelectorAll(".cus-nav-btn").forEach(b => b.classList.remove("active"));
     const target = document.getElementById(sectionId);
-    if (target) target.style.display = "block";
+    if (target) {
+        target.style.display = "block";
+        target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
     if (btn) btn.classList.add("active");
+
+    if (sectionId === "secSurveys") {
+        setTimeout(loadMySurveys, 30);
+    } else if (sectionId === "secFeedback") {
+        setTimeout(() => loadCommunityFeedbacks(false), 30);
+    } else if (sectionId === "secProfile") {
+        setTimeout(refreshProfileData, 30);
+    }
+}
+
+async function refreshProfileData() {
+    if (!currentCus) return;
+    try {
+        const prof = await (await fetch(`${CUS_API}/profile/${currentCus.accountId}`)).json();
+        if (document.getElementById("pFullName")) document.getElementById("pFullName").value = prof.fullName || currentCus.fullName;
+        if (document.getElementById("pEmailDisplay") && prof.email) document.getElementById("pEmailDisplay").value = prof.email;
+        if (document.getElementById("pPhone")) document.getElementById("pPhone").value = prof.phone || "";
+        if (document.getElementById("pAge")) document.getElementById("pAge").value = prof.age || 20;
+        if (document.getElementById("pGender")) document.getElementById("pGender").value = prof.gender || "Nam";
+        if (document.getElementById("pAddress")) document.getElementById("pAddress").value = prof.address || "";
+        if (document.getElementById("pInterest")) document.getElementById("pInterest").value = prof.interest || "Gaming";
+        if (document.getElementById("profCardInterestTag")) document.getElementById("profCardInterestTag").innerText = prof.interest || "Gaming";
+        if (document.getElementById("profCardAgeTag")) document.getElementById("profCardAgeTag").innerText = (prof.age || 20) + " tuổi";
+    } catch (e) {
+        console.error("Lỗi refreshProfileData:", e);
+    }
 }
 
 async function initCustomerPortal() {
@@ -69,6 +98,7 @@ async function initCustomerPortal() {
         if (document.getElementById("pAddress")) document.getElementById("pAddress").value = prof.address || "";
         if (document.getElementById("pInterest")) document.getElementById("pInterest").value = prof.interest || "Gaming";
         if (document.getElementById("profCardInterestTag")) document.getElementById("profCardInterestTag").innerText = prof.interest || "Gaming";
+        if (document.getElementById("profCardAgeTag")) document.getElementById("profCardAgeTag").innerText = (prof.age || 20) + " tuổi";
     } catch (e) {
         console.error("Lỗi nạp hồ sơ khách hàng:", e);
     }
@@ -85,7 +115,6 @@ async function refreshCustomerDataSilently() {
             loadMySurveys()
         ]);
 
-        // Cập nhật micro-stats trên Member Card
         const myFeedbacks = allFeedbacksCache.filter(f => f.accountId === currentCus.accountId);
         if (document.getElementById("profStatReviews")) {
             document.getElementById("profStatReviews").innerText = myFeedbacks.length;
@@ -96,7 +125,6 @@ async function refreshCustomerDataSilently() {
             document.getElementById("profStatSurveys").innerText = myCompletedSurveys.length;
         }
 
-        // Nếu đang mở Pop-up đánh giá thì cập nhật live luôn
         if (document.getElementById("reviewModal")?.classList.contains("show") && selectedModalProductId) {
             await loadModalProductReviews(selectedModalProductId);
         }
@@ -106,7 +134,7 @@ async function refreshCustomerDataSilently() {
 }
 
 // =========================================================
-// 1. SHOWCASE SẢN PHẨM & BỘ LỌC DANH MỤC
+// 1. GỬI PHẢN HỒI VỀ SẢN PHẨM & DANH MỤC SẢN PHẨM
 // =========================================================
 async function loadProductShowcase() {
     try {
@@ -120,9 +148,44 @@ async function loadProductShowcase() {
             filterSelect.value = currentSelected;
         }
 
+        const directSelect = document.getElementById("directFbProduct");
+        if (directSelect) {
+            const curVal = directSelect.value;
+            directSelect.innerHTML = allProductsCache.map(p =>
+                `<option value="${p.productId}">${p.productName} (${Number(p.price).toLocaleString("vi-VN")} ₫)</option>`
+            ).join("");
+            if (curVal) directSelect.value = curVal;
+        }
+
         filterShowcaseProducts();
     } catch (e) {
         console.error("Lỗi loadProductShowcase:", e);
+    }
+}
+
+async function submitDirectFeedback() {
+    const productId = Number(document.getElementById("directFbProduct")?.value || 0);
+    const rating = Number(document.getElementById("directFbRating")?.value || 5);
+    const comment = (document.getElementById("directFbComment")?.value || "").trim();
+
+    if (!productId) return alert("Vui lòng chọn sản phẩm cần phản hồi!");
+    if (!comment) return alert("Vui lòng nhập nội dung phản hồi về sản phẩm!");
+
+    try {
+        const res = await fetch(`${CUS_API}/feedbacks/${currentCus.accountId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ productId, rating, comment })
+        });
+        const data = await res.json();
+        if (!res.ok) return alert(data.message || "Lỗi gửi phản hồi.");
+
+        alert(data.message || "Đã gửi phản hồi về sản phẩm thành công!");
+        document.getElementById("directFbComment").value = "";
+        await refreshCustomerDataSilently();
+        notifyDataChanged("feedbacks");
+    } catch (err) {
+        alert("Lỗi kết nối khi gửi phản hồi: " + err.message);
     }
 }
 
@@ -157,7 +220,6 @@ function renderProductCards(list) {
     if (list.length === 0) {
         gallery.innerHTML = `
             <div style="grid-column: 1/-1; text-align:center; padding:40px; background:#ffffff; border:1px solid var(--brand-border); border-radius:var(--radius-lg); color:var(--text-muted);">
-                <div style="font-size:32px; margin-bottom:8px;">🔍</div>
                 <div style="font-weight:700; font-size:15px; color:var(--text-primary);">Không tìm thấy sản phẩm phù hợp</div>
                 <div style="font-size:13px; margin-top:4px;">Vui lòng thử chọn danh mục khác hoặc nhập từ khóa tìm kiếm mới.</div>
             </div>
@@ -191,12 +253,11 @@ function renderProductCards(list) {
                             <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                             <span>${Number(p.avgRating ?? p.averageRating ?? 5).toFixed(1)} / 5</span>
                         </span>
-                        <span style="font-size:11.5px; color:var(--text-muted);">(${p.reviewCount ?? p.totalReviews ?? 0} đánh giá)</span>
+                        <span style="font-size:11.5px; color:var(--text-muted);">(${p.reviewCount ?? p.totalReviews ?? 0} phản hồi)</span>
                     </div>
                 </div>
                 <button class="btn btn-primary" style="width:100%; padding:9px; font-size:13px; display:inline-flex; align-items:center; justify-content:center; gap:6px;" onclick="openReviewModal(${p.productId})">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                    <span>Đánh giá & Xem nhận xét</span>
+                    <span>Gửi phản hồi về sản phẩm</span>
                 </button>
             </div>
         </div>
@@ -204,9 +265,6 @@ function renderProductCards(list) {
     }).join("");
 }
 
-// =========================================================
-// 2. GỬI ĐÁNH GIÁ SẢN PHẨM & CỘNG ĐỒNG NHẬN XÉT
-// =========================================================
 async function openReviewModal(productId) {
     const prod = allProductsCache.find(p => p.productId === productId) || allProductsCache[0];
     if (!prod) return;
@@ -222,12 +280,6 @@ async function openReviewModal(productId) {
     document.getElementById("reviewModal").classList.add("show");
 
     await loadModalProductReviews(prod.productId);
-}
-
-function openReviewModalFromFilter() {
-    const chosenId = Number(document.getElementById("filterReviewProduct")?.value || 0);
-    const targetId = chosenId > 0 ? chosenId : (allProductsCache[0]?.productId || 1);
-    openReviewModal(targetId);
 }
 
 function closeReviewModal() {
@@ -258,7 +310,7 @@ async function loadModalProductReviews(productId) {
 
         const box = document.getElementById("modalProductReviewsBox");
         if (list.length === 0) {
-            box.innerHTML = `<p style="font-size:13px; color:var(--text-muted); padding:10px 0;">Chưa có đánh giá nào cho sản phẩm này. Hãy là người đầu tiên nhận xét!</p>`;
+            box.innerHTML = `<p style="font-size:13px; color:var(--text-muted); padding:10px 0;">Chưa có phản hồi nào cho sản phẩm này.</p>`;
             return;
         }
 
@@ -277,7 +329,7 @@ async function loadModalProductReviews(productId) {
                 <div style="margin-top:5px; font-size:13px; color:var(--text-secondary); line-height:1.45;">"${f.comment}"</div>
                 ${f.adminReply ? `
                     <div class="review-reply-box" style="margin-top:8px;">
-                        <span style="font-weight:700; font-size:11.5px; text-transform:uppercase; letter-spacing:0.04em;">✓ Phản hồi từ Quản lý CRM:</span>
+                        <span style="font-weight:700; font-size:11.5px; text-transform:uppercase; letter-spacing:0.04em;">✓ Phản hồi từ Người quản lý:</span>
                         <div style="margin-top:3px;">${f.adminReply}</div>
                     </div>
                 ` : ''}
@@ -290,7 +342,7 @@ async function loadModalProductReviews(productId) {
 
 async function submitModalFeedback() {
     const comment = document.getElementById("modalFbComment").value.trim();
-    if (!comment) return alert("Vui lòng nhập nội dung nhận xét của bạn.");
+    if (!comment) return alert("Vui lòng nhập nội dung phản hồi của bạn.");
 
     const body = {
         productId: selectedModalProductId,
@@ -305,7 +357,7 @@ async function submitModalFeedback() {
             body: JSON.stringify(body)
         });
         const data = await res.json();
-        alert(data.message || "Đã gửi nhận xét phản hồi thành công!");
+        alert(data.message || "Đã gửi phản hồi về sản phẩm thành công!");
 
         document.getElementById("modalFbComment").value = "";
         closeReviewModal();
@@ -316,71 +368,177 @@ async function submitModalFeedback() {
     }
 }
 
+// BỘ LỌC ĐÁNH GIÁ THÔNG MINH (ENTERPRISE FILTER SUITE)
+let reviewFilterCategory = "";
+let reviewFilterRating = null;
+let reviewFilterRepliedOnly = false;
+
 async function loadCommunityFeedbacks(resetFilter = false) {
     try {
-        const filterEl = document.getElementById("filterReviewProduct");
-        if (resetFilter && filterEl) filterEl.value = "";
-        const prodId = filterEl ? filterEl.value : "";
-
-        const url = !prodId ? `${CUS_API}/all-feedbacks` : `${CUS_API}/all-feedbacks?productId=${prodId}`;
-        allFeedbacksCache = await (await fetch(url)).json();
-
-        const tbody = document.getElementById("myFeedbackTable");
-        if (!tbody) return;
-
-        if (allFeedbacksCache.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-muted);">Chưa có đánh giá nào.</td></tr>`;
-            return;
+        if (resetFilter) {
+            reviewFilterCategory = "";
+            reviewFilterRating = null;
+            reviewFilterRepliedOnly = false;
+            const searchEl = document.getElementById("reviewSearchInput");
+            if (searchEl) searchEl.value = "";
+            document.querySelectorAll(".review-filter-toolbar .filter-pill").forEach(p => p.classList.remove("active"));
+            const pillAll = document.getElementById("pillReviewCatAll");
+            if (pillAll) pillAll.classList.add("active");
         }
 
-        tbody.innerHTML = allFeedbacksCache.map(f => {
-            const isMine = f.accountId === currentCus.accountId;
-            return `
-            <tr>
-                <td><img src="${f.productImage || DEFAULT_IMG}" class="prod-thumb" alt="${f.productName}" onerror="this.src='${DEFAULT_IMG}'"></td>
-                <td><b style="color:var(--text-primary);">${f.productName}</b></td>
-                <td>
-                    <b>${f.customerName}</b>
-                    ${isMine ? '<span class="badge badge-active" style="margin-left:4px; font-size:10.5px;">Của bạn</span>' : ''}
-                </td>
-                <td>
-                    <span class="star-rating-box">
-                        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                        <span>${f.rating}.0 / 5</span>
-                    </span>
-                </td>
-                <td>"${f.comment}"</td>
-                <td>
-                    ${f.adminReply ? `
-                        <div style="background:#eff6ff; border-left:3px solid #2563eb; padding:6px 10px; border-radius:3px; font-size:12.5px; color:#1e3a8a;">
-                            <b>Quản lý giải đáp:</b> ${f.adminReply}
-                        </div>
-                    ` : `<span style="color:var(--text-muted); font-size:12px;">Đang chờ phản hồi...</span>`}
-                </td>
-            </tr>
-            `;
-        }).join("");
+        const res = await fetch(`${CUS_API}/all-feedbacks`);
+        allFeedbacksCache = await res.json();
+        renderFilteredCommunityFeedbacks();
     } catch (e) {
         console.error("Lỗi loadCommunityFeedbacks:", e);
     }
 }
 
+function filterReviewByCategory(cat, btn) {
+    reviewFilterCategory = cat;
+    document.querySelectorAll(".review-filter-toolbar .filter-pill").forEach(p => {
+        if (p.id !== "pillReview5Star" && p.id !== "pillReviewReplied") p.classList.remove("active");
+    });
+    if (btn) btn.classList.add("active");
+    renderFilteredCommunityFeedbacks();
+}
+
+function filterReviewByRating(stars, btn) {
+    if (reviewFilterRating === stars) {
+        reviewFilterRating = null;
+        if (btn) btn.classList.remove("active");
+    } else {
+        reviewFilterRating = stars;
+        if (btn) btn.classList.add("active");
+    }
+    renderFilteredCommunityFeedbacks();
+}
+
+function filterReviewByReplied(btn) {
+    reviewFilterRepliedOnly = !reviewFilterRepliedOnly;
+    if (btn) btn.classList.toggle("active", reviewFilterRepliedOnly);
+    renderFilteredCommunityFeedbacks();
+}
+
+function filterCommunityReviewsLive() {
+    renderFilteredCommunityFeedbacks();
+}
+
+function resetReviewFilters() {
+    loadCommunityFeedbacks(true);
+}
+
+function renderFilteredCommunityFeedbacks() {
+    const tbody = document.getElementById("myFeedbackTable");
+    if (!tbody) return;
+
+    const kw = (document.getElementById("reviewSearchInput")?.value || "").trim().toLowerCase();
+
+    const filtered = allFeedbacksCache.filter(f => {
+        // Lọc theo danh mục sản phẩm
+        if (reviewFilterCategory) {
+            const prod = allProductsCache.find(p => p.productId === f.productId);
+            const cat = ((prod && prod.categoryName) || f.categoryName || f.productName || "").toLowerCase();
+            if (!cat.includes(reviewFilterCategory.toLowerCase())) return false;
+        }
+
+        // Lọc theo số sao
+        if (reviewFilterRating !== null && f.rating !== reviewFilterRating) {
+            return false;
+        }
+
+        // Lọc chỉ xem phản hồi đã có câu trả lời từ Quản lý
+        if (reviewFilterRepliedOnly && !f.adminReply) {
+            return false;
+        }
+
+        // Lọc theo từ khóa tìm kiếm
+        if (kw) {
+            const matchName = f.productName && f.productName.toLowerCase().includes(kw);
+            const matchUser = f.customerName && f.customerName.toLowerCase().includes(kw);
+            const matchComment = f.comment && f.comment.toLowerCase().includes(kw);
+            const matchReply = f.adminReply && f.adminReply.toLowerCase().includes(kw);
+            if (!matchName && !matchUser && !matchComment && !matchReply) return false;
+        }
+
+        return true;
+    });
+
+    const countBadge = document.getElementById("reviewFilterCountBadge");
+    if (countBadge) {
+        countBadge.innerText = `Đang hiển thị ${filtered.length} / ${allFeedbacksCache.length} phản hồi`;
+    }
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:28px; color:var(--text-muted); font-size:13px;">Không tìm thấy phản hồi nào phù hợp tiêu chí lọc.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(f => {
+        const isMine = f.accountId === currentCus.accountId;
+        return `
+        <tr>
+            <td><img src="${f.productImage || DEFAULT_IMG}" class="prod-thumb" alt="${f.productName}" onerror="this.src='${DEFAULT_IMG}'"></td>
+            <td><b style="color:var(--text-primary); font-size:13.5px;">${f.productName}</b></td>
+            <td>
+                <div style="font-weight:700; color:#0F172A;">${f.customerName}</div>
+                ${isMine ? '<span class="badge badge-customer" style="margin-top:2px; font-size:10px; padding:1px 6px;">Của bạn</span>' : ''}
+            </td>
+            <td>
+                <span class="star-rating-box">
+                    <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    <span>${f.rating}.0 / 5</span>
+                </span>
+            </td>
+            <td style="line-height:1.5;">"${f.comment}"</td>
+            <td>
+                ${f.adminReply ? `
+                    <div style="background:#FFF7ED; border-left:3px solid #FF5B00; padding:8px 12px; border-radius:6px; font-size:12.5px; color:#9A3412; line-height:1.5;">
+                        <div style="font-weight:800; font-size:11px; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:2px;">✓ Người quản lý CRM giải đáp:</div>
+                        <div>${f.adminReply}</div>
+                    </div>
+                ` : `<span style="color:var(--text-muted); font-size:12px;">Đang chờ bộ phận Quản lý tiếp nhận...</span>`}
+            </td>
+        </tr>
+        `;
+    }).join("");
+}
+
 // =========================================================
-// 3. KHẢO SÁT SẢN PHẨM MỚI (MỤC III.4.6 & 4.7)
+// 2. NHẬN ĐƯỢC KHẢO SÁT VÀ THỰC HIỆN
 // =========================================================
 async function loadMySurveys() {
     try {
         allSurveysCache = await (await fetch(`${CUS_API}/surveys/${currentCus.accountId}`)).json();
+
+        const totalCount = allSurveysCache.length;
+        const doneCount = allSurveysCache.filter(s => s.isCompleted).length;
+        const pendingCount = allSurveysCache.filter(s => !s.isCompleted && s.isActive && !s.isExpired).length;
+
+        if (document.getElementById("cusKpiTotalSurveys")) document.getElementById("cusKpiTotalSurveys").innerText = totalCount;
+        if (document.getElementById("cusKpiPendingSurveys")) document.getElementById("cusKpiPendingSurveys").innerText = pendingCount;
+        if (document.getElementById("cusKpiDoneSurveys")) document.getElementById("cusKpiDoneSurveys").innerText = doneCount;
+
+        const badge = document.getElementById("navSurveyPendingBadge");
+        if (badge) {
+            if (pendingCount > 0) {
+                badge.style.display = "inline-block";
+                badge.innerText = `${pendingCount} mới`;
+            } else {
+                badge.style.display = "none";
+            }
+        }
+
         const tbody = document.getElementById("mySurveyTable");
         if (!tbody) return;
 
         if (allSurveysCache.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">Hiện tại chưa có bài khảo sát nào.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-muted);">Hiện tại chưa có bảng khảo sát nào được gửi đến tài khoản của bạn.</td></tr>`;
             return;
         }
 
         tbody.innerHTML = allSurveysCache.map(s => {
-            let expireLabel = `<span class="badge badge-info">Không thời hạn</span>`;
+            let expireLabel = `<span class="badge badge-info">Còn hiệu lực</span>`;
             if (s.expiresAt) {
                 const d = new Date(s.expiresAt).toLocaleDateString("vi-VN");
                 expireLabel = s.isExpired
@@ -388,26 +546,42 @@ async function loadMySurveys() {
                     : `<span class="badge badge-info">Đến ngày ${d}</span>`;
             }
 
+            let myAnswerHtml = `<span style="color:#d97706; font-size:12px; font-weight:600;">Chưa thực hiện</span>`;
+            if (s.isCompleted && s.myResponse) {
+                myAnswerHtml = `
+                    <div style="font-size:12px; line-height:1.45;">
+                        <div><b>Điểm:</b> <span style="color:#1e40af; font-weight:700;">${s.myResponse.score}/5</span> &bull; <b>Ý định:</b> <span class="badge badge-info" style="font-size:10.5px;">${s.myResponse.buyingIntent}</span></div>
+                        <div style="color:#475569; margin-top:2px;"><i>"${s.myResponse.customerOpinion}"</i></div>
+                    </div>
+                `;
+            } else if (s.isCompleted) {
+                myAnswerHtml = `<span class="badge badge-active">Đã gửi kết quả</span>`;
+            }
+
             let actionHtml = "";
             if (s.isCompleted) {
-                actionHtml = `<span class="badge badge-active" style="padding:5px 12px; font-size:12px;">✓ Đã hoàn tất</span>`;
+                actionHtml = `<span class="badge badge-active" style="padding:5px 12px; font-size:12px;">✓ Đã thực hiện</span>`;
             } else if (!s.isActive) {
-                actionHtml = `<button class="btn btn-warning" disabled style="padding:4px 10px; font-size:12px;">Đang tạm khóa</button>`;
+                actionHtml = `<button class="btn btn-warning" disabled style="padding:4px 10px; font-size:12px;">Đã đóng</button>`;
             } else if (s.isExpired) {
                 actionHtml = `<button class="btn btn-warning" disabled style="padding:4px 10px; font-size:12px;">Đã hết hạn</button>`;
             } else {
-                actionHtml = `<button class="btn btn-success" style="padding:5px 12px; font-size:12px;" onclick="openSurveyModal(${s.surveyId})">Tham gia khảo sát</button>`;
+                actionHtml = `<button class="btn" style="padding:6px 16px; font-size:12px; border-radius:6px;" onclick="openSurveyModal(${s.surveyId})">Thực hiện khảo sát</button>`;
             }
 
             return `
             <tr>
+                <td><b>#${s.surveyId}</b></td>
                 <td>
                     <b style="font-size:13.5px; color:var(--text-primary);">${s.title}</b>
                     <div style="color:var(--text-muted); font-size:11.5px; margin-top:2px; line-height:1.4;">${s.description || ""}</div>
                 </td>
-                <td><b style="color:#1d4ed8;">${s.targetProduct}</b></td>
-                <td><b style="color:var(--text-primary); font-size:13.5px;">${Number(s.expectedPrice).toLocaleString("vi-VN")} ₫</b></td>
+                <td>
+                    <b style="color:#1d4ed8;">${s.targetProduct}</b>
+                    <div style="font-size:12px; color:#059669; font-weight:700; margin-top:2px;">${Number(s.expectedPrice).toLocaleString("vi-VN")} ₫</div>
+                </td>
                 <td>${expireLabel}</td>
+                <td>${myAnswerHtml}</td>
                 <td style="text-align:center;">${actionHtml}</td>
             </tr>
             `;
@@ -415,6 +589,36 @@ async function loadMySurveys() {
     } catch (e) {
         console.error("Lỗi loadMySurveys:", e);
     }
+}
+
+function selectSurveyScore(val, el) {
+    document.getElementById("svSelectedScore").value = val;
+    document.querySelectorAll("#svScoreButtonsGroup .survey-score-btn").forEach(b => b.classList.remove("active"));
+    if (el) el.classList.add("active");
+}
+
+function selectSurveyPriceEval(val, el) {
+    document.getElementById("svSelectedPriceEval").value = val;
+    document.querySelectorAll(".survey-choice-grid .survey-choice-card").forEach(c => {
+        if (c.onclick && c.onclick.toString().includes("selectSurveyPriceEval")) {
+            c.classList.remove("active");
+        }
+    });
+    if (el) el.classList.add("active");
+}
+
+function toggleSurveyChip(el) {
+    if (el) el.classList.toggle("active");
+}
+
+function selectSurveyIntent(val, el) {
+    document.getElementById("svSelectedIntent").value = val;
+    document.querySelectorAll(".survey-choice-grid .survey-choice-card").forEach(c => {
+        if (c.onclick && c.onclick.toString().includes("selectSurveyIntent")) {
+            c.classList.remove("active");
+        }
+    });
+    if (el) el.classList.add("active");
 }
 
 function openSurveyModal(surveyId) {
@@ -426,6 +630,31 @@ function openSurveyModal(surveyId) {
     document.getElementById("svModalDesc").innerText = sv.description || "";
     document.getElementById("svModalProduct").innerText = sv.targetProduct;
     document.getElementById("svModalPrice").innerText = Number(sv.expectedPrice).toLocaleString("vi-VN") + " ₫";
+    
+    // Đặt lại các giá trị mặc định cho bài khảo sát
+    document.getElementById("svSelectedScore").value = 5;
+    document.querySelectorAll("#svScoreButtonsGroup .survey-score-btn").forEach((b, idx) => {
+        b.classList.toggle("active", idx === 4);
+    });
+
+    document.getElementById("svSelectedPriceEval").value = "Giá rất hợp lý / Đáng đầu tư";
+    const priceCards = document.querySelectorAll(".survey-choice-grid .survey-choice-card");
+    priceCards.forEach((c, idx) => {
+        if (c.onclick && c.onclick.toString().includes("selectSurveyPriceEval")) {
+            c.classList.toggle("active", idx === 0);
+        }
+    });
+
+    document.getElementById("svSelectedIntent").value = "Đặt trước ngay đợt đầu (Pre-order)";
+    priceCards.forEach((c, idx) => {
+        if (c.onclick && c.onclick.toString().includes("selectSurveyIntent")) {
+            c.classList.toggle("active", idx === 4);
+        }
+    });
+
+    if (document.getElementById("svModalWillingPrice")) {
+        document.getElementById("svModalWillingPrice").value = Number(sv.expectedPrice).toLocaleString("vi-VN") + " ₫";
+    }
     document.getElementById("svModalOpinion").value = "";
 
     document.getElementById("surveyModal").classList.add("show");
@@ -436,18 +665,35 @@ function closeSurveyModal() {
 }
 
 async function submitModalSurvey() {
-    const score = Number(document.getElementById("svModalScore").value);
-    const buyingIntent = document.getElementById("svModalIntent").value;
-    const opinion = document.getElementById("svModalOpinion").value.trim() || "Mức giá hợp lý.";
+    const score = Number(document.getElementById("svSelectedScore")?.value || 5);
+    const intent = document.getElementById("svSelectedIntent")?.value || "Đặt trước ngay đợt đầu (Pre-order)";
+    const priceEval = document.getElementById("svSelectedPriceEval")?.value || "Giá rất hợp lý / Đáng đầu tư";
+    
+    const selectedChips = Array.from(document.querySelectorAll("#svChipsGroup .survey-chip-item.active"))
+        .map(c => c.getAttribute("data-val") || c.innerText.replace("✓", "").trim())
+        .filter(Boolean);
+    const chipText = selectedChips.length > 0 ? selectedChips.join(", ") : "Hiệu năng vượt trội, Pin trâu";
+
+    const willingPrice = document.getElementById("svModalWillingPrice")?.value.trim() || "";
+    const extraOpinion = document.getElementById("svModalOpinion")?.value.trim() || "";
+
+    // Đóng gói cấu trúc phản hồi chi tiết đa tiêu chí
+    let formattedOpinion = `[Đánh giá giá: ${priceEval}] [Tiêu chí mong đợi: ${chipText}]`;
+    if (willingPrice) formattedOpinion += ` [Giá sẵn sàng chi: ${willingPrice}]`;
+    if (extraOpinion) formattedOpinion += ` [Góp ý: ${extraOpinion}]`;
 
     try {
         const res = await fetch(`${CUS_API}/surveys/${selectedModalSurveyId}/submit/${currentCus.accountId}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ score, buyingIntent, customerOpinion: opinion })
+            body: JSON.stringify({
+                score,
+                buyingIntent: intent,
+                customerOpinion: formattedOpinion
+            })
         });
         const data = await res.json();
-        alert(data.message || "Cảm ơn bạn đã đóng góp ý kiến khảo sát!");
+        alert(data.message || "Đã gửi bảng khảo sát thành công! Cảm ơn ý kiến quý báu của bạn.");
         closeSurveyModal();
         await loadMySurveys();
         notifyDataChanged("surveys");
@@ -457,7 +703,7 @@ async function submitModalSurvey() {
 }
 
 // =========================================================
-// 4. CẬP NHẬT THÔNG TIN HỒ SƠ CÁ NHÂN (MỤC III.4.5)
+// 3. CHỈNH SỬA THÔNG TIN CÁ NHÂN
 // =========================================================
 async function updateProfile() {
     const fullName = document.getElementById("pFullName").value.trim();
@@ -487,9 +733,8 @@ async function updateProfile() {
             body: JSON.stringify(body)
         });
         const data = await res.json();
-        alert(data.message || "Đã lưu cập nhật thông tin cá nhân thành công!");
+        alert(data.message || "Đã lưu chỉnh sửa thông tin cá nhân thành công!");
 
-        // Cập nhật lại cache và hiển thị UI tức thì
         currentCus.fullName = fullName;
         localStorage.setItem("currentCustomer", JSON.stringify(currentCus));
 
@@ -499,6 +744,7 @@ async function updateProfile() {
         if (document.getElementById("cusWelcome")) document.getElementById("cusWelcome").innerText = fullName;
         if (document.getElementById("profCardFullName")) document.getElementById("profCardFullName").innerText = fullName;
         if (document.getElementById("profCardInterestTag")) document.getElementById("profCardInterestTag").innerText = interest;
+        if (document.getElementById("profCardAgeTag")) document.getElementById("profCardAgeTag").innerText = age + " tuổi";
 
         notifyDataChanged("customers");
     } catch (err) {

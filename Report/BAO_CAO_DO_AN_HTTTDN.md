@@ -115,14 +115,14 @@ Doanh nghiệp SGU Tech hoạt động phân phối thiết bị công nghệ. H
                                        |
     +----------------------------------+----------------------------------+
     |                                  |                                  |
-1.0 QUẢN TRỊ ADMIN             2.0 PHÂN HỆ CRM                 3.0 CỔNG KHÁCH HÀNG
-    |                                  |                                  |
-    |-- 1.1 Quản lý Tài khoản          |-- 2.1 Quản lý Khách hàng         |-- 3.1 Đăng ký tài khoản
-    |-- 1.2 Phân quyền (Roles)         |-- 2.2 Khóa / Mở khóa KH          |-- 3.2 Đăng nhập hệ thống
-    |-- 1.3 Quản lý Sản phẩm           |-- 2.3 Tiếp nhận phản hồi         |-- 3.3 Chỉnh sửa thông tin
-    |-- 1.4 Quản lý Nhà cung cấp       |-- 2.4 Trả lời giải đáp           |-- 3.4 Gửi phản hồi sản phẩm
-    |-- 1.5 Sao lưu & Phục hồi CSDL    |-- 2.5 Báo cáo độ tuổi & sở thích |-- 3.5 Nhận & làm khảo sát
-                                       |-- 2.6 Phát hành khảo sát mới     |-- 3.6 Xem câu trả lời từ QL
+1.0 ADMIN SERVER                   2.0 NGƯỜI QUẢN LÝ                  3.0 KHÁCH HÀNG
+(Tách biệt các phân hệ khác)           |                                  |
+    |                                  |-- 2.1 Thêm một khách hàng mới    |-- 3.1 Đăng ký tài khoản KH
+    |-- 1.1 Thêm mới Account           |-- 2.2 Xóa khách hàng             |-- 3.2 Đăng nhập
+    |-- 1.2 Xóa & Khóa/Mở Account      |-- 2.3 Khóa tài khoản khách hàng  |-- 3.3 Chỉnh sửa thông tin
+    |-- 1.3 Phân quyền cho Account     |-- 2.4 Tiếp nhận phản hồi KH      |-- 3.4 Gửi phản hồi sản phẩm
+    |-- 1.4 Sao lưu & Phục hồi CSDL    |-- 2.5 Báo cáo độ tuổi & sở thích |-- 3.5 Nhận & thực hiện khảo sát
+                                       |-- 2.6 Tạo khảo sát gửi TK KH
                                        |-- 2.7 Thống kê kết quả khảo sát
 ```
 
@@ -324,22 +324,22 @@ Hệ thống được thiết kế theo kiến trúc **tách biệt hoàn toàn 
    - **Cơ chế hoạt động:** Hỗ trợ nhấn phím `Enter` tại ô tài khoản/mật khẩu hoặc nhấn nút `Đăng nhập`. Backend kiểm tra mật khẩu mã hóa `BCrypt`, kiểm tra trạng thái khóa (`IsActive`) và tự động điều hướng theo đúng `RoleName`.
 
 2. **Giao diện Phân hệ Quản trị Hệ thống - Admin Server (`admin.html` - Mục II.2):**
-   - **Tab 1 - Tổng quan & Thống kê Doanh nghiệp:** Hiển thị 6 chỉ số KPI thời gian thực (Sản phẩm lưu kho, Tổng giá trị kho niêm yết, Đối tác cung cấp, Lượt đánh giá, Tài khoản người dùng, Tỷ lệ hài lòng tích cực), bộ lọc theo khoảng thời gian (Hôm nay, 7 ngày, 30 ngày, Tùy chọn ngày) và 5 biểu đồ trực quan (`Chart.js`) cùng nhật ký phản hồi chi tiết.
-   - **Tab 2 - Quản lý Danh mục & Tồn kho Sản phẩm:** Hỗ trợ **Xem, Tìm kiếm từ khóa, Tìm kiếm nâng cao & Lọc đa tiêu chí** (theo Danh mục, Nhà cung cấp, Trạng thái kinh doanh, Khoảng giá từ `minPrice` đến `maxPrice`), **Sắp xếp** (Giá tăng/giảm dần, Tồn kho nhiều nhất, Tên A-Z), Xuất file báo cáo CSV, và Thêm/Sửa/Xóa sản phẩm qua hộp thoại Modal.
-   - **Tab 3 - Quản lý Đối tác & Nhà cung cấp:** Tìm kiếm theo mã, tên công ty hoặc địa chỉ; Thêm mới, Chỉnh sửa thông tin và Xóa nhà cung cấp (có kiểm tra toàn vẹn khóa ngoại với hàng hóa trong kho).
-   - **Tab 4 - Quản trị Tài khoản & Phân quyền (`Accounts & Roles`):** Lọc tài khoản theo vai trò (`Admin`, `Manager`, `Customer`), cấp tài khoản mới, **phân quyền trực tiếp** bằng menu chọn vai trò (`PUT /api/admin/accounts/{id}/role`), Khóa/Mở khóa truy cập và Xóa tài khoản.
+   - **Tách biệt hoàn toàn:** Giao diện của Admin Server tách biệt hoàn toàn với giao diện của quản lý nhân sự (`HR`), quản lý kho (`Warehouse`), quản lý bán hàng (`Sales`) và người quản lý khách hàng (`Manager`). Chức năng xem/lọc sản phẩm, nhà cung cấp được lược bỏ khỏi Admin Server theo đúng yêu cầu đề bài.
+   - **Tab 1 - Thêm, Xóa & Phân quyền Account:** Hiển thị thống kê số lượng Account, biểu mẫu trực tiếp thêm Account mới kèm phân quyền, thanh tìm kiếm/lọc theo quyền (`Admin`, `Manager`, `Customer`, `HR`, `Warehouse`, `Sales`) và bảng quản lý Account cho phép **Phân quyền trực tiếp** (`PUT /api/admin/accounts/{id}/role`), **Khóa / Mở khóa Account** và **Xóa Account**.
+   - **Tab 2 - Danh mục Quyền & Phân tách Hệ thống:** Hiển thị bảng ma trận phân tách 6 nhóm quyền và nguyên tắc tách biệt giao diện Admin Server với các phân hệ nghiệp vụ.
 
-3. **Giao diện Phân hệ Quản lý Quan hệ Khách hàng - CRM Manager (`manager_crm.html` - Mục III.4.1):**
-   - **Tab 1 - Quản lý Hồ sơ Khách hàng (Mục 4.1.1 – 4.1.3):** Tìm kiếm, lọc khách hàng theo nhóm độ tuổi (`<20`, `20-30`, `>30`) và sở thích tiêu dùng (`Gaming`, `Văn phòng`, `Đồ họa`, `Lập trình`); Thêm hồ sơ khách hàng mới, Khóa/Mở khóa tài khoản khách hàng và Xóa khách hàng.
-   - **Tab 2 - Tiếp nhận & Giải đáp Phản hồi (Mục 4.1.4):** Thống kê 4 chỉ số phản hồi (Tổng phản hồi, Đã giải đáp, Chờ giải đáp, Điểm hài lòng TB), biểu đồ phân bố 1–5 sao, và chức năng gửi nội dung giải đáp chính thức từ Quản lý CRM tới từng đánh giá của khách hàng.
-   - **Tab 3 - Báo cáo Độ tuổi & Sở thích Khách hàng (Mục 4.1.5):** Tự động tính toán tỷ lệ phần trăm các nhóm tuổi và nhóm sở thích, hiển thị thanh tiến độ trực quan và đưa ra **Khuyến nghị Chiến lược Nhập hàng** cho Ban Giám đốc.
-   - **Tab 4 - Khảo sát Thị trường & Thăm dò Sản phẩm mới (Mục 4.1.6 – 4.1.7):** Cho phép Quản lý phát hành bài khảo sát sản phẩm dự kiến nhập (kèm giá dự kiến và thời hạn hiệu lực), tạm khóa/mở khảo sát, và xem **Bảng thống kê kết quả khảo sát** (Tổng lượt phản hồi, điểm quan tâm trung bình, cơ cấu ý định mua: *Rất muốn mua / Đang cân nhắc / Không mua*, và danh sách ý kiến chi tiết).
+3. **Giao diện Người quản lý (`manager_crm.html` - Mục III.4.1):**
+   - **Tab 1 - Thêm, Xóa & Khóa TK Khách hàng:** Thực hiện đầy đủ 3 chức năng: **(1) Thêm một khách hàng mới**, **(2) Xóa khách hàng**, **(3) Khóa tài khoản khách hàng** (hoặc mở khóa), kèm bộ lọc theo nhóm tuổi và sở thích.
+   - **Tab 2 - Tiếp nhận phản hồi khách hàng:** Thực hiện chức năng **(4) Tiếp nhận phản hồi của khách hàng**, xem thống kê điểm đánh giá 1–5 sao và gửi câu trả lời giải đáp tới khách hàng.
+   - **Tab 3 - Báo cáo KH: Độ tuổi & Sở thích:** Thực hiện chức năng **(5) Báo cáo về khách hàng, tỷ lệ độ tuổi, sở thích** với 2 biểu đồ `Chart.js` (Tỷ lệ Độ tuổi `<20`, `20-30`, `>30` và Tỷ lệ Sở thích `Gaming`, `Văn phòng`, `Đồ họa`, `Lập trình`) cùng bảng chi tiết.
+   - **Tab 4 - Tạo khảo sát & Gửi đến TK KH:** Thực hiện chức năng **(6) Tạo bảng khảo sát và gửi đến tài khoản khách hàng**, cho phép chọn danh sách tài khoản khách hàng nhận khảo sát và theo dõi số lượng tài khoản đã nhận.
+   - **Tab 5 - Thống kê kết quả khảo sát:** Thực hiện chức năng **(7) Thống kê kết quả khảo sát** trên một tab độc lập với biểu đồ Tỷ lệ ý định mua, Phân bố điểm 1–5 và bảng chi tiết câu trả lời của từng tài khoản khách hàng.
 
-4. **Giao diện Cổng Trải nghiệm Khách hàng (`user.html` - Mục III.4.3):**
-   - **Tab 1 - Danh mục Sản phẩm:** Hiển thị lưới sản phẩm kèm trạng thái tồn kho, điểm sao trung bình, lọc nhanh theo danh mục và tìm kiếm tức thì.
-   - **Tab 2 - Đánh giá Sản phẩm & Phản hồi Cộng đồng:** Khách hàng chọn mức sao (1–5 sao), gửi nhận xét về sản phẩm và theo dõi câu trả lời giải đáp từ Quản lý CRM.
-   - **Tab 3 - Khảo sát Sản phẩm mới:** Khách hàng nhận các bài khảo sát đang mở từ doanh nghiệp, chấm điểm mức độ quan tâm, chọn ý định mua sắm và gửi góp ý về mức giá/tính năng.
-   - **Tab 4 - Hồ sơ Cá nhân:** Khách hàng xem thẻ thành viên và chỉnh sửa thông tin cá nhân (Họ tên, Email, SĐT, Độ tuổi, Giới tính, Sở thích, Địa chỉ); mọi thay đổi được đồng bộ tức thì sang báo cáo nhân khẩu học của Quản lý CRM.
+4. **Giao diện Khách hàng (`customer_login.html` & `user.html` - Mục III.4.3):**
+   - **Chức năng (1) Đăng ký tài khoản khách hàng & (2) Đăng nhập (`customer_login.html`):** Cho phép khách hàng đăng ký tài khoản mới và đăng nhập vào cổng khách hàng tách biệt.
+   - **Tab 1 - (4) Gửi phản hồi về sản phẩm (`user.html`):** Biểu mẫu gửi phản hồi trực tiếp về sản phẩm (chọn sản phẩm, chấm 1–5 sao, nhập nhận xét), danh sách sản phẩm và bảng theo dõi phản hồi kèm giải đáp từ Người quản lý.
+   - **Tab 2 - (5) Nhận khảo sát & Thực hiện (`user.html`):** Hiển thị danh sách các bảng khảo sát do Người quản lý gửi đến tài khoản khách hàng, nút **Thực hiện khảo sát** và kết quả đã trả lời của khách hàng.
+   - **Tab 3 - (3) Chỉnh sửa thông tin (`user.html`):** Cho phép khách hàng chỉnh sửa Họ tên, Số điện thoại, Email, Độ tuổi, Giới tính, Sở thích và Địa chỉ.
 
 ---
 
@@ -414,7 +414,7 @@ Doanh nghiệp xây dựng quy chế sao lưu an toàn CSDL trên Microsoft SQL 
 ### 1. Những kết quả đã đạt được
 * Xây dựng thành công toàn diện Hệ thống Thông tin Doanh nghiệp SGU Tech bám sát 100% đề bài của Khoa CNTT - SGU.
 * Thiết kế CSDL 9 bảng chuẩn hóa cao, bảo toàn toàn vẹn dữ liệu, có kịch bản Backup/Restore.
-* Giao diện phân tách mạch lạc 3 cổng (Admin, Quản lý CRM, Khách hàng) với ngôn ngữ thiết kế doanh nghiệp (Corporate ERP), loại bỏ hoàn toàn các lỗi lặp terminal hay spam request.
+* Giao diện phân tách mạch lạc 3 cổng (Admin Server, Quản lý CRM, Cổng Khách hàng) với ngôn ngữ thiết kế doanh nghiệp công nghệ tiên tiến (lấy cảm hứng từ hệ sinh thái VNG Tech & tập đoàn lớn): Tông cam công nghệ đặc trưng (#FF5B00), thanh điều hướng tinh tế, bộ 3 thẻ điều hướng VNG tương tác (Sản phẩm, Khảo sát, Hồ sơ) và form đăng ký tối giản 3 trường cơ bản, mang lại trải nghiệm hiện đại, mượt mà và trực quan.
 * Chức năng khảo sát có thời hạn và thống kê trực quan phản ánh đúng thực tế thăm dò thị trường của doanh nghiệp thương mại.
 
 ### 2. Ưu điểm & Hạn chế

@@ -43,20 +43,30 @@ namespace HTTTDN.AdminApi.Controllers
         [HttpPost("customers")]
         public async Task<IActionResult> CreateCustomer([FromBody] CustomerRegisterDto dto)
         {
-            if (await _context.Accounts.AnyAsync(a => a.Username == dto.Username))
+            string username = (dto.Username ?? "").Trim();
+            string fullName = (dto.FullName ?? "").Trim();
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(fullName))
+                return BadRequest(new { message = "Vui lòng nhập đầy đủ Tên đăng nhập và Họ tên khách hàng!" });
+
+            if (await _context.Accounts.AnyAsync(a => a.Username.ToLower() == username.ToLower()))
                 return BadRequest(new { message = "Tên đăng nhập đã tồn tại!" });
 
             var customerRole = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == "Customer");
             if (customerRole == null)
                 return BadRequest(new { message = "Chưa cấu hình Role Customer trong CSDL." });
 
+            string rawPass = string.IsNullOrWhiteSpace(dto.Password) ? "123456" : dto.Password.Trim();
+            string email = string.IsNullOrWhiteSpace(dto.Email)
+                ? $"{username.ToLower()}@customer.sgutech.vn"
+                : dto.Email.Trim();
+
             var account = new Account
             {
-                Username = dto.Username,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-                FullName = dto.FullName,
-                Email = dto.Email,
-                Phone = dto.Phone,
+                Username = username,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(rawPass),
+                FullName = fullName,
+                Email = email,
+                Phone = (dto.Phone ?? "").Trim(),
                 RoleId = customerRole.RoleId,
                 IsActive = true,
                 CreatedAt = DateTime.Now
@@ -68,10 +78,10 @@ namespace HTTTDN.AdminApi.Controllers
             var profile = new CustomerProfile
             {
                 AccountId = account.AccountId,
-                Age = dto.Age,
-                Gender = dto.Gender,
-                Address = dto.Address,
-                Interest = dto.Interest
+                Age = dto.Age > 0 ? dto.Age : 20,
+                Gender = string.IsNullOrWhiteSpace(dto.Gender) ? "Nam" : dto.Gender,
+                Address = string.IsNullOrWhiteSpace(dto.Address) ? "TP. Hồ Chí Minh" : dto.Address.Trim(),
+                Interest = string.IsNullOrWhiteSpace(dto.Interest) ? "Gaming" : dto.Interest
             };
 
             _context.CustomerProfiles.Add(profile);
@@ -187,6 +197,10 @@ namespace HTTTDN.AdminApi.Controllers
         public async Task<IActionResult> GetSurveys()
         {
             var now = DateTime.Now;
+            int totalCustomerAccounts = await _context.Accounts
+                .Include(a => a.Role)
+                .CountAsync(a => a.Role != null && a.Role.RoleName == "Customer");
+
             var surveys = await _context.Surveys
                 .OrderByDescending(s => s.CreatedAt)
                 .Select(s => new
@@ -200,6 +214,7 @@ namespace HTTTDN.AdminApi.Controllers
                     s.IsActive,
                     s.ExpiresAt,
                     IsExpired = s.ExpiresAt.HasValue && s.ExpiresAt.Value < now,
+                    TotalCustomerAccounts = totalCustomerAccounts,
                     TotalResponses = _context.SurveyResponses.Count(r => r.SurveyId == s.SurveyId)
                 })
                 .ToListAsync();
@@ -235,7 +250,16 @@ namespace HTTTDN.AdminApi.Controllers
             _context.Surveys.Add(survey);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Đã phát hành bảng khảo sát mới!", surveyId = survey.SurveyId });
+            int recipientCount = await _context.Accounts
+                .Include(a => a.Role)
+                .CountAsync(a => a.Role != null && a.Role.RoleName == "Customer" && a.IsActive);
+
+            return Ok(new
+            {
+                message = $"Đã tạo bảng khảo sát và gửi đến {recipientCount} tài khoản khách hàng đang hoạt động!",
+                surveyId = survey.SurveyId,
+                recipientCount
+            });
         }
 
         // API KHÓA / MỞ KHÓA KHẢO SÁT
@@ -297,9 +321,20 @@ namespace HTTTDN.AdminApi.Controllers
                 NotBuying = responses.Count(r => r.BuyingIntent == "Không mua")
             };
 
+            var scoreDistribution = new
+            {
+                Score1 = responses.Count(r => r.Score == 1),
+                Score2 = responses.Count(r => r.Score == 2),
+                Score3 = responses.Count(r => r.Score == 3),
+                Score4 = responses.Count(r => r.Score == 4),
+                Score5 = responses.Count(r => r.Score == 5)
+            };
+
             var detailResponses = responses.Select(r => new
             {
                 r.ResponseId,
+                r.AccountId,
+                CustomerUsername = r.Account != null ? r.Account.Username : "khachhang",
                 CustomerName = r.Account != null ? r.Account.FullName : "Khách hàng",
                 r.Score,
                 r.BuyingIntent,
@@ -311,11 +346,16 @@ namespace HTTTDN.AdminApi.Controllers
             {
                 survey.SurveyId,
                 survey.Title,
+                survey.Description,
                 survey.TargetProduct,
                 survey.ExpectedPrice,
+                survey.CreatedAt,
+                survey.ExpiresAt,
+                survey.IsActive,
                 totalResponses = total,
                 averageScore = avgScore,
                 intentStats,
+                scoreDistribution,
                 detailResponses
             });
         }

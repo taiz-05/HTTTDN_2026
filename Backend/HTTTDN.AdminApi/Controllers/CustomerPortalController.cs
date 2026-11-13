@@ -293,7 +293,17 @@ namespace HTTTDN.AdminApi.Controllers
                     s.IsActive,
                     s.ExpiresAt,
                     IsExpired = s.ExpiresAt.HasValue && s.ExpiresAt.Value < now,
-                    IsCompleted = _context.SurveyResponses.Any(r => r.SurveyId == s.SurveyId && r.AccountId == accountId)
+                    IsCompleted = _context.SurveyResponses.Any(r => r.SurveyId == s.SurveyId && r.AccountId == accountId),
+                    MyResponse = _context.SurveyResponses
+                        .Where(r => r.SurveyId == s.SurveyId && r.AccountId == accountId)
+                        .Select(r => new
+                        {
+                            r.Score,
+                            r.BuyingIntent,
+                            r.CustomerOpinion,
+                            r.SubmittedAt
+                        })
+                        .FirstOrDefault()
                 })
                 .ToListAsync();
 
