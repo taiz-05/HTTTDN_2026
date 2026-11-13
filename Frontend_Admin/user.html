@@ -3,73 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGU Tech Store - Cổng Trải nghiệm & Mua sắm Khách hàng</title>
-    <link rel="stylesheet" href="style.css">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Cổng Trải Nghiệm Khách Hàng - SGU Tech Store</title>
+    <link rel="stylesheet" href="style.css?v=20261113_final_v5">
 </head>
 <body>
-    <!-- THANH ĐIỀU HƯỚNG KHÁCH HÀNG CHUẨN E-COMMERCE HIỆN ĐẠI -->
+    <!-- THANH ĐIỀU HƯỚNG KHÁCH HÀNG (TECH ORANGE) -->
     <nav class="customer-navbar">
         <div style="display:flex; align-items:center; gap:12px;">
-            <div class="sidebar-logo-badge" style="width:36px; height:36px; font-size:13.5px; background:linear-gradient(135deg, #2563eb, #1d4ed8);">SGU</div>
+            <div class="sidebar-logo-badge" style="width:38px; height:38px; font-size:14px; font-weight:900; background:linear-gradient(135deg, #FF6A00, #EE4D00); border-radius:10px; color:#ffffff;">SGU</div>
             <div>
-                <div style="font-weight:800; font-size:14.5px; letter-spacing:0.02em; color:#ffffff; line-height:1.2;">SGU TECH STORE</div>
-                <div style="font-size:11px; color:#94a3b8; font-weight:500;">Cổng Trải nghiệm Mua sắm & Đánh giá</div>
+                <div style="font-weight:800; font-size:15px; letter-spacing:-0.01em; color:#0F172A; line-height:1.2;">SGU TECH STORE</div>
+                <div style="font-size:11px; color:#64748B; font-weight:500;">Hệ thống Khách hàng &bull; Đánh giá &bull; Khảo sát</div>
             </div>
         </div>
 
         <div class="customer-nav-links">
-            <button class="cus-nav-btn active" onclick="switchCustomerTab('secShop', this)">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                <span>Danh mục Sản phẩm</span>
-            </button>
-
-            <button class="cus-nav-btn" onclick="switchCustomerTab('secReviews', this)">
+            <button class="cus-nav-btn active" id="navBtnFeedback" onclick="switchCustomerTab('secFeedback', this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-                <span>Cộng đồng Đánh giá</span>
+                <span>Phản hồi sản phẩm</span>
             </button>
 
-            <button class="cus-nav-btn" onclick="switchCustomerTab('secSurveys', this)">
+            <button class="cus-nav-btn" id="navBtnSurveys" onclick="switchCustomerTab('secSurveys', this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                <span>Khảo sát Thị trường</span>
+                <span>Khảo sát thị trường</span>
+                <span id="navSurveyPendingBadge" style="display:none; background:#FF5B00; color:#ffffff; font-size:10.5px; font-weight:700; padding:1px 7px; border-radius:999px; margin-left:4px;">0</span>
             </button>
 
-            <button class="cus-nav-btn" onclick="switchCustomerTab('secProfile', this)">
+            <button class="cus-nav-btn" id="navBtnProfile" onclick="switchCustomerTab('secProfile', this)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                <span>Tài khoản của tôi</span>
+                <span>Hồ sơ cá nhân</span>
             </button>
         </div>
 
         <div class="topbar-right" style="gap:12px;">
-            <div class="user-badge-wrap" style="background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.15); color:#ffffff; padding:5px 12px; border-radius:999px;">
-                <div class="user-avatar-circle" id="cusAvatarTop" style="background:linear-gradient(135deg, #2563eb, #38bdf8); width:26px; height:26px; font-size:11px; font-weight:700;">KH</div>
-                <span class="user-name-text" id="cusWelcome" style="color:#ffffff; font-weight:600; font-size:12.5px;">Khách hàng</span>
+            <div class="user-profile-badge" style="background:#FFF7ED; border-color:#FFD4BF;">
+                <div class="user-avatar-circle" id="cusAvatarTop" style="background:linear-gradient(135deg, #FF6A00, #EE4D00); width:28px; height:28px; font-size:11px; font-weight:700; color:#ffffff;">KH</div>
+                <div class="user-profile-info">
+                    <span class="user-name-text" id="cusWelcome" style="color:#0F172A; font-weight:700; font-size:12.5px;">Khách hàng</span>
+                    <span class="user-role-tag" style="color:#EA580C; font-weight:600;">Thành viên</span>
+                </div>
             </div>
-            <button class="btn btn-danger" style="padding:6px 14px; font-size:12px; border-radius:999px; display:inline-flex; align-items:center; gap:5px;" onclick="logoutCustomer()">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <button class="btn btn-warning" style="padding:6px 14px; font-size:12px; border-radius:8px;" onclick="logoutCustomer()">
                 <span>Đăng xuất</span>
             </button>
         </div>
     </nav>
 
     <div class="container">
+        <!-- VNG STYLE HERO BANNER (TƯƠNG TỰ VNG.COM.VN) -->
+        <div class="vng-hero-section">
+            <div class="vng-mission-tag">MISSION</div>
+            <h1 class="vng-hero-headline">Build Technologies and Empower Customers.<br><span class="vng-sub-headline">From Vietnam to the world.</span></h1>
+            <p class="vng-hero-desc">Chào mừng bạn đến với Cổng Khách hàng SGU Tech. Trải nghiệm hệ thống sản phẩm công nghệ cao, đóng góp ý kiến phản hồi và tham gia các chiến dịch khảo sát thị trường trực tiếp cùng doanh nghiệp.</p>
+        </div>
+
+        <!-- 3 VNG SIGNATURE CARDS (PRODUCTS, PEOPLE, IMPACTS) -->
+        <div class="vng-cards-grid">
+            <div class="vng-feature-card" onclick="switchCustomerTab('secFeedback', document.getElementById('navBtnFeedback'))">
+                <div class="vng-card-icon-wrap">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF5B00" stroke-width="1.8"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                </div>
+                <h3 class="vng-card-title">Products</h3>
+                <div class="vng-card-sub-label">Sản phẩm & Đánh giá</div>
+                <p class="vng-card-desc">Khám phá 16 dòng thiết bị công nghệ tiên tiến và gửi đánh giá trải nghiệm trực tiếp đến Người quản lý</p>
+            </div>
+
+            <div class="vng-feature-card" onclick="switchCustomerTab('secSurveys', document.getElementById('navBtnSurveys'))">
+                <div class="vng-card-icon-wrap">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF5B00" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <h3 class="vng-card-title">People</h3>
+                <div class="vng-card-sub-label">Khảo sát & Tiếng nói người dùng</div>
+                <p class="vng-card-desc">Bày tỏ mức độ quan tâm và ý định mua sắm về các dòng thiết bị mới trước khi chính thức mở bán</p>
+            </div>
+
+            <div class="vng-feature-card" onclick="switchCustomerTab('secProfile', document.getElementById('navBtnProfile'))">
+                <div class="vng-card-icon-wrap">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF5B00" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><path d="M4 20h16"/></svg>
+                </div>
+                <h3 class="vng-card-title">Impacts</h3>
+                <div class="vng-card-sub-label">Hồ sơ & Định hình Sở thích</div>
+                <p class="vng-card-desc">Tùy chỉnh thông tin cá nhân, cập nhật độ tuổi và định hình phân nhóm sở thích tiêu dùng công nghệ</p>
+            </div>
+        </div>
+
         <!-- =========================================================
-             MỤC 1: SHOWCASE DANH MỤC SẢN PHẨM & ĐÁNH GIÁ
+             TAB 1: GỬI PHẢN HỒI VỀ SẢN PHẨM & SHOWCASE
              ========================================================= -->
-        <div id="secShop" class="cus-section">
-            <!-- HERO BANNER CỬA HÀNG -->
-            <div class="store-hero-banner">
+        <div id="secFeedback" class="cus-section">
+            <div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:12px;">
                 <div>
-                    <span class="store-hero-badge">✨ SGU Tech Storefront 2026</span>
-                    <h2 class="store-hero-title">Khám Phá Thiết Bị Công Nghệ Chính Hãng Hàng Đầu</h2>
-                    <p class="store-hero-sub">Trải nghiệm các dòng Laptop AI, Màn hình chuyên dụng và Phụ kiện Gaming đỉnh cao. Hãy gửi đánh giá nhận xét và tham gia khảo sát để nhận điểm thưởng thành viên thân thiết!</p>
+                    <h2 class="page-header-title">Gửi Phản Hồi Về Sản Phẩm</h2>
+                    <p class="page-header-sub">Chọn sản phẩm để gửi đánh giá chất lượng và theo dõi phản hồi giải đáp từ Người quản lý</p>
                 </div>
             </div>
 
-            <!-- BỘ LỌC DANH MỤC & TÌM KIẾM -->
-            <div class="card" style="padding: 16px 20px; margin-bottom: 20px;">
+            <!-- FORM GỬI PHẢN HỒI NHANH -->
+            <div class="card" style="padding:20px; margin-bottom:22px; border: 1.5px solid #FFD4BF;">
+                <div style="font-weight:700; font-size:14.5px; color:#0F172A; margin-bottom:12px;">
+                    Biểu mẫu Gửi Phản hồi về Sản phẩm
+                </div>
+                <form onsubmit="event.preventDefault(); submitDirectFeedback();">
+                    <div class="grid-form" style="grid-template-columns: 1.5fr 1fr 2fr auto; align-items:end; margin-bottom:0;">
+                        <div>
+                            <label>Chọn sản phẩm cần phản hồi *</label>
+                            <select id="directFbProduct" required></select>
+                        </div>
+                        <div>
+                            <label>Mức độ hài lòng (1 - 5 sao) *</label>
+                            <select id="directFbRating">
+                                <option value="5">5 Sao - Rất hài lòng</option>
+                                <option value="4">4 Sao - Hài lòng</option>
+                                <option value="3">3 Sao - Bình thường</option>
+                                <option value="2">2 Sao - Chưa tốt</option>
+                                <option value="1">1 Sao - Không hài lòng</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Nội dung phản hồi về sản phẩm *</label>
+                            <input type="text" id="directFbComment" placeholder="Nhập nhận xét, góp ý hoặc phản hồi chất lượng..." required>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn" style="height:38px; padding:0 22px; white-space:nowrap; border-radius:8px;">
+                                Gửi phản hồi
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- LỊCH SỬ PHẢN HỒI VÀ GIẢI ĐÁP -->
+            <div class="card" style="padding: 18px 20px; margin-bottom: 22px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
+                    <div>
+                        <div style="font-weight:800; font-size:15px; color:#0F172A;">Cộng đồng Đánh giá & Tiếp nhận Giải đáp từ Người quản lý</div>
+                        <div style="font-size:12px; color:#64748B; margin-top:2px;">Theo dõi trải nghiệm khách hàng và các câu trả lời trực tiếp từ bộ phận Quản lý</div>
+                    </div>
+                    <span class="badge badge-info" id="reviewFilterCountBadge">Đang hiển thị tất cả phản hồi</span>
+                </div>
+
+                <!-- BỘ LỌC PHẢN HỒI THÔNG MINH (TÌM KIẾM + PILLS DANH MỤC + LỌC SAO) -->
+                <div class="review-filter-toolbar">
+                    <div class="review-filter-group" style="flex:1; min-width:260px; max-width:340px;">
+                        <div class="search-box-wrap" style="width:100%; margin-bottom:0;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input type="text" id="reviewSearchInput" placeholder="Tìm theo tên sản phẩm, đánh giá..." oninput="filterCommunityReviewsLive()">
+                        </div>
+                    </div>
+
+                    <div class="review-filter-group">
+                        <button type="button" class="filter-pill active" id="pillReviewCatAll" onclick="filterReviewByCategory('', this)">Tất cả</button>
+                        <button type="button" class="filter-pill" onclick="filterReviewByCategory('Laptop', this)">Laptop</button>
+                        <button type="button" class="filter-pill" onclick="filterReviewByCategory('Màn hình', this)">Màn hình</button>
+                        <button type="button" class="filter-pill" onclick="filterReviewByCategory('Bàn phím', this)">Bàn phím/Chuột</button>
+                        <button type="button" class="filter-pill" onclick="filterReviewByCategory('Linh kiện', this)">Linh kiện</button>
+                    </div>
+
+                    <div class="review-filter-group">
+                        <button type="button" class="filter-pill" id="pillReview5Star" onclick="filterReviewByRating(5, this)">5 ★ Hài lòng</button>
+                        <button type="button" class="filter-pill" id="pillReviewReplied" onclick="filterReviewByReplied(this)">✓ Đã giải đáp</button>
+                        <button type="button" class="btn btn-warning" style="padding:6px 14px; font-size:12px;" onclick="resetReviewFilters()">Đặt lại</button>
+                    </div>
+                </div>
+
+                <div class="table-wrap" style="margin-top:0;">
+                    <table style="min-width: 980px;">
+                        <thead>
+                            <tr>
+                                <th style="width: 75px;">Hình ảnh</th>
+                                <th style="width: 220px;">Sản phẩm</th>
+                                <th style="width: 160px;">Khách hàng gửi</th>
+                                <th style="width: 140px;">Đánh giá</th>
+                                <th>Nội dung phản hồi về sản phẩm</th>
+                                <th style="width: 280px;">Phản hồi tiếp nhận từ Người quản lý</th>
+                            </tr>
+                        </thead>
+                        <tbody id="myFeedbackTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- BỘ LỌC DANH MỤC & TÌM KIẾM SẢN PHẨM -->
+            <div class="card" style="padding: 16px 20px; margin-bottom: 16px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
                     <div class="category-pills-bar" style="margin-bottom:0;">
-                        <button class="cat-pill-btn active" onclick="filterByCategory('', this)">Tất cả</button>
+                        <button class="cat-pill-btn active" onclick="filterByCategory('', this)">Tất cả sản phẩm</button>
                         <button class="cat-pill-btn" onclick="filterByCategory('Laptop', this)">Laptop & Macbook</button>
                         <button class="cat-pill-btn" onclick="filterByCategory('Màn hình', this)">Màn hình</button>
                         <button class="cat-pill-btn" onclick="filterByCategory('Bàn phím', this)">Bàn phím & Chuột</button>
@@ -87,68 +208,63 @@
         </div>
 
         <!-- =========================================================
-             MỤC 2: CỘNG ĐỒNG ĐÁNH GIÁ SẢN PHẨM & PHẢN HỒI
-             ========================================================= -->
-        <div id="secReviews" class="cus-section" style="display:none;">
-            <div class="page-header">
-                <div>
-                    <h2 class="page-header-title">Cộng đồng Đánh giá & Phản hồi Khách hàng</h2>
-                    <p class="page-header-sub">Tổng hợp nhận xét thực tế từ người dùng và lời giải đáp chính thức từ đội ngũ Quản trị SGU Tech</p>
-                </div>
-            </div>
-
-            <div class="card" style="padding: 16px 20px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
-                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                        <span style="font-weight:700; color:var(--text-secondary); font-size:12.5px;">Lọc theo sản phẩm:</span>
-                        <select id="filterReviewProduct" onchange="loadCommunityFeedbacks(false)" style="min-width:240px;"></select>
-                        <button class="btn btn-warning" onclick="loadCommunityFeedbacks(true)">Xem tất cả</button>
-                    </div>
-                    <button class="btn btn-success" onclick="openReviewModalFromFilter()" style="display:flex; align-items:center; gap:6px;">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                        <span>Gửi đánh giá sản phẩm</span>
-                    </button>
-                </div>
-
-                <div class="table-wrap" style="margin-top:0;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 65px;">Hình ảnh</th>
-                                <th>Sản phẩm</th>
-                                <th>Khách hàng</th>
-                                <th>Điểm đánh giá</th>
-                                <th>Nội dung nhận xét</th>
-                                <th>Giải đáp từ Quản lý CRM</th>
-                            </tr>
-                        </thead>
-                        <tbody id="myFeedbackTable"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- =========================================================
-             MỤC 3: KHẢO SÁT SẢN PHẨM MỚI (MỤC III.4.6 & 4.7)
+             TAB 2: NHẬN ĐƯỢC KHẢO SÁT VÀ THỰC HIỆN
              ========================================================= -->
         <div id="secSurveys" class="cus-section" style="display:none;">
             <div class="page-header">
                 <div>
-                    <h2 class="page-header-title">Khảo sát & Thăm dò Sản phẩm Công nghệ Mới</h2>
-                    <p class="page-header-sub">Đóng góp ý kiến và mức giá kỳ vọng về các thiết bị chuẩn bị ra mắt để tích lũy điểm thưởng thành viên</p>
+                    <h2 class="page-header-title">Nhận Bảng Khảo Sát Và Thực Hiện</h2>
+                    <p class="page-header-sub">Danh sách các bảng khảo sát do Người quản lý gửi đến tài khoản khách hàng của bạn</p>
                 </div>
             </div>
 
-            <div class="card" style="padding: 16px 20px;">
+            <!-- THỐNG KÊ NHANH -->
+            <div class="stat-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 20px;">
+                <div class="kpi-card">
+                    <div class="kpi-card-header">
+                        <span class="kpi-card-label">Tổng Khảo Sát Nhận Được</span>
+                        <div class="kpi-card-icon" style="background:#FFF7ED; color:#EA580C;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        </div>
+                    </div>
+                    <div class="kpi-card-val" id="cusKpiTotalSurveys">0</div>
+                    <div class="kpi-card-sub">Gửi đến tài khoản của bạn</div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-card-header">
+                        <span class="kpi-card-label">Khảo Sát Chờ Thực Hiện</span>
+                        <div class="kpi-card-icon" style="background:#FEF3C7; color:#D97706;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </div>
+                    </div>
+                    <div class="kpi-card-val" style="color:#EA580C;" id="cusKpiPendingSurveys">0</div>
+                    <div class="kpi-card-sub">Cần bạn đóng góp ý kiến</div>
+                </div>
+
+                <div class="kpi-card">
+                    <div class="kpi-card-header">
+                        <span class="kpi-card-label">Khảo Sát Đã Hoàn Thành</span>
+                        <div class="kpi-card-icon" style="background:#ECFDF5; color:#059669;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                    </div>
+                    <div class="kpi-card-val" style="color:#059669;" id="cusKpiDoneSurveys">0</div>
+                    <div class="kpi-card-sub">Đã gửi kết quả về Người quản lý</div>
+                </div>
+            </div>
+
+            <div class="card" style="padding: 18px 20px;">
                 <div class="table-wrap" style="margin-top:0;">
-                    <table>
+                    <table style="min-width: 950px;">
                         <thead>
                             <tr>
-                                <th>Tiêu đề bài khảo sát</th>
-                                <th>Sản phẩm dự kiến nhập</th>
-                                <th>Giá dự kiến</th>
-                                <th>Thời hạn hiệu lực</th>
-                                <th style="text-align: center; width: 170px;">Hành động</th>
+                                <th style="width:70px;">Mã KS</th>
+                                <th style="width:260px;">Tiêu đề & Nội dung bảng khảo sát</th>
+                                <th style="width:220px;">Sản phẩm khảo sát & Giá dự kiến</th>
+                                <th style="width:140px;">Thời hạn</th>
+                                <th>Kết quả thực hiện của bạn</th>
+                                <th style="text-align: center; width: 175px;">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody id="mySurveyTable"></tbody>
@@ -158,144 +274,145 @@
         </div>
 
         <!-- =========================================================
-             MỤC 4: HỒ SƠ TÀI KHOẢN & SỞ THÍCH (MỤC III.4.5) - CHUẨN CON NGƯỜI LÀM
+             TAB 3: CHỈNH SỬA THÔNG TIN TÀI KHOẢN KHÁCH HÀNG
              ========================================================= -->
         <div id="secProfile" class="cus-section" style="display:none;">
             <div class="page-header">
                 <div>
-                    <h2 class="page-header-title">Tài khoản & Tùy chọn Mua sắm Cá nhân</h2>
-                    <p class="page-header-sub">Quản lý hồ sơ định danh, độ tuổi, sở thích công nghệ và địa chỉ giao hàng nhận quà tri ân</p>
+                    <h2 class="page-header-title">Chỉnh Sửa Thông Tin Tài Khoản Khách Hàng</h2>
+                    <p class="page-header-sub">Cập nhật thông tin cá nhân, số điện thoại, độ tuổi, sở thích tiêu dùng và địa chỉ liên hệ</p>
                 </div>
             </div>
 
             <div class="customer-profile-layout">
-                <!-- CỘT 1: THẺ DANH TÍNH THÀNH VIÊN (HERO MEMBER CARD) -->
+                <!-- CỘT 1: THẺ TÀI KHOẢN KHÁCH HÀNG -->
                 <div class="profile-hero-card">
-                    <div class="profile-hero-cover"></div>
+                    <div class="profile-hero-cover" style="background: linear-gradient(135deg, #FF6A00 0%, #EE4D00 100%);"></div>
                     <div class="profile-hero-body">
-                        <div class="profile-avatar-wrap" id="profAvatarBig">KH</div>
+                        <div class="profile-avatar-wrap" id="profAvatarBig" style="background:linear-gradient(135deg, #FF6A00, #EE4D00); border-color:#ffffff;">KH</div>
                         <h3 class="profile-user-name" id="profCardFullName">Họ và tên</h3>
                         <div class="profile-user-sub" id="profCardUsername">@username</div>
-                        <div class="profile-tier-badge">⭐ Thành viên Thân thiết (SGU Member)</div>
+                        <div class="profile-tier-badge" style="background:#FFF7ED; color:#EA580C; border:1px solid #FFD4BF;">Tài khoản Khách hàng</div>
 
-                        <div class="profile-stats-grid">
+                        <div class="profile-stats-grid" style="grid-template-columns: 1fr 1fr;">
                             <div class="profile-stat-item">
                                 <div class="profile-stat-val" id="profStatReviews">0</div>
-                                <div class="profile-stat-label">Đánh giá</div>
+                                <div class="profile-stat-label">Phản hồi đã gửi</div>
                             </div>
                             <div class="profile-stat-item">
                                 <div class="profile-stat-val" id="profStatSurveys">0</div>
-                                <div class="profile-stat-label">Khảo sát</div>
-                            </div>
-                            <div class="profile-stat-item">
-                                <div class="profile-stat-val" style="color:#059669;">150</div>
-                                <div class="profile-stat-label">Điểm thưởng</div>
+                                <div class="profile-stat-label">Khảo sát đã làm</div>
                             </div>
                         </div>
 
                         <div class="profile-info-list">
                             <div class="profile-info-row">
-                                <span class="profile-info-label">Trạng thái tài khoản:</span>
-                                <span class="badge badge-active" style="font-size:11px;">Hoạt động</span>
+                                <span class="profile-info-label">Trạng thái:</span>
+                                <span class="badge badge-active" style="font-size:11px;">Đang hoạt động</span>
                             </div>
                             <div class="profile-info-row">
-                                <span class="profile-info-label">Vai trò:</span>
-                                <span class="badge badge-info" style="font-size:11px;">Khách hàng</span>
+                                <span class="profile-info-label">Phân quyền:</span>
+                                <span class="badge badge-info" style="font-size:11px;">Customer (Khách hàng)</span>
                             </div>
                             <div class="profile-info-row">
-                                <span class="profile-info-label">Sở thích chính:</span>
-                                <span class="badge-tag" id="profCardInterestTag">Gaming</span>
+                                <span class="profile-info-label">Độ tuổi hiện tại:</span>
+                                <b id="profCardAgeTag" style="font-size:12.5px; color:#0F172A;">22 tuổi</b>
+                            </div>
+                            <div class="profile-info-row">
+                                <span class="profile-info-label">Sở thích tiêu dùng:</span>
+                                <span class="badge-tag" id="profCardInterestTag" style="background:#FFF7ED; color:#EA580C; border:1px solid #FFD4BF;">Gaming</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- CỘT 2: FORM CẬP NHẬT THÔNG TIN ĐẦY ĐỦ BỐ CỤC -->
+                <!-- CỘT 2: BIỂU MẪU CHỈNH SỬA THÔNG TIN KHÁCH HÀNG -->
                 <div class="profile-form-card">
-                    <div class="profile-section-title">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                        <span>1. Thông tin Định danh & Liên hệ</span>
-                    </div>
-
-                    <div class="grid-form" style="grid-template-columns: 1fr 1fr;">
-                        <div>
-                            <label>Họ và tên khách hàng *</label>
-                            <input type="text" id="pFullName" placeholder="Nhập họ và tên">
+                    <form onsubmit="event.preventDefault(); updateProfile();">
+                        <div class="profile-section-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5B00" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            <span>Thông tin Tài khoản & Liên hệ</span>
                         </div>
-                        <div>
-                            <label>Số điện thoại liên lạc *</label>
-                            <input type="text" id="pPhone" placeholder="Số điện thoại di động">
-                        </div>
-                    </div>
 
-                    <div class="grid-form" style="grid-template-columns: 1fr 1fr;">
-                        <div>
-                            <label>Tên đăng nhập hệ thống</label>
-                            <input type="text" id="pUsernameDisplay" disabled style="background:#f1f5f9; color:var(--text-muted); cursor:not-allowed;">
+                        <div class="grid-form" style="grid-template-columns: 1fr 1fr;">
+                            <div>
+                                <label>Họ và tên khách hàng *</label>
+                                <input type="text" id="pFullName" placeholder="Nhập họ và tên đầy đủ" required>
+                            </div>
+                            <div>
+                                <label>Số điện thoại liên hệ *</label>
+                                <input type="text" id="pPhone" placeholder="Số điện thoại di động" required>
+                            </div>
                         </div>
-                        <div>
-                            <label>Địa chỉ Email</label>
-                            <input type="email" id="pEmailDisplay" placeholder="email@gmail.com">
+
+                        <div class="grid-form" style="grid-template-columns: 1fr 1fr;">
+                            <div>
+                                <label>Tên đăng nhập (Username)</label>
+                                <input type="text" id="pUsernameDisplay" disabled style="background:#F1F5F9; color:var(--text-muted); cursor:not-allowed;">
+                            </div>
+                            <div>
+                                <label>Địa chỉ Email</label>
+                                <input type="email" id="pEmailDisplay" placeholder="email@gmail.com">
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="profile-section-title">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                        <span>2. Nhân khẩu học & Sở thích tiêu dùng (Mục III.4.5)</span>
-                    </div>
-
-                    <div class="grid-form" style="grid-template-columns: 1fr 1fr 2fr;">
-                        <div>
-                            <label>Độ tuổi hiện tại *</label>
-                            <input type="number" id="pAge" min="10" max="100" placeholder="VD: 20">
+                        <div class="profile-section-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5B00" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                            <span>Độ tuổi, Giới tính & Sở thích Tiêu dùng</span>
                         </div>
-                        <div>
-                            <label>Giới tính</label>
-                            <select id="pGender">
-                                <option value="Nam">Nam</option>
-                                <option value="Nữ">Nữ</option>
-                                <option value="Khác">Khác</option>
-                            </select>
+
+                        <div class="grid-form" style="grid-template-columns: 1fr 1fr 1.5fr;">
+                            <div>
+                                <label>Độ tuổi *</label>
+                                <input type="number" id="pAge" min="10" max="100" placeholder="VD: 22" required>
+                            </div>
+                            <div>
+                                <label>Giới tính</label>
+                                <select id="pGender">
+                                    <option value="Nam">Nam</option>
+                                    <option value="Nữ">Nữ</option>
+                                    <option value="Khác">Khác</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Sở thích tiêu dùng *</label>
+                                <select id="pInterest">
+                                    <option value="Gaming">Gaming</option>
+                                    <option value="Văn phòng">Văn phòng</option>
+                                    <option value="Đồ họa">Đồ họa</option>
+                                    <option value="Lập trình">Lập trình</option>
+                                </select>
+                            </div>
                         </div>
-                        <div>
-                            <label>Sở thích công nghệ hàng đầu *</label>
-                            <select id="pInterest">
-                                <option value="Gaming">🎮 Gaming (Game thủ, Gear, Đồ họa đỉnh)</option>
-                                <option value="Văn phòng">💼 Văn phòng (Office, Mỏng nhẹ, Pin trâu)</option>
-                                <option value="Đồ họa">🎨 Đồ họa (Design, Màu chuẩn 4K, Render)</option>
-                                <option value="Lập trình">💻 Lập trình (Dev, Cấu hình mạnh, Đa nhiệm)</option>
-                            </select>
+
+                        <div class="profile-section-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5B00" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            <span>Địa chỉ giao hàng</span>
                         </div>
-                    </div>
 
-                    <div class="profile-section-title">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                        <span>3. Địa chỉ Giao hàng & Quà tặng Tri ân</span>
-                    </div>
+                        <div style="margin-bottom: 22px;">
+                            <label>Địa chỉ chi tiết</label>
+                            <input type="text" id="pAddress" placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố">
+                        </div>
 
-                    <div style="margin-bottom: 22px;">
-                        <label>Địa chỉ thường trú / Nơi nhận hàng chi tiết</label>
-                        <input type="text" id="pAddress" placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố">
-                    </div>
-
-                    <div style="display:flex; justify-content:flex-end; gap:12px; border-top:1px solid var(--brand-border); padding-top:18px;">
-                        <button class="btn btn-success" style="padding:10px 24px; font-size:13.5px; display:inline-flex; align-items:center; gap:8px;" onclick="updateProfile()">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                            <span>Lưu thay đổi thông tin</span>
-                        </button>
-                    </div>
+                        <div style="display:flex; justify-content:flex-end; gap:12px; border-top:1px solid var(--brand-border); padding-top:18px;">
+                            <button type="submit" class="btn" style="padding:11px 28px; font-size:13.5px; border-radius:10px;">
+                                Lưu chỉnh sửa thông tin
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- =========================================================
-         POP-UP MODAL 1: GỬI PHẢN HỒI SẢN PHẨM
+         POP-UP MODAL 1: GỬI PHẢN HỒI SẢN PHẨM CHI TIẾT
          ========================================================= -->
     <div class="modal-overlay" id="reviewModal" onclick="if(event.target===this) closeReviewModal()">
         <div class="modal-box" style="max-width: 580px;">
             <div class="modal-header">
-                <h3>Đánh giá & Phản hồi sản phẩm</h3>
+                <h3>Gửi phản hồi về sản phẩm</h3>
                 <button class="modal-close" onclick="closeReviewModal()">×</button>
             </div>
             <div class="modal-body">
@@ -304,7 +421,7 @@
                     <div>
                         <span class="badge badge-info" id="modalProdCat">Danh mục</span>
                         <h4 id="modalProdName" style="font-size:14.5px; margin:4px 0; color:var(--text-primary);">Tên sản phẩm</h4>
-                        <div id="modalProdPrice" style="font-weight:800; color:#1d4ed8; font-size:15px;">0 đ</div>
+                        <div id="modalProdPrice" style="font-weight:800; color:#EA580C; font-size:15px;">0 đ</div>
                     </div>
                 </div>
 
@@ -318,69 +435,200 @@
                     <span class="star-label" id="starTextLabel">5/5 - Rất hài lòng</span>
                 </div>
 
-                <label for="modalFbComment">Nội dung nhận xét & cảm nhận khi sử dụng:</label>
-                <textarea id="modalFbComment" rows="3" placeholder="Chia sẻ cảm nhận chi tiết về hiệu năng, thiết kế hoặc độ bền của sản phẩm..."></textarea>
+                <label for="modalFbComment">Nội dung phản hồi về sản phẩm:</label>
+                <textarea id="modalFbComment" rows="3" placeholder="Nhập ý kiến phản hồi của bạn về chất lượng, tính năng, mức giá của sản phẩm..."></textarea>
 
                 <div class="modal-reviews-list">
-                    <label>Các nhận xét của khách hàng khác (<span id="modalReviewCount">0</span>):</label>
+                    <label>Các phản hồi đã gửi về sản phẩm này (<span id="modalReviewCount">0</span>):</label>
                     <div id="modalProductReviewsBox" style="margin-top:8px;"></div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-warning" onclick="closeReviewModal()">Đóng</button>
-                <button class="btn btn-success" onclick="submitModalFeedback()">Gửi đánh giá</button>
+                <button class="btn" onclick="submitModalFeedback()">Gửi phản hồi</button>
             </div>
         </div>
     </div>
 
     <!-- =========================================================
-         POP-UP MODAL 2: THỰC HIỆN KHẢO SÁT SẢN PHẨM MỚI
+         POP-UP MODAL 2: THỰC HIỆN BẢNG KHẢO SÁT CHUYÊN SÂU (ENTERPRISE SURVEY)
          ========================================================= -->
     <div class="modal-overlay" id="surveyModal" onclick="if(event.target===this) closeSurveyModal()">
-        <div class="modal-box" style="max-width:540px;">
+        <div class="modal-box" style="max-width:680px; max-height:90vh; overflow-y:auto;">
             <div class="modal-header">
-                <h3>Thực hiện khảo sát sản phẩm mới</h3>
+                <div>
+                    <h3 style="font-size:17px; font-weight:800; color:#0F172A;">Phiếu Khảo Sát Nghiên Cứu Thị Trường</h3>
+                    <div style="font-size:12px; color:#64748B; margin-top:2px;">Ý kiến của bạn định hình chiến lược phát triển sản phẩm công nghệ của doanh nghiệp</div>
+                </div>
                 <button class="modal-close" onclick="closeSurveyModal()">×</button>
             </div>
-            <div class="modal-body">
-                <div style="padding:14px 16px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; margin-bottom:16px;">
-                    <div style="font-weight:700; color:#1e40af; font-size:14px;" id="svModalTitle"></div>
-                    <div style="font-size:12.5px; color:#475569; margin:4px 0 8px; line-height:1.5;" id="svModalDesc"></div>
-                    <div style="font-size:13px; color:#1e3a8a;">Sản phẩm: <b id="svModalProduct"></b> | Giá dự kiến: <b style="color:#059669;" id="svModalPrice"></b></div>
+            <div class="modal-body" style="padding: 20px 24px;">
+                <!-- KHỐI SẢN PHẨM KHẢO SÁT CHUẨN THƯƠNG MẠI -->
+                <div style="padding:16px 20px; background:linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%); border:1.5px solid #FFD4BF; border-radius:14px; margin-bottom:20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+                        <div>
+                            <span class="vng-mission-tag" style="margin-bottom:6px; font-size:10px; padding:3px 10px;">DỰ ÁN SẢN PHẨM MỚI</span>
+                            <div style="font-weight:800; color:#0F172A; font-size:16px; letter-spacing:-0.01em;" id="svModalTitle"></div>
+                            <div style="font-size:13px; color:#475569; margin:4px 0 10px; line-height:1.5;" id="svModalDesc"></div>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; justify-content:space-between; padding-top:10px; border-top:1px dashed #FDBA74; flex-wrap:wrap; gap:8px;">
+                        <div style="font-size:13px; color:#334155;">Thiết bị mục tiêu: <b id="svModalProduct" style="color:#0F172A;"></b></div>
+                        <div style="font-size:13.5px; color:#334155;">Giá dự kiến mở bán: <b style="color:#EA580C; font-size:15px; font-weight:800;" id="svModalPrice"></b></div>
+                    </div>
                 </div>
 
-                <div style="margin-bottom:14px;">
-                    <label>1. Đánh giá mức độ quan tâm của bạn đối với sản phẩm này (1 - 5 điểm):</label>
-                    <select id="svModalScore">
-                        <option value="5">5 điểm - Rất quan tâm và ấn tượng</option>
-                        <option value="4">4 điểm - Khá quan tâm</option>
-                        <option value="3">3 điểm - Bình thường</option>
-                        <option value="2">2 điểm - Ít quan tâm</option>
-                        <option value="1">1 điểm - Không có nhu cầu</option>
-                    </select>
+                <!-- CÂU 1: LIKERT SCORE 1 - 5 (INTERACTIVE BUTTONS) -->
+                <div class="survey-section-box">
+                    <div class="survey-q-title">
+                        <span style="color:#FF5B00;">1.</span> Mức độ quan tâm của bạn đối với dòng sản phẩm này *
+                    </div>
+                    <div class="survey-q-desc">Chọn mức độ từ 1 (Hoàn toàn không quan tâm) đến 5 (Rất hào hứng đón nhận)</div>
+                    <div class="survey-score-grid" id="svScoreButtonsGroup">
+                        <div class="survey-score-btn" onclick="selectSurveyScore(1, this)">
+                            <div class="survey-score-num">1</div>
+                            <div class="survey-score-label">Rất thờ ơ</div>
+                        </div>
+                        <div class="survey-score-btn" onclick="selectSurveyScore(2, this)">
+                            <div class="survey-score-num">2</div>
+                            <div class="survey-score-label">Ít quan tâm</div>
+                        </div>
+                        <div class="survey-score-btn" onclick="selectSurveyScore(3, this)">
+                            <div class="survey-score-num">3</div>
+                            <div class="survey-score-label">Bình thường</div>
+                        </div>
+                        <div class="survey-score-btn" onclick="selectSurveyScore(4, this)">
+                            <div class="survey-score-num">4</div>
+                            <div class="survey-score-label">Khá quan tâm</div>
+                        </div>
+                        <div class="survey-score-btn active" onclick="selectSurveyScore(5, this)">
+                            <div class="survey-score-num">5</div>
+                            <div class="survey-score-label">Rất hào hứng</div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="svSelectedScore" value="5">
                 </div>
 
-                <div style="margin-bottom:14px;">
-                    <label>2. Dự kiến quyết định mua khi sản phẩm mở bán chính thức:</label>
-                    <select id="svModalIntent">
-                        <option value="Rất muốn mua">Rất muốn mua (Sẵn sàng đặt cọc sớm)</option>
-                        <option value="Đang cân nhắc">Đang cân nhắc (Chờ xem đánh giá thực tế)</option>
-                        <option value="Không mua">Không mua (Chưa có nhu cầu đổi thiết bị)</option>
-                    </select>
+                <!-- CÂU 2: ĐÁNH GIÁ MỨC GIÁ DỰ KIẾN (RADIO TILES) -->
+                <div class="survey-section-box">
+                    <div class="survey-q-title">
+                        <span style="color:#FF5B00;">2.</span> Bạn đánh giá thế nào về mức giá dự kiến ở trên? *
+                    </div>
+                    <div class="survey-q-desc">So sánh tương quan giữa giá niêm yết và giá trị công nghệ mang lại</div>
+                    <div class="survey-choice-grid">
+                        <div class="survey-choice-card active" onclick="selectSurveyPriceEval('Giá rất hợp lý / Đáng đầu tư', this)">
+                            <div class="survey-choice-radio"></div>
+                            <div>
+                                <div class="survey-choice-title">Giá rất hợp lý & cạnh tranh</div>
+                                <div class="survey-choice-sub">Đáng đầu tư so với cấu hình phần cứng</div>
+                            </div>
+                        </div>
+                        <div class="survey-choice-card" onclick="selectSurveyPriceEval('Mức giá hơi cao nhưng chấp nhận được', this)">
+                            <div class="survey-choice-radio"></div>
+                            <div>
+                                <div class="survey-choice-title">Hơi cao nhưng chấp nhận được</div>
+                                <div class="survey-choice-sub">Cần có thêm quà tặng kèm hoặc trả góp 0%</div>
+                            </div>
+                        </div>
+                        <div class="survey-choice-card" onclick="selectSurveyPriceEval('Mức giá quá đắt / Cần giảm thêm', this)">
+                            <div class="survey-choice-radio"></div>
+                            <div>
+                                <div class="survey-choice-title">Giá quá đắt so với thị trường</div>
+                                <div class="survey-choice-sub">Nên điều chỉnh giảm giá từ 10% - 20%</div>
+                            </div>
+                        </div>
+                        <div class="survey-choice-card" onclick="selectSurveyPriceEval('Chưa phù hợp với ngân sách', this)">
+                            <div class="survey-choice-radio"></div>
+                            <div>
+                                <div class="survey-choice-title">Chưa phù hợp với ngân sách</div>
+                                <div class="survey-choice-sub">Vượt quá khả năng chi trả hiện tại</div>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="svSelectedPriceEval" value="Giá rất hợp lý / Đáng đầu tư">
                 </div>
 
-                <div>
-                    <label>3. Ý kiến đóng góp về mức giá dự kiến và tính năng kỳ vọng:</label>
-                    <textarea id="svModalOpinion" rows="3" placeholder="VD: Nếu giá bán kèm ưu đãi quà tặng hoặc hỗ trợ trả góp 0% thì tôi sẽ đặt mua ngay..."></textarea>
+                <!-- CÂU 3: TÍNH NĂNG MONG ĐỢI NHẤT (MULTI-SELECT CHIPS) -->
+                <div class="survey-section-box">
+                    <div class="survey-q-title">
+                        <span style="color:#FF5B00;">3.</span> Tiêu chí & Tính năng bạn mong đợi nhất ở sản phẩm này *
+                    </div>
+                    <div class="survey-q-desc">Bấm chọn các tính năng bạn ưu tiên nhất (có thể chọn nhiều tiêu chí)</div>
+                    <div class="survey-chips-grid" id="svChipsGroup">
+                        <div class="survey-chip-item active" onclick="toggleSurveyChip(this)" data-val="Hiệu năng mạnh mẽ">⚡ Hiệu năng vượt trội</div>
+                        <div class="survey-chip-item active" onclick="toggleSurveyChip(this)" data-val="Thời lượng pin bền bỉ">🔋 Pin trâu & Sạc nhanh</div>
+                        <div class="survey-chip-item" onclick="toggleSurveyChip(this)" data-val="Thiết kế mỏng nhẹ cao cấp">🎨 Thiết kế mỏng nhẹ sang trọng</div>
+                        <div class="survey-chip-item active" onclick="toggleSurveyChip(this)" data-val="Công nghệ AI thông minh">🤖 Tính năng AI thông minh</div>
+                        <div class="survey-chip-item" onclick="toggleSurveyChip(this)" data-val="Bảo hành VIP 1 đổi 1">🛡️ Bảo hành VIP 1 đổi 1</div>
+                        <div class="survey-chip-item" onclick="toggleSurveyChip(this)" data-val="Chính sách trợ giá">💰 Trợ giá thu cũ đổi mới</div>
+                    </div>
+                </div>
+
+                <!-- CÂU 4: Ý ĐỊNH MUA SẮM (RADIO TILES) -->
+                <div class="survey-section-box">
+                    <div class="survey-q-title">
+                        <span style="color:#FF5B00;">4.</span> Kế hoạch & Ý định mua sắm của bạn khi sản phẩm mở bán *
+                    </div>
+                    <div class="survey-q-desc">Xác định thời điểm bạn sẵn sàng ra quyết định sở hữu thiết bị</div>
+                    <div class="survey-choice-grid">
+                        <div class="survey-choice-card active" onclick="selectSurveyIntent('Đặt trước ngay đợt đầu (Pre-order)', this)">
+                            <div class="survey-choice-radio"></div>
+                            <div>
+                                <div class="survey-choice-title">🚀 Đặt trước ngay (Pre-order)</div>
+                                <div class="survey-choice-sub">Mua ngay trong đợt mở bán đầu tiên</div>
+                            </div>
+                        </div>
+                        <div class="survey-choice-card" onclick="selectSurveyIntent('Chờ đánh giá thực tế', this)">
+                            <div class="survey-choice-radio"></div>
+                            <div>
+                                <div class="survey-choice-title">⏳ Chờ đánh giá thực tế</div>
+                                <div class="survey-choice-sub">Chờ 1-3 tháng xem trải nghiệm người dùng</div>
+                            </div>
+                        </div>
+                        <div class="survey-choice-card" onclick="selectSurveyIntent('Đợi đợt khuyến mãi giảm giá', this)">
+                            <div class="survey-choice-radio"></div>
+                            <div>
+                                <div class="survey-choice-title">🎁 Đợi dịp khuyến mãi</div>
+                                <div class="survey-choice-sub">Mua khi có voucher giảm giá hoặc quà khủng</div>
+                            </div>
+                        </div>
+                        <div class="survey-choice-card" onclick="selectSurveyIntent('Chưa có nhu cầu mua', this)">
+                            <div class="survey-choice-radio"></div>
+                            <div>
+                                <div class="survey-choice-title">❌ Chưa có kế hoạch mua</div>
+                                <div class="survey-choice-sub">Thiết bị hiện tại vẫn đáp ứng đủ nhu cầu</div>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="svSelectedIntent" value="Đặt trước ngay đợt đầu (Pre-order)">
+                </div>
+
+                <!-- CÂU 5: MỨC GIÁ KỲ VỌNG & GÓP Ý HOÀN THIỆN -->
+                <div class="survey-section-box" style="margin-bottom:0;">
+                    <div class="survey-q-title">
+                        <span style="color:#FF5B00;">5.</span> Mức giá kỳ vọng & Ý kiến đóng góp hoàn thiện sản phẩm
+                    </div>
+                    <div class="grid-form" style="grid-template-columns: 1fr; margin-bottom: 12px;">
+                        <div>
+                            <label style="font-weight:600; font-size:12.5px;">Mức giá bạn sẵn sàng chi trả cho sản phẩm này (VNĐ):</label>
+                            <input type="text" id="svModalWillingPrice" placeholder="VD: 7.500.000 đ">
+                        </div>
+                    </div>
+                    <div>
+                        <label style="font-weight:600; font-size:12.5px;">Góp ý thêm về tính năng, màu sắc hoặc chính sách dịch vụ:</label>
+                        <textarea id="svModalOpinion" rows="3" placeholder="Chia sẻ kỳ vọng của bạn để doanh nghiệp cải tiến sản phẩm trước khi ra mắt chính thức..."></textarea>
+                    </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-warning" onclick="closeSurveyModal()">Hủy</button>
-                <button class="btn btn-success" onclick="submitModalSurvey()">Hoàn tất khảo sát</button>
+            <div class="modal-footer" style="padding:16px 24px;">
+                <button type="button" class="btn btn-warning" onclick="closeSurveyModal()">Hủy bỏ</button>
+                <button type="button" class="btn" onclick="submitModalSurvey()" style="padding:10px 24px; font-size:13.5px; border-radius:8px;">
+                    Hoàn tất & Gửi kết quả khảo sát
+                </button>
             </div>
         </div>
     </div>
 
-    <script src="user.js"></script>
+    <script src="user.js?v=20261113_final_v5"></script>
 </body>
 </html>

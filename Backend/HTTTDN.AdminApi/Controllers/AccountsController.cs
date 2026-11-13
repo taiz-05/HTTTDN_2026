@@ -16,11 +16,8 @@ namespace HTTTDN.AdminApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var allowedRoles = new[] { "Admin", "Manager", "Customer" };
-
             var list = await _context.Accounts
                 .Include(a => a.Role)
-                .Where(a => a.Role == null || allowedRoles.Contains(a.Role.RoleName))
                 .OrderByDescending(a => a.AccountId)
                 .Select(a => new
                 {
@@ -31,6 +28,7 @@ namespace HTTTDN.AdminApi.Controllers
                     a.Phone,
                     a.RoleId,
                     RoleName = a.Role != null ? a.Role.RoleName : "Customer",
+                    RoleDescription = a.Role != null ? a.Role.Description : "",
                     a.IsActive,
                     a.CreatedAt
                 })
@@ -38,14 +36,13 @@ namespace HTTTDN.AdminApi.Controllers
             return Ok(list);
         }
 
-        // Chỉ trả về đúng 3 quyền: Admin, Manager, Customer
+        // Trả về danh sách các quyền trong hệ thống để Admin phân quyền cho Account
         [HttpGet("roles")]
         [HttpGet("/api/admin/roles")]
         public async Task<IActionResult> GetRoles()
         {
-            var allowedRoles = new[] { "Admin", "Manager", "Customer" };
             var roles = await _context.Roles
-                .Where(r => allowedRoles.Contains(r.RoleName))
+                .OrderBy(r => r.RoleId)
                 .ToListAsync();
             return Ok(roles);
         }

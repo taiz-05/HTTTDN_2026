@@ -3,34 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập Nội bộ - Hệ thống HTTT Doanh nghiệp</title>
-    <link rel="stylesheet" href="style.css">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Đăng nhập Hệ thống Nội bộ - Admin Server & Quản lý | SGU Enterprise</title>
+    <link rel="stylesheet" href="style.css?v=20261113_final_v5">
 </head>
 <body>
     <div class="auth-wrapper">
-        <div class="auth-card">
-            <div class="auth-brand-badge">SGU TECH ENTERPRISE</div>
+        <div class="auth-card" style="box-shadow: 0 20px 45px rgba(255, 91, 0, 0.08); border: 1.5px solid #FFD4BF; border-radius: 20px;">
+            <div class="auth-brand-badge" style="background: linear-gradient(135deg, #FF6A00, #EE4D00); font-size: 13px; font-weight: 800; letter-spacing: 0.04em;">SGU ENTERPRISE</div>
             <div class="auth-header">
-                <h2>CỔNG QUẢN TRỊ NỘI BỘ</h2>
-                <p>Đăng nhập bảo mật dành cho Quản trị viên (Admin) & Quản lý CRM</p>
+                <h2 style="font-size: 22px; font-weight: 800; color: #0F172A; letter-spacing: -0.02em;">HỆ THỐNG QUẢN TRỊ NỘI BỘ</h2>
+                <p style="font-size: 13px; color: #64748B; margin-top: 4px;">Cổng đăng nhập bảo mật dành riêng cho Admin Server & Quản lý CRM</p>
             </div>
 
             <form id="adminLoginForm" onsubmit="event.preventDefault(); handleLogin();">
-                <div style="margin-bottom: 14px;">
+                <div style="margin-bottom: 16px;">
                     <label for="username">Tài khoản đăng nhập</label>
-                    <input type="text" id="username" placeholder="Nhập tên tài khoản (admin / quanly)" autocomplete="username" required autofocus>
+                    <input type="text" id="username" placeholder="Nhập tên tài khoản (VD: admin hoặc quanly)" autocomplete="username" required autofocus>
                 </div>
 
-                <div style="margin-bottom: 20px;">
+                <div style="margin-bottom: 22px;">
                     <label for="password">Mật khẩu</label>
                     <input type="password" id="password" placeholder="Nhập mật khẩu" autocomplete="current-password" required>
                 </div>
 
-                <button type="submit" class="btn" style="width: 100%; padding: 10px;">Đăng nhập</button>
+                <button type="submit" class="btn" style="width: 100%; padding: 12px; font-size: 14px; border-radius: 10px;">
+                    Đăng nhập hệ thống
+                </button>
             </form>
 
-            <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-color); text-align: center; font-size: 13px;">
-                Khách hàng mua sắm: <a href="customer_login.html">Chuyển sang trang Khách hàng</a>
+            <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #F1F5F9; text-align: center; font-size: 12.5px; color: #64748b;">
+                Khách hàng mua sắm & khảo sát: <a href="customer_login.html" style="color: #FF5B00; font-weight: 700; text-decoration: none;">Cổng Khách hàng &rarr;</a>
             </div>
         </div>
     </div>
@@ -52,10 +57,18 @@
                 const data = await res.json();
                 if (!res.ok) return alert(data.message || "Đăng nhập thất bại.");
 
+                if (data.roleName === "Customer") {
+                    return alert("Tài khoản Khách hàng không có quyền truy cập Hệ thống Quản trị Nội bộ! Vui lòng chuyển sang Cổng Khách hàng.");
+                }
+
                 localStorage.setItem("currentUser", JSON.stringify(data));
-                if (data.roleName === "Admin") window.location.href = "admin.html";
-                else if (data.roleName === "Manager") window.location.href = "manager_crm.html";
-                else window.location.href = "customer_login.html";
+                if (data.roleName === "Admin") {
+                    window.location.href = "admin.html";
+                } else if (data.roleName === "Manager") {
+                    window.location.href = "manager_crm.html";
+                } else {
+                    alert(`Đăng nhập thành công với quyền [${data.roleName}]. Phân hệ ${data.roleName} được tách biệt độc lập với Admin Server và Quản lý CRM.`);
+                }
             } catch (err) {
                 alert("Không thể kết nối đến máy chủ Backend (http://localhost:5000). Vui lòng đảm bảo bạn đã chạy lệnh 'dotnet run' tại thư mục Backend!");
             }

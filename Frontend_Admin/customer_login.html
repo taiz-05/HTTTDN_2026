@@ -3,73 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập & Đăng ký Khách hàng</title>
-    <link rel="stylesheet" href="style.css">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Cổng Dịch Vụ Khách Hàng - SGU Tech Store</title>
+    <link rel="stylesheet" href="style.css?v=20261113_final_v5">
 </head>
 <body>
     <div class="auth-wrapper">
-        <div class="auth-card" style="max-width: 440px;">
-            <div class="auth-brand-badge" style="background:#ecfdf5; border-color:#a7f3d0; color:#047857;">SGU TECH STORE</div>
+        <div class="auth-card" style="box-shadow: 0 20px 45px rgba(255, 91, 0, 0.08); border: 1.5px solid #FFD4BF; border-radius: 20px;">
+            <div class="auth-brand-badge" style="background: linear-gradient(135deg, #FF6A00, #EE4D00); font-size: 13px; font-weight: 800; letter-spacing: 0.04em;">SGU TECH STORE</div>
             <div class="auth-header">
-                <h2>CỔNG THÔNG TIN KHÁCH HÀNG</h2>
-                <p>Đăng nhập hoặc đăng ký tài khoản khách hàng mới</p>
+                <h2 style="font-size: 22px; font-weight: 800; color: #0F172A; letter-spacing: -0.02em;">CỔNG KHÁCH HÀNG</h2>
+                <p style="font-size: 13px; color: #64748B; margin-top: 4px;">Trải nghiệm mua sắm công nghệ số, gửi phản hồi và tham gia khảo sát</p>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 18px; background: #f3f4f6; padding: 4px; border-radius: 4px;">
-                <button type="button" class="btn" id="tabLoginBtn" onclick="switchAuthMode('login')">Đăng nhập</button>
-                <button type="button" class="btn btn-warning" id="tabRegBtn" onclick="switchAuthMode('register')">Đăng ký tài khoản</button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 22px; background: #FFF7ED; padding: 5px; border-radius: 12px; border: 1px solid #FFD4BF;">
+                <button type="button" class="btn" id="tabLoginBtn" onclick="switchAuthMode('login')" style="padding: 9px 12px; font-size: 13px; border-radius: 8px;">Đăng nhập</button>
+                <button type="button" class="btn btn-warning" id="tabRegBtn" onclick="switchAuthMode('register')" style="padding: 9px 12px; font-size: 13px; border-radius: 8px;">Đăng ký tài khoản</button>
             </div>
 
-            <!-- FORM ĐĂNG NHẬP (Nhấn Enter tự động đăng nhập) -->
+            <!-- FORM ĐĂNG NHẬP -->
             <form id="loginBox" onsubmit="event.preventDefault(); loginCustomer();">
-                <div style="margin-bottom: 14px;">
-                    <label for="lUser">Tên đăng nhập</label>
-                    <input type="text" id="lUser" placeholder="Nhập username (VD: khachhang1)" autocomplete="username" required autofocus>
+                <div style="margin-bottom: 16px;">
+                    <label for="lUser">Tên đăng nhập *</label>
+                    <input type="text" id="lUser" placeholder="VD: khachhang1" autocomplete="username" required autofocus>
                 </div>
-                <div style="margin-bottom: 18px;">
-                    <label for="lPass">Mật khẩu</label>
+                <div style="margin-bottom: 22px;">
+                    <label for="lPass">Mật khẩu *</label>
                     <input type="password" id="lPass" placeholder="Nhập mật khẩu" autocomplete="current-password" required>
                 </div>
-                <button type="submit" class="btn btn-success" style="width: 100%; padding: 10px;">Đăng nhập</button>
+                <button type="submit" class="btn" style="width: 100%; padding: 12px; font-size: 14px; border-radius: 10px;">
+                    Đăng nhập hệ thống
+                </button>
             </form>
 
-            <!-- FORM ĐĂNG KÝ (Nhấn Enter tự động đăng ký) -->
+            <!-- FORM ĐĂNG KÝ TỐI GIẢN (CHỈ 3 TRƯỜNG BẮT BUỘC + 1 SĐT TÙY CHỌN) -->
             <form id="registerBox" style="display: none;" onsubmit="event.preventDefault(); registerCustomer();">
-                <div class="grid-form" style="grid-template-columns: 1fr 1fr;">
-                    <div>
-                        <label>Tên đăng nhập</label>
-                        <input type="text" id="rUser" placeholder="Username" required>
-                    </div>
-                    <div>
-                        <label>Mật khẩu</label>
-                        <input type="password" id="rPass" placeholder="Mật khẩu" required>
-                    </div>
+                <div style="margin-bottom: 14px;">
+                    <label for="rUser">Tên đăng nhập mới *</label>
+                    <input type="text" id="rUser" placeholder="VD: khachhang_moi" required>
                 </div>
-                <div style="margin-bottom: 12px;">
-                    <label>Họ và tên khách hàng</label>
-                    <input type="text" id="rName" placeholder="Nhập họ và tên" required>
+
+                <div style="margin-bottom: 14px;">
+                    <label for="rPass">Mật khẩu *</label>
+                    <input type="password" id="rPass" placeholder="Khởi tạo mật khẩu" required>
                 </div>
-                <div class="grid-form" style="grid-template-columns: 1fr 1fr;">
-                    <div>
-                        <label>Số điện thoại</label>
-                        <input type="text" id="rPhone" placeholder="Số điện thoại">
-                    </div>
-                    <div>
-                        <label>Độ tuổi</label>
-                        <input type="number" id="rAge" value="20" min="10" max="100">
-                    </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label for="rName">Họ và tên khách hàng *</label>
+                    <input type="text" id="rName" placeholder="Nhập họ và tên đầy đủ" required>
                 </div>
+
                 <div style="margin-bottom: 18px;">
-                    <label>Sở thích tiêu dùng</label>
-                    <select id="rInterest">
-                        <option value="Gaming">Gaming</option>
-                        <option value="Văn phòng">Văn phòng</option>
-                        <option value="Đồ họa">Đồ họa</option>
-                        <option value="Lập trình">Lập trình</option>
-                    </select>
+                    <label for="rPhone">Số điện thoại (tùy chọn)</label>
+                    <input type="text" id="rPhone" placeholder="VD: 0901234567">
                 </div>
-                <button type="submit" class="btn btn-success" style="width: 100%; padding: 10px;">Hoàn tất đăng ký</button>
+
+                <button type="submit" class="btn" style="width: 100%; padding: 12px; font-size: 14px; border-radius: 10px;">
+                    Hoàn tất đăng ký
+                </button>
+                
+                <p style="font-size: 12px; color: #64748b; text-align: center; margin-top: 12px; line-height: 1.5;">
+                    Độ tuổi, giới tính và sở thích tiêu dùng sẽ được tạo sẵn. Bạn có thể cập nhật chi tiết trong mục <b>Hồ sơ cá nhân</b> sau khi đăng nhập.
+                </p>
             </form>
+
+            <!-- LIÊN KẾT CHUYỂN CỔNG NỘI BỘ -->
+            <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #F1F5F9; text-align: center; font-size: 12.5px; color: #64748b;">
+                Dành cho Quản trị viên & Quản lý: <a href="login.html" style="color: #FF5B00; font-weight: 700; text-decoration: none;">Cổng Quản trị Nội bộ &rarr;</a>
+            </div>
         </div>
     </div>
 
@@ -119,18 +122,22 @@
             const username = document.getElementById("rUser").value.trim();
             const password = document.getElementById("rPass").value.trim();
             const fullName = document.getElementById("rName").value.trim();
+            const phone = document.getElementById("rPhone").value.trim();
 
             if (!username || !password || !fullName) {
-                return alert("Vui lòng nhập đầy đủ Tên đăng nhập, Mật khẩu và Họ tên.");
+                return alert("Vui lòng nhập đầy đủ Tên đăng nhập, Mật khẩu và Họ tên khách hàng.");
             }
 
             const body = {
                 username,
                 password,
                 fullName,
-                phone: document.getElementById("rPhone").value.trim(),
-                age: Number(document.getElementById("rAge").value || 20),
-                interest: document.getElementById("rInterest").value
+                phone: phone || "0901234567",
+                email: `${username.toLowerCase()}@customer.sgutech.vn`,
+                age: 22,
+                gender: "Nam",
+                interest: "Gaming",
+                address: "TP. Hồ Chí Minh"
             };
 
             try {
@@ -140,9 +147,9 @@
                     body: JSON.stringify(body)
                 });
                 const data = await res.json();
-                if (!res.ok) return alert(data.message || "Lỗi đăng ký.");
+                if (!res.ok) return alert(data.message || "Lỗi đăng ký tài khoản.");
 
-                alert("Đăng ký tài khoản thành công. Vui lòng đăng nhập.");
+                alert("Đăng ký tài khoản thành công! Bạn có thể đăng nhập ngay.");
                 document.getElementById("lUser").value = username;
                 document.getElementById("lPass").value = password;
                 switchAuthMode('login');
