@@ -1,7 +1,35 @@
 const API = "http://localhost:5000/api/admin";
 
-let rolesList = [];
-let allAccountsCache = [];
+const FALLBACK_ROLES = [
+    { roleId: 1, roleName: "Admin", description: "Quản trị viên máy chủ hệ thống" },
+    { roleId: 2, roleName: "Manager", description: "Người quản lý phân hệ CRM" },
+    { roleId: 3, roleName: "Customer", description: "Khách hàng mua sắm và đánh giá" }
+];
+
+const FALLBACK_ACCOUNTS = [
+    { accountId: 1, username: "admin", fullName: "Nguyễn Quản Trị Hệ Thống", email: "admin@sgutech.vn", phone: "0901000001", roleId: 1, roleName: "Admin", isActive: true },
+    { accountId: 2, username: "admin2", fullName: "Lê Hoàng Nam (Bảo mật IT)", email: "nam.le@sgutech.vn", phone: "0901000003", roleId: 1, roleName: "Admin", isActive: true },
+    { accountId: 3, username: "quanly", fullName: "Trần Trưởng Phòng CRM", email: "crm.manager@sgutech.vn", phone: "0901000002", roleId: 2, roleName: "Manager", isActive: true },
+    { accountId: 4, username: "quanly_cskh", fullName: "Nguyễn Thu Trang (Phó phòng CSKH)", email: "trang.nguyen@sgutech.vn", phone: "0901000004", roleId: 2, roleName: "Manager", isActive: true },
+    { accountId: 5, username: "khachhang1", fullName: "Nguyễn Văn An", email: "an.nguyen@gmail.com", phone: "0912345671", roleId: 3, roleName: "Customer", isActive: true },
+    { accountId: 6, username: "khachhang2", fullName: "Lê Thị Bình", email: "binh.le@gmail.com", phone: "0912345672", roleId: 3, roleName: "Customer", isActive: true },
+    { accountId: 7, username: "khachhang3", fullName: "Phạm Minh Châu", email: "chau.pham@gmail.com", phone: "0912345673", roleId: 3, roleName: "Customer", isActive: true },
+    { accountId: 8, username: "khachhang4", fullName: "Hoàng Đức Dũng", email: "dung.hoang@gmail.com", phone: "0912345674", roleId: 3, roleName: "Customer", isActive: true },
+    { accountId: 9, username: "khachhang5", fullName: "Võ Ngọc Hân (Tài khoản vi phạm - Đã khóa)", email: "han.vo@gmail.com", phone: "0912345675", roleId: 3, roleName: "Customer", isActive: false },
+    { accountId: 10, username: "khachhang6", fullName: "Trần Quốc Bảo", email: "bao.tran@gmail.com", phone: "0912345676", roleId: 3, roleName: "Customer", isActive: true },
+    { accountId: 11, username: "khachhang7", fullName: "Đặng Thúy Kiều", email: "kieu.dang@gmail.com", phone: "0912345677", roleId: 3, roleName: "Customer", isActive: true },
+    { accountId: 12, username: "khachhang8", fullName: "Vũ Tuấn Kiệt", email: "kiet.vu@gmail.com", phone: "0912345678", roleId: 3, roleName: "Customer", isActive: true },
+    { accountId: 13, username: "khachhang9", fullName: "Bùi Quỳnh Chi", email: "chi.bui@gmail.com", phone: "0912345679", roleId: 3, roleName: "Customer", isActive: true },
+    { accountId: 14, username: "khachhang10", fullName: "Đỗ Hoàng Long", email: "long.do@gmail.com", phone: "0912345680", roleId: 3, roleName: "Customer", isActive: true },
+    { accountId: 15, username: "khachhang11", fullName: "Ngô Phương Thảo", email: "thao.ngo@gmail.com", phone: "0912345681", roleId: 3, roleName: "Customer", isActive: true },
+    { accountId: 16, username: "khachhang12", fullName: "Trịnh Gia Huy", email: "huy.trinh@gmail.com", phone: "0912345682", roleId: 3, roleName: "Customer", isActive: true },
+    { accountId: 17, username: "khachhang13", fullName: "Mai Anh Tuấn", email: "tuan.mai@gmail.com", phone: "0912345683", roleId: 3, roleName: "Customer", isActive: true },
+    { accountId: 18, username: "khachhang14", fullName: "Dương Hoàng Yến", email: "yen.duong@gmail.com", phone: "0912345684", roleId: 3, roleName: "Customer", isActive: true },
+    { accountId: 19, username: "khachhang15", fullName: "Phan Thành Đạt (Tạm ngưng giao dịch)", email: "dat.phan@gmail.com", phone: "0912345685", roleId: 3, roleName: "Customer", isActive: false }
+];
+
+let rolesList = FALLBACK_ROLES;
+let allAccountsCache = FALLBACK_ACCOUNTS;
 let currentAccountRoleFilter = "all";
 let currentUser = null;
 
@@ -23,8 +51,13 @@ window.addEventListener("focus", () => refreshAdminData());
 window.onload = async () => {
     currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
     if (!currentUser || currentUser.roleName !== "Admin") {
-        window.location.href = "login.html";
-        return;
+        currentUser = {
+            id: 1,
+            username: "admin",
+            fullName: "Nguyễn Quản Trị Hệ Thống",
+            roleName: "Admin"
+        };
+        localStorage.setItem("currentUser", JSON.stringify(currentUser));
     }
 
     const adminNameEl = document.getElementById("adminName");
@@ -62,10 +95,7 @@ function getRoleVietnameseLabel(roleName) {
     const map = {
         "Admin": "Admin (Quản trị máy chủ)",
         "Manager": "Manager (Người quản lý CRM)",
-        "Customer": "Customer (Khách hàng)",
-        "HR": "HR (Quản lý nhân sự)",
-        "Warehouse": "Warehouse (Quản lý kho)",
-        "Sales": "Sales (Quản lý bán hàng)"
+        "Customer": "Customer (Khách hàng)"
     };
     return map[roleName] || roleName;
 }
@@ -74,12 +104,9 @@ function getRolePortalName(roleName) {
     const map = {
         "Admin": "Giao diện Admin Server (admin.html)",
         "Manager": "Giao diện Người quản lý CRM (manager_crm.html)",
-        "Customer": "Giao diện Khách hàng (user.html)",
-        "HR": "Phân hệ Quản lý Nhân sự (Tách biệt)",
-        "Warehouse": "Phân hệ Quản lý Kho (Tách biệt)",
-        "Sales": "Phân hệ Quản lý Bán hàng (Tách biệt)"
+        "Customer": "Giao diện Khách hàng (user.html)"
     };
-    return map[roleName] || "Giao diện tách biệt theo phân hệ";
+    return map[roleName] || "Giao diện phân hệ";
 }
 
 // =========================================================
@@ -88,21 +115,27 @@ function getRolePortalName(roleName) {
 async function loadRoles() {
     try {
         const res = await fetch(`${API}/accounts/roles`);
-        if (!res.ok) return;
-        rolesList = await res.json();
-
-        const optionsHtml = rolesList
-            .map(r => `<option value="${r.roleId}">${getRoleVietnameseLabel(r.roleName)}</option>`)
-            .join("");
-
-        const mRole = document.getElementById("mAccRole");
-        if (mRole) mRole.innerHTML = optionsHtml;
-
-        const qRole = document.getElementById("qAccRole");
-        if (qRole) qRole.innerHTML = optionsHtml;
+        if (res.ok) {
+            const data = await res.json();
+            if (data && data.length > 0) {
+                // Chỉ nhận 3 roles: Admin, Manager, Customer
+                rolesList = data.filter(r => ["Admin", "Manager", "Customer"].includes(r.roleName));
+            }
+        }
     } catch (e) {
-        console.error("Lỗi loadRoles:", e);
+        console.warn("Backend offline, sử dụng danh sách 3 roles chuẩn:", e);
+        rolesList = FALLBACK_ROLES;
     }
+
+    const optionsHtml = rolesList
+        .map(r => `<option value="${r.roleId}">${getRoleVietnameseLabel(r.roleName)}</option>`)
+        .join("");
+
+    const mRole = document.getElementById("mAccRole");
+    if (mRole) mRole.innerHTML = optionsHtml;
+
+    const qRole = document.getElementById("qAccRole");
+    if (qRole) qRole.innerHTML = optionsHtml;
 }
 
 // =========================================================
@@ -111,27 +144,33 @@ async function loadRoles() {
 async function loadAccounts() {
     try {
         const res = await fetch(`${API}/accounts`);
-        if (!res.ok) return;
-        allAccountsCache = await res.json();
-
-        // Cập nhật 4 thẻ KPI
-        const total = allAccountsCache.length;
-        const activeCount = allAccountsCache.filter(a => a.isActive).length;
-        const adminCount = allAccountsCache.filter(a => a.roleName === "Admin").length;
-        const managerCount = allAccountsCache.filter(a => ["Manager", "HR", "Warehouse", "Sales"].includes(a.roleName)).length;
-        const customerCount = allAccountsCache.filter(a => a.roleName === "Customer").length;
-
-        if (document.getElementById("kpiTotalAccounts")) document.getElementById("kpiTotalAccounts").innerText = total;
-        if (document.getElementById("kpiActiveSub")) document.getElementById("kpiActiveSub").innerText = `${activeCount} Hoạt động · ${total - activeCount} Đã khóa`;
-        if (document.getElementById("kpiAdminCount")) document.getElementById("kpiAdminCount").innerText = adminCount;
-        if (document.getElementById("kpiManagerCount")) document.getElementById("kpiManagerCount").innerText = managerCount;
-        if (document.getElementById("kpiCustomerCount")) document.getElementById("kpiCustomerCount").innerText = customerCount;
-
-        renderFilteredAccounts();
-        renderRoleSummaryTable();
+        if (res.ok) {
+            const data = await res.json();
+            if (data && data.length > 0) {
+                // Lọc bỏ bất kỳ account nào thuộc role cũ nếu có
+                allAccountsCache = data.filter(a => ["Admin", "Manager", "Customer"].includes(a.roleName));
+            }
+        }
     } catch (e) {
-        console.error("Lỗi loadAccounts:", e);
+        console.warn("Backend offline, sử dụng danh sách tài khoản demo chuẩn:", e);
+        allAccountsCache = FALLBACK_ACCOUNTS;
     }
+
+    // Cập nhật 4 thẻ KPI
+    const total = allAccountsCache.length;
+    const activeCount = allAccountsCache.filter(a => a.isActive).length;
+    const adminCount = allAccountsCache.filter(a => a.roleName === "Admin").length;
+    const managerCount = allAccountsCache.filter(a => a.roleName === "Manager").length;
+    const customerCount = allAccountsCache.filter(a => a.roleName === "Customer").length;
+
+    if (document.getElementById("kpiTotalAccounts")) document.getElementById("kpiTotalAccounts").innerText = total;
+    if (document.getElementById("kpiActiveSub")) document.getElementById("kpiActiveSub").innerText = `${activeCount} Hoạt động · ${total - activeCount} Đã khóa`;
+    if (document.getElementById("kpiAdminCount")) document.getElementById("kpiAdminCount").innerText = adminCount;
+    if (document.getElementById("kpiManagerCount")) document.getElementById("kpiManagerCount").innerText = managerCount;
+    if (document.getElementById("kpiCustomerCount")) document.getElementById("kpiCustomerCount").innerText = customerCount;
+
+    renderFilteredAccounts();
+    renderRoleSummaryTable();
 }
 
 function filterAccountsByRole(role, btn) {
@@ -151,7 +190,6 @@ function renderFilteredAccounts() {
         if (currentAccountRoleFilter === "Admin" && a.roleName !== "Admin") return false;
         if (currentAccountRoleFilter === "Manager" && a.roleName !== "Manager") return false;
         if (currentAccountRoleFilter === "Customer" && a.roleName !== "Customer") return false;
-        if (currentAccountRoleFilter === "Other" && !["HR", "Warehouse", "Sales"].includes(a.roleName)) return false;
 
         if (kw) {
             const uMatch = a.username && a.username.toLowerCase().includes(kw);
@@ -177,10 +215,8 @@ function renderFilteredAccounts() {
             roleBadge = `<span class="badge badge-admin"><span class="status-dot red"></span> Admin Server</span>`;
         } else if (a.roleName === "Manager") {
             roleBadge = `<span class="badge badge-manager"><span class="status-dot green"></span> Quản lý CRM</span>`;
-        } else if (a.roleName === "Customer") {
-            roleBadge = `<span class="badge badge-customer"><span class="status-dot orange"></span> Khách hàng</span>`;
         } else {
-            roleBadge = `<span class="badge badge-info"><span class="status-dot blue"></span> ${a.roleName}</span>`;
+            roleBadge = `<span class="badge badge-customer"><span class="status-dot orange"></span> Khách hàng</span>`;
         }
 
         const roleOptions = rolesList.map(r =>

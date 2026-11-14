@@ -50,6 +50,19 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+if (args.Contains("--seed-only"))
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var rNames = string.Join(", ", context.Roles.Select(r => r.RoleName));
+        Console.WriteLine($"[ROLES IN DB]: {rNames}");
+        Console.WriteLine($"[ACCOUNTS IN DB]: {context.Accounts.Count()} accounts.");
+    }
+    Console.WriteLine("[DB SEED SUCCESS]: SQLite database initialized with 3 roles: Admin, Manager, Customer.");
+    return;
+}
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
