@@ -7,11 +7,11 @@ HỌC KỲ 1 - NĂM HỌC 2026 - 2027 | TRƯỜNG ĐẠI HỌC SÀI GÒN (SGU)
 Xây dựng Hệ thống Thông tin Quản trị Doanh nghiệp Thương mại & Mô phỏng Phân hệ Quản lý Quan hệ Khách hàng (CRM - Mục III.4).
 
 2. DANH SÁCH THÀNH VIÊN NHÓM:
-- Thành viên 1: [Họ tên] - MSSV: [MSSV] - Khối lượng: 100% (Nhóm trưởng, Backend, Database)
-- Thành viên 2: [Họ tên] - MSSV: [MSSV] - Khối lượng: 100% (Frontend Admin & Manager CRM)
-- Thành viên 3: [Họ tên] - MSSV: [MSSV] - Khối lượng: 100% (Frontend Customer, Phân tích BFD/DFD)
-- Thành viên 4: [Họ tên] - MSSV: [MSSV] - Khối lượng: 100% (Thiết kế CSDL, Script SQL, Backup/Restore)
-- Thành viên 5: [Họ tên] - MSSV: [MSSV] - Khối lượng: 100% (Kiểm thử, Báo cáo Word, Hướng dẫn sử dụng)
+- Thành viên 1: [Huỳnh Tuấn Tài] - MSSV: [3123411261] - Khối lượng: 100% (Nhóm trưởng, Backend, Database,Kiểm thử)
+- Thành viên 2: [Hoàng Thái Thanh] - MSSV: [3123411267] - Khối lượng: 100% (Frontend Admin & Manager CRM,Báo cáo Word)
+- Thành viên 3: [Lê Nguyễn Phú Hải] - MSSV: [3123411080] - Khối lượng: 100% (Frontend Customer, Phân tích BFD/DFD,Hướng dẫn sử dụng)
+- Thành viên 4: [Nguyễn Đăng Khoa] - MSSV: [3123411157] - Khối lượng: 100% (Thiết kế CSDL, Script SQL, Backup/Restore)
+
 
 3. CẤU TRÚC THƯ MỤC NỘP BÀI:
 - /Database/HTTTDN_DB.sql             : Script khởi tạo 9 bảng CSDL, dữ liệu demo và kịch bản Backup/Restore.
@@ -23,7 +23,7 @@ Xây dựng Hệ thống Thông tin Quản trị Doanh nghiệp Thương mại &
 
 4. HƯỚNG DẪN CÀI ĐẶT & CHẠY CHƯƠNG TRÌNH:
 - Cách 1 (Chạy nhanh tự động với SQLite tích hợp sẵn):
-  + Nhấp đúp vào file "start_demo.bat" ở thư mục gốc, hoặc mở Terminal tại "/Backend/HTTTDN.AdminApi" và chạy lệnh "dotnet run" (Server chạy ở http://localhost:5000, tự động tạo CSDL và nạp sẵn dữ liệu mẫu).
+  + Nhấp đúp vào file "start_demo.bat" ở thư mục gốc, hoặc mở Terminal tại "" và chạy lệnh "dotnet run" (Server chạy ở http://localhost:5000, tự động tạo CSDL và nạp sẵn dữ liệu mẫu).
   + Mở "/Frontend_Admin/login.html" (dành cho Admin & Quản lý CRM) hoặc "/Frontend_Admin/customer_login.html" (dành cho Khách hàng).
 - Cách 2 (Chạy với Microsoft SQL Server):
   + Mở SQL Server Management Studio (SSMS), chạy toàn bộ file "/Database/HTTTDN_DB.sql".

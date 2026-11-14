@@ -130,14 +130,11 @@ GO
 -- PHẦN II: NẠP DỮ LIỆU DEMO DOANH NGHIỆP PHONG PHÚ (22 TÀI KHOẢN, 16 SẢN PHẨM, 18 PHẢN HỒI, 5 KHẢO SÁT)
 -- ========================================================================
 
--- 1. Nạp danh sách quyền (Roles)
+-- 1. Nạp danh sách quyền (Roles) - CHỈ CÒN 3 ROLE: Admin, Manager, Customer
 INSERT INTO Roles (RoleName, Description) VALUES
 (N'Admin', N'Quản trị viên máy chủ hệ thống'),
 (N'Manager', N'Người quản lý phân hệ CRM'),
-(N'Customer', N'Khách hàng mua sắm và đánh giá'),
-(N'Warehouse', N'Nhân viên quản lý kho'),
-(N'Sales', N'Nhân viên bán hàng'),
-(N'HR', N'Nhân viên quản lý nhân sự');
+(N'Customer', N'Khách hàng mua sắm và đánh giá');
 
 -- 2. Nạp tài khoản test (Tất cả mật khẩu mặc định: 123456)
 INSERT INTO Accounts (Username, PasswordHash, FullName, Email, Phone, RoleId, IsActive, CreatedAt) VALUES
@@ -145,9 +142,6 @@ INSERT INTO Accounts (Username, PasswordHash, FullName, Email, Phone, RoleId, Is
 ('admin2', '123456', N'Lê Hoàng Nam (Bảo mật IT)', 'nam.le@sgutech.vn', '0901000003', 1, 1, DATEADD(DAY, -45, GETDATE())),
 ('quanly', '123456', N'Trần Trưởng Phòng CRM', 'crm.manager@sgutech.vn', '0901000002', 2, 1, DATEADD(DAY, -55, GETDATE())),
 ('quanly_cskh', '123456', N'Nguyễn Thu Trang (Phó phòng CSKH)', 'trang.nguyen@sgutech.vn', '0901000004', 2, 1, DATEADD(DAY, -40, GETDATE())),
-('kho_lead', '123456', N'Phạm Hoàng Kho (Thủ kho chính)', 'kho@sgutech.vn', '0901000005', 4, 1, DATEADD(DAY, -35, GETDATE())),
-('sales_lead', '123456', N'Đặng Bích Sales (Trưởng nhóm Sale)', 'sales@sgutech.vn', '0901000006', 5, 1, DATEADD(DAY, -30, GETDATE())),
-('hr_lead', '123456', N'Vũ Minh Nhân Sự (Chuyên viên HR)', 'hr@sgutech.vn', '0901000007', 6, 1, DATEADD(DAY, -28, GETDATE())),
 ('khachhang1', '123456', N'Nguyễn Văn An', 'an.nguyen@gmail.com', '0912345671', 3, 1, DATEADD(DAY, -25, GETDATE())),
 ('khachhang2', '123456', N'Lê Thị Bình', 'binh.le@gmail.com', '0912345672', 3, 1, DATEADD(DAY, -22, GETDATE())),
 ('khachhang3', '123456', N'Phạm Minh Châu', 'chau.pham@gmail.com', '0912345673', 3, 1, DATEADD(DAY, -20, GETDATE())),

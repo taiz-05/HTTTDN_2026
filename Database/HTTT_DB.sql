@@ -130,14 +130,11 @@ GO
 -- PHẦN II: NẠP DỮ LIỆU DEMO THEO QUY ĐỊNH CHẤM ĐỒ ÁN (ĐẦY ĐỦ TÀI KHOẢN & GIAO DỊCH)
 -- ========================================================================
 
--- 1. Nạp danh sách quyền (Roles)
+-- 1. Nạp danh sách quyền (Roles) - CHỈ CÒN 3 ROLE: Admin, Manager, Customer
 INSERT INTO Roles (RoleName, Description) VALUES
 (N'Admin', N'Quản trị viên máy chủ hệ thống'),
 (N'Manager', N'Người quản lý phân hệ CRM'),
-(N'Customer', N'Khách hàng mua sắm và đánh giá'),
-(N'Warehouse', N'Nhân viên quản lý kho'),
-(N'Sales', N'Nhân viên bán hàng'),
-(N'HR', N'Nhân viên quản lý nhân sự');
+(N'Customer', N'Khách hàng mua sắm và đánh giá');
 
 -- 2. Nạp tài khoản test (Tất cả mật khẩu mặc định là: 123456)
 INSERT INTO Accounts (Username, PasswordHash, FullName, Email, Phone, RoleId, IsActive, CreatedAt) VALUES

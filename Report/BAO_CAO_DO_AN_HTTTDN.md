@@ -18,11 +18,10 @@
 
 | STT | MSSV | Họ và Tên | Nhiệm vụ chính được phân công | Tỷ lệ đóng góp (%) | Điểm tự đánh giá | Chữ ký |
 | :---: | :---: | :--- | :--- | :---: | :---: | :---: |
-| 1 | 3121xxxxxx | [Họ tên SV 1] | **Nhóm trưởng:** Khảo sát HTTT, Phân tích nghiệp vụ, Viết bài toán mô tả, Quản lý tiến độ dự án. | 100% | 10 / 10 | |
-| 2 | 3121xxxxxx | [Họ tên SV 2] | Vẽ Sơ đồ chức năng (BFD), Sơ đồ ngữ cảnh, Sơ đồ DFD mức đỉnh, Xây dựng bảng từ điển CSDL. | 100% | 10 / 10 | |
-| 3 | 3121xxxxxx | [Họ tên SV 3] | Thiết kế CSDL SQL Server 9 bảng, Viết kịch bản Backup/Restore, Xây dựng Backend ASP.NET Core API. | 100% | 10 / 10 | |
-| 4 | 3121xxxxxx | [Họ tên SV 4] | Lập trình Frontend: Cổng Quản trị Admin Server & Phân hệ Quản lý CRM Manager (Chart.js, Báo cáo). | 100% | 10 / 10 | |
-| 5 | 3121xxxxxx | [Họ tên SV 5] | Lập trình Frontend Cổng Khách hàng (Đánh giá, Khảo sát), Kiểm thử (Test case), Soạn thảo báo cáo Word. | 100% | 10 / 10 | |
+| 1 | 3123411261 | [Huỳnh Tuấn Tài] | **Nhóm trưởng:** Khảo sát HTTT, Phân tích nghiệp vụ, Viết bài toán mô tả, Kiểm thử (Test case), Quản lý tiến độ dự án. | 100% | 10 / 10 | |
+| 2 | 3123411267 | [Hoàng Thái Thanh] | Vẽ Sơ đồ chức năng (BFD), Sơ đồ ngữ cảnh, Sơ đồ DFD mức đỉnh, Xây dựng bảng từ điển CSDL. | 100% | 10 / 10 | |
+| 3 | 3123411157 | [Nguyễn Đăng Khoa] | Thiết kế CSDL SQL Server 9 bảng, Viết kịch bản Backup/Restore, Xây dựng Backend ASP.NET Core API. | 100% | 10 / 10 | |
+| 4 | 3123411080 | [Lê Nguyễn Phú Hải] | Lập trình Frontend:  Cổng Khách hàng (Đánh giá, Khảo sát),Cổng Quản trị Admin Server & Phân hệ Quản lý CRM Manager (Chart.js, Báo cáo). | 100% | 10 / 10 | |
 
 #### Bảng Kế hoạch Làm việc Chi tiết (Tiến độ 15 tuần):
 * **Tuần 1 – Tuần 2:** Nhận đề tài từ Khoa CNTT SGU, họp nhóm phân chia vai trò, xác định phạm vi chọn phân hệ CRM (Mục III.4).
@@ -179,7 +178,7 @@ Hệ thống được thiết kế chuẩn hóa gồm **9 bảng quan hệ chặ
 | Tên cột | Kiểu dữ liệu | Khóa | Ràng buộc | Mô tả |
 | :--- | :--- | :---: | :--- | :--- |
 | `RoleId` | INT | **PK** | IDENTITY(1,1) | Mã định danh vai trò |
-| `RoleName` | NVARCHAR(50) | | NOT NULL, UNIQUE | Tên quyền (Admin, Manager, Customer, Warehouse, Sales, HR) |
+| `RoleName` | NVARCHAR(50) | | NOT NULL, UNIQUE | Tên vai trò chuẩn hệ thống (Admin, Manager, Customer) |
 | `Description`| NVARCHAR(250)| | NULL | Mô tả quyền hạn trong hệ thống |
 
 #### 2. Bảng `Accounts` (Tài khoản người dùng)
@@ -383,7 +382,7 @@ Dưới đây là tài liệu hướng dẫn vận hành chi tiết cho 3 nhóm 
 ![Cổng Đăng nhập Quản trị Nội bộ](images/ui_guide_login.png)
 *Hình 4.1: Cổng Đăng nhập Hệ thống Quản trị Nội bộ dành riêng cho Admin và Quản lý*
 
-* **Bước 2 - Thao tác Quản trị Tài khoản & Phân quyền:** Trên giao diện `admin.html`, Quản trị viên theo dõi 4 thẻ chỉ số KPI, bấm nút "+ Thêm tài khoản" để cấp tài khoản mới, chọn quyền trực tiếp từ Dropdown (Admin, Manager, Customer, HR, Warehouse, Sales), bấm "Khóa" để tạm ngưng truy cập hoặc bấm "Xóa Account" để thu hồi tài khoản.
+* **Bước 2 - Thao tác Quản trị Tài khoản & Phân quyền:** Trên giao diện `admin.html`, Quản trị viên theo dõi 4 thẻ chỉ số KPI, bấm nút "+ Thêm tài khoản" để cấp tài khoản mới, chọn quyền trực tiếp từ Dropdown (Admin, Manager, Customer), bấm "Khóa" để tạm ngưng truy cập hoặc bấm "Xóa Account" để thu hồi tài khoản.
 
 ![Giao diện Tác nghiệp Admin Server](images/ui_guide_admin.png)
 *Hình 4.2: Giao diện Tác nghiệp của Admin Server — Quản lý Danh sách Tài khoản & Phân quyền trực tiếp*
