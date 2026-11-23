@@ -192,7 +192,7 @@ namespace HTTTDN.AdminApi.Controllers
             return Ok(new { totalCustomers = total, ageStats, interestStats });
         }
 
-        // 7. QUẢN LÝ KHẢO SÁT (CÓ THỜI HẠN + KHÓA/MỞ KHÓA + XÓA)
+        // 7. QUẢN LÝ KHẢO SÁT ĐA CÂU HỎI & ĐA YÊU CẦU (CÓ THỜI HẠN + KHÓA/MỞ KHÓA + XÓA + TIẾP NHẬN PHẢN HỒI)
         [HttpGet("surveys")]
         public async Task<IActionResult> GetSurveys()
         {
@@ -213,9 +213,13 @@ namespace HTTTDN.AdminApi.Controllers
                     s.CreatedAt,
                     s.IsActive,
                     s.ExpiresAt,
+                    s.RequirementsJson,
+                    s.QuestionsJson,
                     IsExpired = s.ExpiresAt.HasValue && s.ExpiresAt.Value < now,
                     TotalCustomerAccounts = totalCustomerAccounts,
-                    TotalResponses = _context.SurveyResponses.Count(r => r.SurveyId == s.SurveyId)
+                    TotalResponses = _context.SurveyResponses.Count(r => r.SurveyId == s.SurveyId),
+                    PendingResponses = _context.SurveyResponses.Count(r => r.SurveyId == s.SurveyId && (r.AdminReply == null || r.AdminReply == "")),
+                    AnsweredResponses = _context.SurveyResponses.Count(r => r.SurveyId == s.SurveyId && r.AdminReply != null && r.AdminReply != "")
                 })
                 .ToListAsync();
 
@@ -232,9 +236,17 @@ namespace HTTTDN.AdminApi.Controllers
             }
             else if (dto.DurationType == "Date" && dto.ExpiresAt.HasValue)
             {
-                // Đặt hạn tới cuối ngày (23:59:59) của ngày được chọn
                 expiresAt = dto.ExpiresAt.Value.Date.AddDays(1).AddSeconds(-1);
             }
+
+            string defaultReqs = @"[""Yêu cầu đánh giá mức độ quan tâm & thiết kế sản phẩm"",""Yêu cầu thẩm định mức giá dự kiến & ngân sách chi trả"",""Yêu cầu khảo sát cấu hình kỹ thuật & tính năng ưu tiên"",""Yêu cầu xác định kế hoạch mua sắm & chính sách hậu mãi""]";
+            string defaultQs = @"[
+                {""id"":1,""requirement"":""Yêu cầu đánh giá mức độ quan tâm"",""question"":""Mức độ quan tâm và hào hứng của bạn đối với sản phẩm mới này?"",""type"":""rating"",""required"":true,""options"":[""1 - Rất thờ ơ"",""2 - Ít quan tâm"",""3 - Bình thường"",""4 - Khá quan tâm"",""5 - Rất hào hứng""]},
+                {""id"":2,""requirement"":""Yêu cầu thẩm định mức giá dự kiến"",""question"":""Bạn đánh giá thế nào về mức giá dự kiến mở bán so với công nghệ mang lại?"",""type"":""single"",""required"":true,""options"":[""Giá rất hợp lý / Đáng đầu tư"",""Mức giá hơi cao nhưng chấp nhận được"",""Mức giá quá đắt / Cần giảm thêm"",""Chưa phù hợp với ngân sách""]},
+                {""id"":3,""requirement"":""Yêu cầu khảo sát tính năng & cấu hình"",""question"":""Những tiêu chí kỹ thuật & tính năng nào bạn yêu cầu bắt buộc phải có trên sản phẩm?"",""type"":""multi"",""required"":true,""options"":[""Hiệu năng mạnh mẽ vượt trội"",""Thời lượng pin bền bỉ & Sạc nhanh"",""Thiết kế mỏng nhẹ cao cấp"",""Tích hợp công nghệ AI thông minh"",""Màn hình chuẩn màu độ phân giải cao""]},
+                {""id"":4,""requirement"":""Yêu cầu xác định kế hoạch mua sắm"",""question"":""Kế hoạch và ý định mua sắm của bạn khi sản phẩm chính thức mở bán?"",""type"":""single"",""required"":true,""options"":[""Rất muốn mua (Đặt trước Pre-order ngay)"",""Đang cân nhắc (Chờ xem đánh giá thực tế)"",""Đang cân nhắc (Đợi đợt khuyến mãi giảm giá)"",""Không mua (Chưa có nhu cầu)""]},
+                {""id"":5,""requirement"":""Yêu cầu đề xuất mức giá & góp ý riêng"",""question"":""Mức giá bạn sẵn sàng chi trả và các yêu cầu / góp ý chi tiết khác cho sản phẩm:"",""type"":""text"",""required"":false,""options"":[]}
+            ]";
 
             var survey = new Survey
             {
@@ -244,7 +256,9 @@ namespace HTTTDN.AdminApi.Controllers
                 ExpectedPrice = dto.ExpectedPrice,
                 CreatedAt = DateTime.Now,
                 IsActive = true,
-                ExpiresAt = expiresAt
+                ExpiresAt = expiresAt,
+                RequirementsJson = string.IsNullOrWhiteSpace(dto.RequirementsJson) ? defaultReqs : dto.RequirementsJson,
+                QuestionsJson = string.IsNullOrWhiteSpace(dto.QuestionsJson) ? defaultQs : dto.QuestionsJson
             };
 
             _context.Surveys.Add(survey);
@@ -256,9 +270,72 @@ namespace HTTTDN.AdminApi.Controllers
 
             return Ok(new
             {
-                message = $"Đã tạo bảng khảo sát và gửi đến {recipientCount} tài khoản khách hàng đang hoạt động!",
+                message = $"Đã tạo chiến dịch khảo sát đa câu hỏi và gửi đến {recipientCount} tài khoản khách hàng đang hoạt động!",
                 surveyId = survey.SurveyId,
                 recipientCount
+            });
+        }
+
+        // API LẤY TOÀN BỘ PHẢN HỒI / ĐÁNH GIÁ KHẢO SÁT CỦA KHÁCH HÀNG ĐỂ NGƯỜI QUẢN LÝ TIẾP NHẬN & TRẢ LỜI
+        [HttpGet("survey-responses")]
+        public async Task<IActionResult> GetAllSurveyResponses([FromQuery] int? surveyId)
+        {
+            var query = _context.SurveyResponses
+                .Include(r => r.Account)
+                .Include(r => r.Survey)
+                .AsQueryable();
+
+            if (surveyId.HasValue && surveyId.Value > 0)
+            {
+                query = query.Where(r => r.SurveyId == surveyId.Value);
+            }
+
+            var list = await query
+                .OrderByDescending(r => r.SubmittedAt)
+                .Select(r => new
+                {
+                    r.ResponseId,
+                    r.SurveyId,
+                    SurveyTitle = r.Survey != null ? r.Survey.Title : "Chiến dịch khảo sát",
+                    TargetProduct = r.Survey != null ? r.Survey.TargetProduct : "Sản phẩm khảo sát",
+                    ExpectedPrice = r.Survey != null ? r.Survey.ExpectedPrice : 0,
+                    r.AccountId,
+                    CustomerUsername = r.Account != null ? r.Account.Username : "khachhang",
+                    CustomerName = r.Account != null ? r.Account.FullName : "Khách hàng",
+                    r.Score,
+                    r.BuyingIntent,
+                    r.CustomerOpinion,
+                    r.AnswersJson,
+                    r.AdminReply,
+                    Status = !string.IsNullOrEmpty(r.AdminReply) ? "Đã tiếp nhận & Phản hồi" : (string.IsNullOrEmpty(r.Status) ? "Chờ tiếp nhận" : r.Status),
+                    r.RepliedAt,
+                    r.SubmittedAt
+                })
+                .ToListAsync();
+
+            return Ok(list);
+        }
+
+        // API NGƯỜI QUẢN LÝ TIẾP NHẬN & GỬI PHẢN HỒI CHO ĐÁNH GIÁ KHẢO SÁT CỦA KHÁCH HÀNG
+        [HttpPut("survey-responses/{responseId}/reply")]
+        public async Task<IActionResult> ReplyToSurveyResponse(int responseId, [FromBody] SurveyResponseReplyDto dto)
+        {
+            var resp = await _context.SurveyResponses.FindAsync(responseId);
+            if (resp == null)
+                return NotFound(new { message = "Không tìm thấy phiếu đánh giá khảo sát của khách hàng!" });
+
+            resp.AdminReply = (dto.AdminReply ?? "").Trim();
+            resp.Status = string.IsNullOrEmpty(resp.AdminReply) ? "Chờ tiếp nhận" : "Đã tiếp nhận & Phản hồi";
+            resp.RepliedAt = DateTime.Now;
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Đã tiếp nhận và gửi phản hồi cho bài đánh giá khảo sát của khách hàng!",
+                responseId = resp.ResponseId,
+                status = resp.Status,
+                adminReply = resp.AdminReply,
+                repliedAt = resp.RepliedAt
             });
         }
 
@@ -299,6 +376,16 @@ namespace HTTTDN.AdminApi.Controllers
             return Ok(new { message = "Đã xóa bảng khảo sát thành công!" });
         }
 
+        private static string ClassifyBuyingIntent(string? intent)
+        {
+            string s = (intent ?? "").ToLowerInvariant();
+            if (s.Contains("rất muốn") || s.Contains("đặt trước") || s.Contains("pre-order") || s.Contains("mua ngay"))
+                return "WantToBuy";
+            if (s.Contains("không mua") || s.Contains("chưa có nhu cầu") || s.Contains("chưa có kế hoạch") || s.Contains("từ chối"))
+                return "NotBuying";
+            return "Considering";
+        }
+
         [HttpGet("surveys/{id}/statistics")]
         public async Task<IActionResult> GetSurveyStatistics(int id)
         {
@@ -316,9 +403,9 @@ namespace HTTTDN.AdminApi.Controllers
 
             var intentStats = new
             {
-                WantToBuy = responses.Count(r => r.BuyingIntent == "Rất muốn mua"),
-                Considering = responses.Count(r => r.BuyingIntent == "Đang cân nhắc"),
-                NotBuying = responses.Count(r => r.BuyingIntent == "Không mua")
+                WantToBuy = responses.Count(r => ClassifyBuyingIntent(r.BuyingIntent) == "WantToBuy"),
+                Considering = responses.Count(r => ClassifyBuyingIntent(r.BuyingIntent) == "Considering"),
+                NotBuying = responses.Count(r => ClassifyBuyingIntent(r.BuyingIntent) == "NotBuying")
             };
 
             var scoreDistribution = new
@@ -330,15 +417,25 @@ namespace HTTTDN.AdminApi.Controllers
                 Score5 = responses.Count(r => r.Score == 5)
             };
 
+            int answeredCount = responses.Count(r => !string.IsNullOrWhiteSpace(r.AdminReply));
+            int pendingReplyCount = total - answeredCount;
+
             var detailResponses = responses.Select(r => new
             {
                 r.ResponseId,
+                r.SurveyId,
+                SurveyTitle = survey.Title,
+                TargetProduct = survey.TargetProduct,
                 r.AccountId,
                 CustomerUsername = r.Account != null ? r.Account.Username : "khachhang",
                 CustomerName = r.Account != null ? r.Account.FullName : "Khách hàng",
                 r.Score,
                 r.BuyingIntent,
                 r.CustomerOpinion,
+                r.AnswersJson,
+                r.AdminReply,
+                Status = !string.IsNullOrWhiteSpace(r.AdminReply) ? "Đã tiếp nhận & Phản hồi" : "Chờ tiếp nhận",
+                r.RepliedAt,
                 r.SubmittedAt
             });
 
@@ -352,7 +449,11 @@ namespace HTTTDN.AdminApi.Controllers
                 survey.CreatedAt,
                 survey.ExpiresAt,
                 survey.IsActive,
+                survey.RequirementsJson,
+                survey.QuestionsJson,
                 totalResponses = total,
+                answeredCount,
+                pendingReplyCount,
                 averageScore = avgScore,
                 intentStats,
                 scoreDistribution,

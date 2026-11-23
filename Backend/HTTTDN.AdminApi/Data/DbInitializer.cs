@@ -9,6 +9,54 @@ namespace HTTTDN.AdminApi.Data
         {
             context.Database.EnsureCreated();
 
+            // Tự động bổ sung các cột mới cho bảng Surveys và SurveyResponses nếu CSDL đã tồn tại trước đó
+            string[] alterCommands = new[]
+            {
+                "ALTER TABLE Surveys ADD COLUMN RequirementsJson TEXT NULL;",
+                "ALTER TABLE Surveys ADD COLUMN QuestionsJson TEXT NULL;",
+                "ALTER TABLE SurveyResponses ADD COLUMN AnswersJson TEXT NULL;",
+                "ALTER TABLE SurveyResponses ADD COLUMN AdminReply TEXT NULL;",
+                "ALTER TABLE SurveyResponses ADD COLUMN Status TEXT NOT NULL DEFAULT 'Chờ tiếp nhận';",
+                "ALTER TABLE SurveyResponses ADD COLUMN RepliedAt TEXT NULL;"
+            };
+            foreach (var sql in alterCommands)
+            {
+                try { context.Database.ExecuteSqlRaw(sql); } catch { /* Cột đã tồn tại */ }
+            }
+
+            string defaultRequirementsJson = @"[""Yêu cầu đánh giá mức độ quan tâm & thiết kế sản phẩm"",""Yêu cầu thẩm định mức giá dự kiến & ngân sách chi trả"",""Yêu cầu khảo sát cấu hình kỹ thuật & tính năng ưu tiên"",""Yêu cầu xác định kế hoạch mua sắm & chính sách hậu mãi""]";
+            string defaultQuestionsJson = @"[
+                {""id"":1,""requirement"":""Yêu cầu đánh giá mức độ quan tâm"",""question"":""Mức độ quan tâm và hào hứng của bạn đối với sản phẩm mới này?"",""type"":""rating"",""required"":true,""options"":[""1 - Rất thờ ơ"",""2 - Ít quan tâm"",""3 - Bình thường"",""4 - Khá quan tâm"",""5 - Rất hào hứng""]},
+                {""id"":2,""requirement"":""Yêu cầu thẩm định mức giá dự kiến"",""question"":""Bạn đánh giá thế nào về mức giá dự kiến mở bán so với công nghệ mang lại?"",""type"":""single"",""required"":true,""options"":[""Giá rất hợp lý / Đáng đầu tư"",""Mức giá hơi cao nhưng chấp nhận được"",""Mức giá quá đắt / Cần giảm thêm"",""Chưa phù hợp với ngân sách""]},
+                {""id"":3,""requirement"":""Yêu cầu khảo sát tính năng & cấu hình"",""question"":""Những tiêu chí kỹ thuật & tính năng nào bạn yêu cầu bắt buộc phải có trên sản phẩm?"",""type"":""multi"",""required"":true,""options"":[""Hiệu năng mạnh mẽ vượt trội"",""Thời lượng pin bền bỉ & Sạc nhanh"",""Thiết kế mỏng nhẹ cao cấp"",""Tích hợp công nghệ AI thông minh"",""Màn hình chuẩn màu độ phân giải cao"",""Tản nhiệt êm ái & Bền bỉ""]},
+                {""id"":4,""requirement"":""Yêu cầu chính sách ưu đãi & hậu mãi"",""question"":""Chính sách ưu đãi hoặc dịch vụ hậu mãi nào bạn mong muốn nhất khi mở bán?"",""type"":""multi"",""required"":true,""options"":[""Trả góp 0% lãi suất"",""Bảo hành VIP 1 đổi 1 trong 24 tháng"",""Tặng kèm bộ phụ kiện chính hãng"",""Trợ giá thu cũ đổi mới lên đời"",""Voucher giảm giá trực tiếp đợt đầu""]},
+                {""id"":5,""requirement"":""Yêu cầu xác định kế hoạch mua sắm"",""question"":""Kế hoạch và ý định mua sắm của bạn khi sản phẩm chính thức mở bán tại SGU Tech?"",""type"":""single"",""required"":true,""options"":[""Rất muốn mua (Đặt trước Pre-order ngay)"",""Đang cân nhắc (Chờ xem đánh giá thực tế)"",""Đang cân nhắc (Đợi đợt khuyến mãi giảm giá)"",""Không mua (Chưa có nhu cầu)""]},
+                {""id"":6,""requirement"":""Yêu cầu đề xuất mức giá & góp ý riêng"",""question"":""Mức giá bạn sẵn sàng chi trả và các yêu cầu / góp ý chi tiết khác cho sản phẩm:"",""type"":""text"",""required"":false,""options"":[]}
+            ]";
+
+            // Cập nhật bổ sung bộ câu hỏi & yêu cầu đa tiêu chí cho các bài khảo sát cũ chưa có QuestionsJson
+            var existingSurveysWithoutQ = context.Surveys.Where(s => string.IsNullOrEmpty(s.QuestionsJson)).ToList();
+            if (existingSurveysWithoutQ.Any())
+            {
+                foreach (var sv in existingSurveysWithoutQ)
+                {
+                    sv.RequirementsJson = defaultRequirementsJson;
+                    sv.QuestionsJson = defaultQuestionsJson;
+                }
+                context.SaveChanges();
+            }
+
+            // Cập nhật trạng thái mặc định cho các phiếu trả lời cũ
+            var existingRespWithoutStatus = context.SurveyResponses.Where(r => string.IsNullOrEmpty(r.Status)).ToList();
+            if (existingRespWithoutStatus.Any())
+            {
+                foreach (var r in existingRespWithoutStatus)
+                {
+                    r.Status = string.IsNullOrEmpty(r.AdminReply) ? "Chờ tiếp nhận" : "Đã tiếp nhận & Phản hồi";
+                }
+                context.SaveChanges();
+            }
+
             // Luôn kiểm tra và dọn dẹp các vai trò không còn sử dụng (Warehouse, Sales, HR)
             var obsoleteRoles = context.Roles.Where(r => r.RoleName == "Warehouse" || r.RoleName == "Sales" || r.RoleName == "HR").ToList();
             if (obsoleteRoles.Any())
@@ -178,40 +226,40 @@ namespace HTTTDN.AdminApi.Data
             context.Feedbacks.AddRange(feedbacks);
             context.SaveChanges();
 
-            // 8. Khởi tạo 5 bài khảo sát sản phẩm mới
+            // 8. Khởi tạo 5 bài khảo sát sản phẩm mới (kèm nhiều yêu cầu & nhiều câu hỏi khảo sát)
             var surveys = new List<Survey>
             {
-                new Survey { Title = "Khảo sát nhu cầu dòng Laptop AI Siêu Mỏng Nhẹ 2026", Description = "Đánh giá nhu cầu trang bị chip NPU AI chuyên dụng hỗ trợ lập trình viên và sáng tạo nội dung đa nhiệm.", TargetProduct = "ASUS Zenbook S16 OLED AI 2026", ExpectedPrice = 36990000, CreatedAt = DateTime.Now.AddDays(-10), IsActive = true, ExpiresAt = DateTime.Now.AddDays(20) },
-                new Survey { Title = "Thăm dò Bàn phím cơ Custom Nhôm CNC Không dây", Description = "Khảo sát mức giá mong muốn cho dòng bàn phím cơ kết nối 3 chế độ không dây độ trễ thấp.", TargetProduct = "Keychron Q1 Max SGU Custom Edition", ExpectedPrice = 4500000, CreatedAt = DateTime.Now.AddDays(-8), IsActive = true, ExpiresAt = null },
-                new Survey { Title = "Thăm dò Tai nghe chống ồn Hi-Res Thế hệ Mới", Description = "Khảo sát tính năng khử tiếng ồn chủ động bằng AI và thời lượng pin 40 giờ.", TargetProduct = "Sony WH-1000XM6 Edition 2026", ExpectedPrice = 7990000, CreatedAt = DateTime.Now.AddDays(-5), IsActive = true, ExpiresAt = DateTime.Now.AddDays(10) },
-                new Survey { Title = "Khảo sát Màn hình Đồ họa 5K Chuyên Dụng Cho Designer", Description = "Khảo sát nhu cầu trang bị màn hình 5K độ phân giải siêu nét dành cho giới làm đồ họa chuyên nghiệp.", TargetProduct = "Dell UltraSharp 32 5K HDR", ExpectedPrice = 24500000, CreatedAt = DateTime.Now.AddDays(-3), IsActive = true, ExpiresAt = DateTime.Now.AddDays(15) },
-                new Survey { Title = "Khảo sát thử nghiệm Màn hình cong Mini-LED 49 inch (Đã đóng)", Description = "Chương trình thăm dò giai đoạn thử nghiệm ban đầu.", TargetProduct = "Samsung Odyssey OLED G9", ExpectedPrice = 29900000, CreatedAt = DateTime.Now.AddDays(-25), IsActive = false, ExpiresAt = DateTime.Now.AddDays(-5) }
+                new Survey { Title = "Khảo sát nhu cầu dòng Laptop AI Siêu Mỏng Nhẹ 2026", Description = "Đánh giá nhu cầu trang bị chip NPU AI chuyên dụng hỗ trợ lập trình viên và sáng tạo nội dung đa nhiệm.", TargetProduct = "ASUS Zenbook S16 OLED AI 2026", ExpectedPrice = 36990000, CreatedAt = DateTime.Now.AddDays(-10), IsActive = true, ExpiresAt = DateTime.Now.AddDays(20), RequirementsJson = defaultRequirementsJson, QuestionsJson = defaultQuestionsJson },
+                new Survey { Title = "Thăm dò Bàn phím cơ Custom Nhôm CNC Không dây", Description = "Khảo sát mức giá mong muốn cho dòng bàn phím cơ kết nối 3 chế độ không dây độ trễ thấp.", TargetProduct = "Keychron Q1 Max SGU Custom Edition", ExpectedPrice = 4500000, CreatedAt = DateTime.Now.AddDays(-8), IsActive = true, ExpiresAt = null, RequirementsJson = defaultRequirementsJson, QuestionsJson = defaultQuestionsJson },
+                new Survey { Title = "Thăm dò Tai nghe chống ồn Hi-Res Thế hệ Mới", Description = "Khảo sát tính năng khử tiếng ồn chủ động bằng AI và thời lượng pin 40 giờ.", TargetProduct = "Sony WH-1000XM6 Edition 2026", ExpectedPrice = 7990000, CreatedAt = DateTime.Now.AddDays(-5), IsActive = true, ExpiresAt = DateTime.Now.AddDays(10), RequirementsJson = defaultRequirementsJson, QuestionsJson = defaultQuestionsJson },
+                new Survey { Title = "Khảo sát Màn hình Đồ họa 5K Chuyên Dụng Cho Designer", Description = "Khảo sát nhu cầu trang bị màn hình 5K độ phân giải siêu nét dành cho giới làm đồ họa chuyên nghiệp.", TargetProduct = "Dell UltraSharp 32 5K HDR", ExpectedPrice = 24500000, CreatedAt = DateTime.Now.AddDays(-3), IsActive = true, ExpiresAt = DateTime.Now.AddDays(15), RequirementsJson = defaultRequirementsJson, QuestionsJson = defaultQuestionsJson },
+                new Survey { Title = "Khảo sát thử nghiệm Màn hình cong Mini-LED 49 inch (Đã đóng)", Description = "Chương trình thăm dò giai đoạn thử nghiệm ban đầu.", TargetProduct = "Samsung Odyssey OLED G9", ExpectedPrice = 29900000, CreatedAt = DateTime.Now.AddDays(-25), IsActive = false, ExpiresAt = DateTime.Now.AddDays(-5), RequirementsJson = defaultRequirementsJson, QuestionsJson = defaultQuestionsJson }
             };
             context.Surveys.AddRange(surveys);
             context.SaveChanges();
 
-            // 9. Khởi tạo 16 câu trả lời khảo sát mẫu phong phú
+            // 9. Khởi tạo 16 câu trả lời khảo sát mẫu phong phú (kèm trạng thái tiếp nhận & phản hồi của Người quản lý)
             var surveyResponses = new List<SurveyResponse>
             {
-                new SurveyResponse { SurveyId = surveys[0].SurveyId, AccountId = customers[0].AccountId, Score = 5, BuyingIntent = "Rất muốn mua", CustomerOpinion = "Thiết kế cực kỳ sang trọng, nếu có quà tặng kèm chuột không dây và túi chống sốc tôi sẽ đặt trước ngay.", SubmittedAt = DateTime.Now.AddDays(-9) },
-                new SurveyResponse { SurveyId = surveys[0].SurveyId, AccountId = customers[1].AccountId, Score = 4, BuyingIntent = "Đang cân nhắc", CustomerOpinion = "Cấu hình chip AI rất ấn tượng nhưng mức giá gần 37 triệu hơi cao đối với nhân viên văn phòng.", SubmittedAt = DateTime.Now.AddDays(-7) },
-                new SurveyResponse { SurveyId = surveys[0].SurveyId, AccountId = customers[2].AccountId, Score = 5, BuyingIntent = "Rất muốn mua", CustomerOpinion = "Màn hình OLED 3K và thời lượng pin lâu rất phù hợp cho lập trình viên, mong cửa hàng hỗ trợ trả góp 0%.", SubmittedAt = DateTime.Now.AddDays(-6) },
-                new SurveyResponse { SurveyId = surveys[0].SurveyId, AccountId = customers[5].AccountId, Score = 5, BuyingIntent = "Rất muốn mua", CustomerOpinion = "Máy rất nhẹ phù hợp đi công tác xa, tôi sẵn sàng đặt cọc trước.", SubmittedAt = DateTime.Now.AddDays(-4) },
-                new SurveyResponse { SurveyId = surveys[0].SurveyId, AccountId = customers[7].AccountId, Score = 3, BuyingIntent = "Không mua", CustomerOpinion = "Tôi quen dùng máy tính bàn cấu hình cao hơn là laptop mỏng nhẹ.", SubmittedAt = DateTime.Now.AddDays(-3) },
-                new SurveyResponse { SurveyId = surveys[0].SurveyId, AccountId = customers[10].AccountId, Score = 4, BuyingIntent = "Đang cân nhắc", CustomerOpinion = "Chờ xem bản thực tế ngoài showroom SGU Tech rồi sẽ quyết định mua.", SubmittedAt = DateTime.Now.AddDays(-2) },
+                new SurveyResponse { SurveyId = surveys[0].SurveyId, AccountId = customers[0].AccountId, Score = 5, BuyingIntent = "Rất muốn mua", CustomerOpinion = "[Đánh giá giá: Giá rất hợp lý / Đáng đầu tư] [Tiêu chí mong đợi: Hiệu năng mạnh mẽ, Thời lượng pin bền bỉ, Công nghệ AI thông minh] [Chính sách ưu đãi: Tặng kèm bộ phụ kiện chính hãng, Bảo hành VIP 1 đổi 1] [Giá sẵn sàng chi: 35.990.000 ₫] [Góp ý: Thiết kế cực kỳ sang trọng, nếu có quà tặng kèm chuột không dây và túi chống sốc tôi sẽ đặt trước ngay.]", AdminReply = "Cảm ơn bạn Nguyễn Văn An! SGU Tech đã ghi nhận đề xuất tặng kèm chuột không dây + túi chống sốc cho đợt Pre-order đầu tiên của dòng ASUS Zenbook S16 OLED AI.", Status = "Đã tiếp nhận & Phản hồi", RepliedAt = DateTime.Now.AddDays(-8), SubmittedAt = DateTime.Now.AddDays(-9) },
+                new SurveyResponse { SurveyId = surveys[0].SurveyId, AccountId = customers[1].AccountId, Score = 4, BuyingIntent = "Đang cân nhắc", CustomerOpinion = "[Đánh giá giá: Mức giá hơi cao nhưng chấp nhận được] [Tiêu chí mong đợi: Thiết kế mỏng nhẹ cao cấp, Thời lượng pin bền bỉ] [Chính sách ưu đãi: Trả góp 0% lãi suất] [Giá sẵn sàng chi: 33.900.000 ₫] [Góp ý: Cấu hình chip AI rất ấn tượng nhưng mức giá gần 37 triệu hơi cao đối với nhân viên văn phòng.]", AdminReply = "Cảm ơn góp ý của chị Bình! Bộ phận CRM đã đề xuất bổ sung gói trả góp 0% kỳ hạn 12 tháng và voucher giảm 2 triệu đồng cho khách hàng văn phòng ạ.", Status = "Đã tiếp nhận & Phản hồi", RepliedAt = DateTime.Now.AddDays(-6), SubmittedAt = DateTime.Now.AddDays(-7) },
+                new SurveyResponse { SurveyId = surveys[0].SurveyId, AccountId = customers[2].AccountId, Score = 5, BuyingIntent = "Rất muốn mua", CustomerOpinion = "[Đánh giá giá: Giá rất hợp lý / Đáng đầu tư] [Tiêu chí mong đợi: Hiệu năng mạnh mẽ, Màn hình chuẩn màu, Thời lượng pin bền bỉ] [Chính sách ưu đãi: Trả góp 0% lãi suất, Bảo hành VIP 1 đổi 1] [Giá sẵn sàng chi: 36.990.000 ₫] [Góp ý: Màn hình OLED 3K và thời lượng pin lâu rất phù hợp cho lập trình viên, mong cửa hàng hỗ trợ trả góp 0%.]", AdminReply = null, Status = "Chờ tiếp nhận", SubmittedAt = DateTime.Now.AddDays(-6) },
+                new SurveyResponse { SurveyId = surveys[0].SurveyId, AccountId = customers[5].AccountId, Score = 5, BuyingIntent = "Rất muốn mua", CustomerOpinion = "[Đánh giá giá: Giá rất hợp lý / Đáng đầu tư] [Tiêu chí mong đợi: Thiết kế mỏng nhẹ cao cấp, Thời lượng pin bền bỉ] [Giá sẵn sàng chi: 36.500.000 ₫] [Góp ý: Máy rất nhẹ phù hợp đi công tác xa, tôi sẵn sàng đặt cọc trước.]", AdminReply = null, Status = "Chờ tiếp nhận", SubmittedAt = DateTime.Now.AddDays(-4) },
+                new SurveyResponse { SurveyId = surveys[0].SurveyId, AccountId = customers[7].AccountId, Score = 3, BuyingIntent = "Không mua", CustomerOpinion = "[Đánh giá giá: Chưa phù hợp với ngân sách] [Tiêu chí mong đợi: Hiệu năng mạnh mẽ, Tản nhiệt êm ái] [Góp ý: Tôi quen dùng máy tính bàn cấu hình cao hơn là laptop mỏng nhẹ.]", AdminReply = null, Status = "Chờ tiếp nhận", SubmittedAt = DateTime.Now.AddDays(-3) },
+                new SurveyResponse { SurveyId = surveys[0].SurveyId, AccountId = customers[10].AccountId, Score = 4, BuyingIntent = "Đang cân nhắc", CustomerOpinion = "[Đánh giá giá: Mức giá hơi cao nhưng chấp nhận được] [Tiêu chí mong đợi: Thiết kế mỏng nhẹ cao cấp, Màn hình chuẩn màu] [Góp ý: Chờ xem bản thực tế ngoài showroom SGU Tech rồi sẽ quyết định mua.]", AdminReply = null, Status = "Chờ tiếp nhận", SubmittedAt = DateTime.Now.AddDays(-2) },
                 
-                new SurveyResponse { SurveyId = surveys[1].SurveyId, AccountId = customers[3].AccountId, Score = 4, BuyingIntent = "Đang cân nhắc", CustomerOpinion = "Bản nhôm CNC rất đầm, nếu shop có sẵn switch tactile tôi sẽ mua ngay.", SubmittedAt = DateTime.Now.AddDays(-5) },
-                new SurveyResponse { SurveyId = surveys[1].SurveyId, AccountId = customers[0].AccountId, Score = 5, BuyingIntent = "Rất muốn mua", CustomerOpinion = "Mức giá 4.5 triệu cho bản Q1 Max là quá hợp lý trong phân khúc phím nhôm.", SubmittedAt = DateTime.Now.AddDays(-4) },
-                new SurveyResponse { SurveyId = surveys[1].SurveyId, AccountId = customers[9].AccountId, Score = 5, BuyingIntent = "Rất muốn mua", CustomerOpinion = "Sẵn sàng mua ngay khi mở bán đợt đầu, mong có màu đen nhám Anodized.", SubmittedAt = DateTime.Now.AddDays(-3) },
-                new SurveyResponse { SurveyId = surveys[1].SurveyId, AccountId = customers[11].AccountId, Score = 3, BuyingIntent = "Không mua", CustomerOpinion = "Đã có bàn phím cơ rồi nên chưa có nhu cầu mua thêm.", SubmittedAt = DateTime.Now.AddDays(-1) },
+                new SurveyResponse { SurveyId = surveys[1].SurveyId, AccountId = customers[3].AccountId, Score = 4, BuyingIntent = "Đang cân nhắc", CustomerOpinion = "[Đánh giá giá: Giá rất hợp lý / Đáng đầu tư] [Tiêu chí mong đợi: Hiệu năng mạnh mẽ, Thiết kế mỏng nhẹ cao cấp] [Giá sẵn sàng chi: 4.300.000 ₫] [Góp ý: Bản nhôm CNC rất đầm, nếu shop có sẵn switch tactile tôi sẽ mua ngay.]", AdminReply = "SGU Tech xác nhận đợt mở bán Keychron Q1 Max sẽ có đủ cả 3 tùy chọn Switch: Banana Tactile, Red Linear và Brown Switch anh nhé!", Status = "Đã tiếp nhận & Phản hồi", RepliedAt = DateTime.Now.AddDays(-4), SubmittedAt = DateTime.Now.AddDays(-5) },
+                new SurveyResponse { SurveyId = surveys[1].SurveyId, AccountId = customers[0].AccountId, Score = 5, BuyingIntent = "Rất muốn mua", CustomerOpinion = "[Đánh giá giá: Giá rất hợp lý / Đáng đầu tư] [Tiêu chí mong đợi: Hiệu năng mạnh mẽ, Thời lượng pin bền bỉ] [Giá sẵn sàng chi: 4.500.000 ₫] [Góp ý: Mức giá 4.5 triệu cho bản Q1 Max là quá hợp lý trong phân khúc phím nhôm.]", AdminReply = null, Status = "Chờ tiếp nhận", SubmittedAt = DateTime.Now.AddDays(-4) },
+                new SurveyResponse { SurveyId = surveys[1].SurveyId, AccountId = customers[9].AccountId, Score = 5, BuyingIntent = "Rất muốn mua", CustomerOpinion = "[Đánh giá giá: Giá rất hợp lý / Đáng đầu tư] [Tiêu chí mong đợi: Thiết kế mỏng nhẹ cao cấp, Bảo hành VIP 1 đổi 1] [Giá sẵn sàng chi: 4.500.000 ₫] [Góp ý: Sẵn sàng mua ngay khi mở bán đợt đầu, mong có màu đen nhám Anodized.]", AdminReply = null, Status = "Chờ tiếp nhận", SubmittedAt = DateTime.Now.AddDays(-3) },
+                new SurveyResponse { SurveyId = surveys[1].SurveyId, AccountId = customers[11].AccountId, Score = 3, BuyingIntent = "Không mua", CustomerOpinion = "[Đánh giá giá: Chưa phù hợp với ngân sách] [Góp ý: Đã có bàn phím cơ rồi nên chưa có nhu cầu mua thêm.]", AdminReply = null, Status = "Chờ tiếp nhận", SubmittedAt = DateTime.Now.AddDays(-1) },
 
-                new SurveyResponse { SurveyId = surveys[2].SurveyId, AccountId = customers[1].AccountId, Score = 4, BuyingIntent = "Đang cân nhắc", CustomerOpinion = "Nếu trọng lượng nhẹ hơn bản XM5 và đệm tai êm hơn tôi sẽ nâng cấp.", SubmittedAt = DateTime.Now.AddDays(-3) },
-                new SurveyResponse { SurveyId = surveys[2].SurveyId, AccountId = customers[6].AccountId, Score = 5, BuyingIntent = "Rất muốn mua", CustomerOpinion = "Nếu chống ồn AI tốt hơn XM5 thì 8 triệu là mức giá chấp nhận được.", SubmittedAt = DateTime.Now.AddDays(-2) },
-                new SurveyResponse { SurveyId = surveys[2].SurveyId, AccountId = customers[8].AccountId, Score = 4, BuyingIntent = "Đang cân nhắc", CustomerOpinion = "Mong đợi chất âm ấm và microphone đàm thoại rõ ràng hơn.", SubmittedAt = DateTime.Now.AddDays(-1) },
+                new SurveyResponse { SurveyId = surveys[2].SurveyId, AccountId = customers[1].AccountId, Score = 4, BuyingIntent = "Đang cân nhắc", CustomerOpinion = "[Đánh giá giá: Mức giá hơi cao nhưng chấp nhận được] [Tiêu chí mong đợi: Thiết kế mỏng nhẹ cao cấp, Thời lượng pin bền bỉ] [Giá sẵn sàng chi: 7.500.000 ₫] [Góp ý: Nếu trọng lượng nhẹ hơn bản XM5 và đệm tai êm hơn tôi sẽ nâng cấp.]", AdminReply = null, Status = "Chờ tiếp nhận", SubmittedAt = DateTime.Now.AddDays(-3) },
+                new SurveyResponse { SurveyId = surveys[2].SurveyId, AccountId = customers[6].AccountId, Score = 5, BuyingIntent = "Rất muốn mua", CustomerOpinion = "[Đánh giá giá: Giá rất hợp lý / Đáng đầu tư] [Tiêu chí mong đợi: Công nghệ AI thông minh, Thời lượng pin bền bỉ] [Giá sẵn sàng chi: 7.990.000 ₫] [Góp ý: Nếu chống ồn AI tốt hơn XM5 thì 8 triệu là mức giá chấp nhận được.]", AdminReply = null, Status = "Chờ tiếp nhận", SubmittedAt = DateTime.Now.AddDays(-2) },
+                new SurveyResponse { SurveyId = surveys[2].SurveyId, AccountId = customers[8].AccountId, Score = 4, BuyingIntent = "Đang cân nhắc", CustomerOpinion = "[Đánh giá giá: Giá rất hợp lý / Đáng đầu tư] [Tiêu chí mong đợi: Hiệu năng mạnh mẽ, Công nghệ AI thông minh] [Góp ý: Mong đợi chất âm ấm và microphone đàm thoại rõ ràng hơn.]", AdminReply = null, Status = "Chờ tiếp nhận", SubmittedAt = DateTime.Now.AddDays(-1) },
 
-                new SurveyResponse { SurveyId = surveys[3].SurveyId, AccountId = customers[3].AccountId, Score = 5, BuyingIntent = "Rất muốn mua", CustomerOpinion = "Độ phân giải 5K rất cần cho biên tập ảnh và video, mức giá 24.5 triệu rất cạnh tranh với Apple Studio Display.", SubmittedAt = DateTime.Now.AddDays(-2) },
-                new SurveyResponse { SurveyId = surveys[3].SurveyId, AccountId = customers[8].AccountId, Score = 5, BuyingIntent = "Rất muốn mua", CustomerOpinion = "Nếu có chân đế xoay dọc công thái học và cổng sạc Thunderbolt 4 thì hoàn hảo.", SubmittedAt = DateTime.Now.AddDays(-1) },
-                new SurveyResponse { SurveyId = surveys[3].SurveyId, AccountId = customers[12].AccountId, Score = 4, BuyingIntent = "Đang cân nhắc", CustomerOpinion = "Cần kiểm tra độ tương phản thực tế tại showroom SGU Tech.", SubmittedAt = DateTime.Now }
+                new SurveyResponse { SurveyId = surveys[3].SurveyId, AccountId = customers[3].AccountId, Score = 5, BuyingIntent = "Rất muốn mua", CustomerOpinion = "[Đánh giá giá: Giá rất hợp lý / Đáng đầu tư] [Tiêu chí mong đợi: Màn hình chuẩn màu, Bảo hành VIP 1 đổi 1] [Giá sẵn sàng chi: 24.500.000 ₫] [Góp ý: Độ phân giải 5K rất cần cho biên tập ảnh và video, mức giá 24.5 triệu rất cạnh tranh với Apple Studio Display.]", AdminReply = "Cảm ơn đánh giá của anh Dũng! Màn hình Dell UltraSharp 32 5K HDR sẽ được trưng bày trải nghiệm thực tế tại Showroom Quận 1 từ tuần tới ạ.", Status = "Đã tiếp nhận & Phản hồi", RepliedAt = DateTime.Now.AddDays(-1), SubmittedAt = DateTime.Now.AddDays(-2) },
+                new SurveyResponse { SurveyId = surveys[3].SurveyId, AccountId = customers[8].AccountId, Score = 5, BuyingIntent = "Rất muốn mua", CustomerOpinion = "[Đánh giá giá: Giá rất hợp lý / Đáng đầu tư] [Tiêu chí mong đợi: Màn hình chuẩn màu, Thiết kế mỏng nhẹ cao cấp] [Giá sẵn sàng chi: 24.000.000 ₫] [Góp ý: Nếu có chân đế xoay dọc công thái học và cổng sạc Thunderbolt 4 thì hoàn hảo.]", AdminReply = null, Status = "Chờ tiếp nhận", SubmittedAt = DateTime.Now.AddDays(-1) },
+                new SurveyResponse { SurveyId = surveys[3].SurveyId, AccountId = customers[12].AccountId, Score = 4, BuyingIntent = "Đang cân nhắc", CustomerOpinion = "[Đánh giá giá: Mức giá hơi cao nhưng chấp nhận được] [Tiêu chí mong đợi: Màn hình chuẩn màu, Bảo hành VIP 1 đổi 1] [Góp ý: Cần kiểm tra độ tương phản thực tế tại showroom SGU Tech.]", AdminReply = null, Status = "Chờ tiếp nhận", SubmittedAt = DateTime.Now }
             };
             context.SurveyResponses.AddRange(surveyResponses);
             context.SaveChanges();

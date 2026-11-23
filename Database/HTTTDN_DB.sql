@@ -110,7 +110,9 @@ CREATE TABLE Surveys (
     ExpectedPrice DECIMAL(18,2) NOT NULL,
     CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
     IsActive BIT NOT NULL DEFAULT 1,
-    ExpiresAt DATETIME NULL
+    ExpiresAt DATETIME NULL,
+    RequirementsJson NVARCHAR(MAX) NULL,
+    QuestionsJson NVARCHAR(MAX) NULL
 );
 GO
 
@@ -120,8 +122,12 @@ CREATE TABLE SurveyResponses (
     SurveyId INT NOT NULL FOREIGN KEY REFERENCES Surveys(SurveyId) ON DELETE CASCADE,
     AccountId INT NOT NULL FOREIGN KEY REFERENCES Accounts(AccountId) ON DELETE CASCADE,
     Score INT NOT NULL CHECK (Score >= 1 AND Score <= 5),
-    BuyingIntent NVARCHAR(50) NOT NULL,
-    CustomerOpinion NVARCHAR(1000) NULL,
+    BuyingIntent NVARCHAR(150) NOT NULL,
+    CustomerOpinion NVARCHAR(2000) NULL,
+    AnswersJson NVARCHAR(MAX) NULL,
+    AdminReply NVARCHAR(1000) NULL,
+    Status NVARCHAR(50) NOT NULL DEFAULT N'Chờ tiếp nhận',
+    RepliedAt DATETIME NULL,
     SubmittedAt DATETIME NOT NULL DEFAULT GETDATE()
 );
 GO
@@ -194,44 +200,44 @@ INSERT INTO Products (ProductCode, ProductName, CategoryId, SupplierId, Price, C
 ('SP015', N'Card đồ họa ASUS TUF Gaming GeForce RTX 4080 Super 16GB', 4, 1, 29990000, 25500000, 5, N'Cái', N'Đang bán', 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80'),
 ('SP016', N'Webcam 4K Sony Bravia Cam Pro Hội nghị & Livestream', 5, 5, 5290000, 4100000, 14, N'Cái', N'Đang bán', 'https://images.unsplash.com/photo-1588508065123-287b28e013da?w=600&auto=format&fit=crop&q=80');
 
--- 6. Nạp 15 hồ sơ khách hàng đầy đủ nhân khẩu học (Độ tuổi & Sở thích)
+-- 6. Nạp 15 hồ sơ khách hàng đầy đủ nhân khẩu học (Độ tuổi & Sở thích) (AccountId từ 5 đến 19)
 INSERT INTO CustomerProfiles (AccountId, Age, Gender, Address, Interest) VALUES
-(8, 19, N'Nam', N'273 An Dương Vương, Quận 5, TP.HCM', N'Gaming'),
-(9, 24, N'Nữ', N'120 Nguyễn Thị Minh Khai, Quận 3, TP.HCM', N'Văn phòng'),
-(10, 28, N'Nam', N'45 Lê Văn Việt, TP. Thủ Đức, TP.HCM', N'Lập trình'),
-(11, 35, N'Nam', N'88 Cộng Hòa, Quận Tân Bình, TP.HCM', N'Đồ họa'),
-(12, 22, N'Nữ', N'15 Trần Hưng Đạo, Quận 1, TP.HCM', N'Gaming'),
-(13, 31, N'Nam', N'102 Võ Văn Ngân, TP. Thủ Đức, TP.HCM', N'Văn phòng'),
-(14, 18, N'Nữ', N'334 Nguyễn Trãi, Quận 5, TP.HCM', N'Gaming'),
-(15, 42, N'Nam', N'56 Điện Biên Phủ, Quận Bình Thạnh, TP.HCM', N'Lập trình'),
-(16, 26, N'Nữ', N'182 Hai Bà Trưng, Quận 1, TP.HCM', N'Đồ họa'),
-(17, 29, N'Nam', N'65 Hoàng Hoa Thám, Quận Phú Nhuận, TP.HCM', N'Gaming'),
-(18, 23, N'Nữ', N'210 Cách Mạng Tháng 8, Quận 10, TP.HCM', N'Văn phòng'),
-(19, 19, N'Nam', N'99 Nguyễn Tri Phương, Quận 5, TP.HCM', N'Lập trình'),
-(20, 38, N'Nam', N'14 Phan Xích Long, Quận Phú Nhuận, TP.HCM', N'Đồ họa'),
-(21, 25, N'Nữ', N'72 Ba Tháng Hai, Quận 10, TP.HCM', N'Văn phòng'),
-(22, 45, N'Nam', N'415 Lê Hồng Phong, Quận 5, TP.HCM', N'Gaming');
+(5, 19, N'Nam', N'273 An Dương Vương, Quận 5, TP.HCM', N'Gaming'),
+(6, 24, N'Nữ', N'120 Nguyễn Thị Minh Khai, Quận 3, TP.HCM', N'Văn phòng'),
+(7, 28, N'Nam', N'45 Lê Văn Việt, TP. Thủ Đức, TP.HCM', N'Lập trình'),
+(8, 35, N'Nam', N'88 Cộng Hòa, Quận Tân Bình, TP.HCM', N'Đồ họa'),
+(9, 22, N'Nữ', N'15 Trần Hưng Đạo, Quận 1, TP.HCM', N'Gaming'),
+(10, 31, N'Nam', N'102 Võ Văn Ngân, TP. Thủ Đức, TP.HCM', N'Văn phòng'),
+(11, 18, N'Nữ', N'334 Nguyễn Trãi, Quận 5, TP.HCM', N'Gaming'),
+(12, 42, N'Nam', N'56 Điện Biên Phủ, Quận Bình Thạnh, TP.HCM', N'Lập trình'),
+(13, 26, N'Nữ', N'182 Hai Bà Trưng, Quận 1, TP.HCM', N'Đồ họa'),
+(14, 29, N'Nam', N'65 Hoàng Hoa Thám, Quận Phú Nhuận, TP.HCM', N'Gaming'),
+(15, 23, N'Nữ', N'210 Cách Mạng Tháng 8, Quận 10, TP.HCM', N'Văn phòng'),
+(16, 19, N'Nam', N'99 Nguyễn Tri Phương, Quận 5, TP.HCM', N'Lập trình'),
+(17, 38, N'Nam', N'14 Phan Xích Long, Quận Phú Nhuận, TP.HCM', N'Đồ họa'),
+(18, 25, N'Nữ', N'72 Ba Tháng Hai, Quận 10, TP.HCM', N'Văn phòng'),
+(19, 45, N'Nam', N'415 Lê Hồng Phong, Quận 5, TP.HCM', N'Gaming');
 
 -- 7. Nạp 18 dữ liệu Phản hồi & Đánh giá rải đều các mức sao (1-5 sao)
 INSERT INTO Feedbacks (AccountId, ProductId, Rating, Comment, AdminReply, Status, CreatedAt) VALUES
-(8, 1, 5, N'Laptop ROG Strix chạy cực kỳ mượt, tản nhiệt mát mẻ khi chiến game AAA nặng ở độ phân giải 2K.', N'Cảm ơn bạn đã tin tưởng ủng hộ sản phẩm chính hãng tại hệ thống SGU Tech!', N'Đã tiếp nhận & Xử lý', DATEADD(DAY, -10, GETDATE())),
-(9, 7, 4, N'Chuột MX Master 3S cuộn trang vô cực rất êm tay cho công việc văn phòng, pin dùng cả tháng.', N'SGU Tech xin cảm ơn đánh giá tích cực từ bạn!', N'Đã tiếp nhận & Xử lý', DATEADD(DAY, -9, GETDATE())),
-(10, 3, 5, N'Màn hình LG UltraGear hiển thị chuẩn màu, tần số quét 180Hz chơi game và làm việc rất sướng mắt.', N'Chúc bạn có những trải nghiệm tuyệt vời cùng sản phẩm!', N'Đã tiếp nhận & Xử lý', DATEADD(DAY, -8, GETDATE())),
-(11, 11, 5, N'Tốc độ đọc ghi của SSD Samsung 990 Pro cực nhanh, render video đồ họa 4K tiết kiệm rất nhiều thời gian.', N'Cảm ơn bạn! Dòng Samsung 990 Pro là đỉnh nhất hiện nay ạ.', N'Đã tiếp nhận & Xử lý', DATEADD(DAY, -7, GETDATE())),
-(16, 13, 5, N'Màn hình Dell UltraSharp 32 4K IPS Black màu đen sâu, độ phủ màu chuẩn DCI-P3 98% rất đáng tiền cho dân thiết kế.', N'Dòng UltraSharp IPS Black chuyên dụng cho đồ họa cao cấp luôn được hỗ trợ bảo hành đổi mới 3 năm bạn nhé!', N'Đã tiếp nhận & Xử lý', DATEADD(DAY, -6, GETDATE())),
-(17, 5, 5, N'Bàn phím Keychron Q1 Max gõ đầm tay, âm thanh thock trầm rất êm, kết nối không dây 2.4Ghz cực nhạy.', N'Cảm ơn bạn đã lựa chọn phiên bản phím cơ nhôm CNC cao cấp tại SGU Tech!', N'Đã tiếp nhận & Xử lý', DATEADD(DAY, -5, GETDATE())),
-(18, 2, 5, N'MacBook Pro 14 M3 Pro pin trâu kinh khủng, dùng cả ngày không cần cắm sạc, màn hình Liquid Retina XDR tuyệt đẹp.', N'Cảm ơn chị đã mua hàng chính hãng Apple tại SGU Tech!', N'Đã tiếp nhận & Xử lý', DATEADD(DAY, -5, GETDATE())),
-(8, 8, 4, N'Chuột G102 bền bỉ, click nảy tốt, mức giá rất vừa túi tiền sinh viên.', NULL, N'Chờ xử lý', DATEADD(DAY, -4, GETDATE())),
-(14, 9, 4, N'Tai nghe HyperX Cloud II đeo êm tai không bị cấn, mic lọc ồn tốt khi đàm thoại.', NULL, N'Chờ xử lý', DATEADD(DAY, -4, GETDATE())),
-(15, 4, 3, N'Màn hình ProArt màu đẹp nhưng viền hơi dày hơn mong đợi một chút.', NULL, N'Chờ xử lý', DATEADD(DAY, -3, GETDATE())),
-(19, 14, 5, N'RAM Corsair DDR5 64GB mở hàng chục máy ảo Docker chạy mượt mà, LED RGB đồng bộ iCUE đẹp mắt.', NULL, N'Chờ xử lý', DATEADD(DAY, -3, GETDATE())),
-(20, 16, 4, N'Webcam Sony 4K nét căng, tự động lấy nét khuôn mặt khi họp online rất tiện lợi.', NULL, N'Chờ xử lý', DATEADD(DAY, -2, GETDATE())),
-(10, 1, 5, N'Máy đẹp, cấu hình khủng, nhân viên tư vấn SGU Tech rất nhiệt tình hỗ trợ cài đặt ban đầu.', NULL, N'Chờ xử lý', DATEADD(DAY, -2, GETDATE())),
-(17, 6, 2, N'Bàn phím G Pro X gõ tốt nhưng âm thanh clicky của switch hơi ồn khi làm việc ban đêm.', N'Dòng G Pro X dùng switch cơ chuyên cho game thủ nên tiếng clicky khá đanh, bạn có thể ghé showroom SGU Tech để đổi sang phiên bản switch Linear êm hơn nhé!', N'Đã tiếp nhận & Xử lý', DATEADD(DAY, -2, GETDATE())),
-(21, 12, 4, N'Router Asus phát sóng xuyên tường 2 tầng lầu vẫn bắt được sóng WiFi 6 mạnh mẽ.', NULL, N'Chờ xử lý', DATEADD(DAY, -1, GETDATE())),
-(9, 10, 5, N'Chống ồn của Sony XM5 thực sự đỉnh cao, đi xe buýt hay máy bay bật lên là yên tĩnh hoàn toàn.', NULL, N'Chờ xử lý', DATEADD(DAY, -1, GETDATE())),
-(11, 15, 1, N'Card đồ họa RTX 4080 Super giao đến bị cấn một góc hộp bìa carton bên ngoài do vận chuyển.', N'SGU Tech chân thành xin lỗi anh về sự cố khâu vận chuyển! Quản lý kho đã liên hệ và đổi mới nguyên seal cho anh ngay trong hôm nay ạ.', N'Đã tiếp nhận & Xử lý', GETDATE()),
-(8, 11, 5, N'Mua chiếc SSD thứ hai gắn thêm cho laptop ROG, tốc độ ổn định nhiệt độ chỉ 45 độ C.', NULL, N'Chờ xử lý', GETDATE());
+(5, 1, 5, N'Laptop ROG Strix chạy cực kỳ mượt, tản nhiệt mát mẻ khi chiến game AAA nặng ở độ phân giải 2K.', N'Cảm ơn bạn đã tin tưởng ủng hộ sản phẩm chính hãng tại hệ thống SGU Tech!', N'Đã tiếp nhận & Xử lý', DATEADD(DAY, -10, GETDATE())),
+(6, 7, 4, N'Chuột MX Master 3S cuộn trang vô cực rất êm tay cho công việc văn phòng, pin dùng cả tháng.', N'SGU Tech xin cảm ơn đánh giá tích cực từ bạn!', N'Đã tiếp nhận & Xử lý', DATEADD(DAY, -9, GETDATE())),
+(7, 3, 5, N'Màn hình LG UltraGear hiển thị chuẩn màu, tần số quét 180Hz chơi game và làm việc rất sướng mắt.', N'Chúc bạn có những trải nghiệm tuyệt vời cùng sản phẩm!', N'Đã tiếp nhận & Xử lý', DATEADD(DAY, -8, GETDATE())),
+(8, 11, 5, N'Tốc độ đọc ghi của SSD Samsung 990 Pro cực nhanh, render video đồ họa 4K tiết kiệm rất nhiều thời gian.', N'Cảm ơn bạn! Dòng Samsung 990 Pro là đỉnh nhất hiện nay ạ.', N'Đã tiếp nhận & Xử lý', DATEADD(DAY, -7, GETDATE())),
+(13, 13, 5, N'Màn hình Dell UltraSharp 32 4K IPS Black màu đen sâu, độ phủ màu chuẩn DCI-P3 98% rất đáng tiền cho dân thiết kế.', N'Dòng UltraSharp IPS Black chuyên dụng cho đồ họa cao cấp luôn được hỗ trợ bảo hành đổi mới 3 năm bạn nhé!', N'Đã tiếp nhận & Xử lý', DATEADD(DAY, -6, GETDATE())),
+(14, 5, 5, N'Bàn phím Keychron Q1 Max gõ đầm tay, âm thanh thock trầm rất êm, kết nối không dây 2.4Ghz cực nhạy.', N'Cảm ơn bạn đã lựa chọn phiên bản phím cơ nhôm CNC cao cấp tại SGU Tech!', N'Đã tiếp nhận & Xử lý', DATEADD(DAY, -5, GETDATE())),
+(15, 2, 5, N'MacBook Pro 14 M3 Pro pin trâu kinh khủng, dùng cả ngày không cần cắm sạc, màn hình Liquid Retina XDR tuyệt đẹp.', N'Cảm ơn chị đã mua hàng chính hãng Apple tại SGU Tech!', N'Đã tiếp nhận & Xử lý', DATEADD(DAY, -5, GETDATE())),
+(5, 8, 4, N'Chuột G102 bền bỉ, click nảy tốt, mức giá rất vừa túi tiền sinh viên.', NULL, N'Chờ xử lý', DATEADD(DAY, -4, GETDATE())),
+(11, 9, 4, N'Tai nghe HyperX Cloud II đeo êm tai không bị cấn, mic lọc ồn tốt khi đàm thoại.', NULL, N'Chờ xử lý', DATEADD(DAY, -4, GETDATE())),
+(12, 4, 3, N'Màn hình ProArt màu đẹp nhưng viền hơi dày hơn mong đợi một chút.', NULL, N'Chờ xử lý', DATEADD(DAY, -3, GETDATE())),
+(16, 14, 5, N'RAM Corsair DDR5 64GB mở hàng chục máy ảo Docker chạy mượt mà, LED RGB đồng bộ iCUE đẹp mắt.', NULL, N'Chờ xử lý', DATEADD(DAY, -3, GETDATE())),
+(17, 16, 4, N'Webcam Sony 4K nét căng, tự động lấy nét khuôn mặt khi họp online rất tiện lợi.', NULL, N'Chờ xử lý', DATEADD(DAY, -2, GETDATE())),
+(7, 1, 5, N'Máy đẹp, cấu hình khủng, nhân viên tư vấn SGU Tech rất nhiệt tình hỗ trợ cài đặt ban đầu.', NULL, N'Chờ xử lý', DATEADD(DAY, -2, GETDATE())),
+(14, 6, 2, N'Bàn phím G Pro X gõ tốt nhưng âm thanh clicky của switch hơi ồn khi làm việc ban đêm.', N'Dòng G Pro X dùng switch cơ chuyên cho game thủ nên tiếng clicky khá đanh, bạn có thể ghé showroom SGU Tech để đổi sang phiên bản switch Linear êm hơn nhé!', N'Đã tiếp nhận & Xử lý', DATEADD(DAY, -2, GETDATE())),
+(18, 12, 4, N'Router Asus phát sóng xuyên tường 2 tầng lầu vẫn bắt được sóng WiFi 6 mạnh mẽ.', NULL, N'Chờ xử lý', DATEADD(DAY, -1, GETDATE())),
+(6, 10, 5, N'Chống ồn của Sony XM5 thực sự đỉnh cao, đi xe buýt hay máy bay bật lên là yên tĩnh hoàn toàn.', NULL, N'Chờ xử lý', DATEADD(DAY, -1, GETDATE())),
+(8, 15, 1, N'Card đồ họa RTX 4080 Super giao đến bị cấn một góc hộp bìa carton bên ngoài do vận chuyển.', N'SGU Tech chân thành xin lỗi anh về sự cố khâu vận chuyển! Quản lý kho đã liên hệ và đổi mới nguyên seal cho anh ngay trong hôm nay ạ.', N'Đã tiếp nhận & Xử lý', GETDATE()),
+(5, 11, 5, N'Mua chiếc SSD thứ hai gắn thêm cho laptop ROG, tốc độ ổn định nhiệt độ chỉ 45 độ C.', NULL, N'Chờ xử lý', GETDATE());
 
 -- 8. Nạp 5 dữ liệu Khảo sát sản phẩm mới
 INSERT INTO Surveys (Title, Description, TargetProduct, ExpectedPrice, CreatedAt, IsActive, ExpiresAt) VALUES
@@ -241,24 +247,24 @@ INSERT INTO Surveys (Title, Description, TargetProduct, ExpectedPrice, CreatedAt
 (N'Khảo sát Màn hình Đồ họa 5K Chuyên Dụng Cho Designer', N'Khảo sát nhu cầu trang bị màn hình 5K độ phân giải siêu nét dành cho giới làm đồ họa chuyên nghiệp.', N'Dell UltraSharp 32 5K HDR', 24500000, DATEADD(DAY, -3, GETDATE()), 1, DATEADD(DAY, 15, GETDATE())),
 (N'Khảo sát thử nghiệm Màn hình cong Mini-LED 49 inch (Đã đóng)', N'Chương trình thăm dò giai đoạn thử nghiệm ban đầu.', N'Samsung Odyssey OLED G9', 29900000, DATEADD(DAY, -25, GETDATE()), 0, DATEADD(DAY, -5, GETDATE()));
 
--- 9. Nạp 16 kết quả khảo sát mẫu phong phú
+-- 9. Nạp 16 kết quả khảo sát mẫu phong phú (AccountId từ 5 đến 19)
 INSERT INTO SurveyResponses (SurveyId, AccountId, Score, BuyingIntent, CustomerOpinion, SubmittedAt) VALUES
-(1, 8, 5, N'Rất muốn mua', N'Thiết kế cực kỳ sang trọng, nếu có quà tặng kèm chuột không dây và túi chống sốc tôi sẽ đặt trước ngay.', DATEADD(DAY, -9, GETDATE())),
-(1, 9, 4, N'Đang cân nhắc', N'Cấu hình chip AI rất ấn tượng nhưng mức giá gần 37 triệu hơi cao đối với nhân viên văn phòng.', DATEADD(DAY, -7, GETDATE())),
-(1, 10, 5, N'Rất muốn mua', N'Màn hình OLED 3K và thời lượng pin lâu rất phù hợp cho lập trình viên, mong cửa hàng hỗ trợ trả góp 0%.', DATEADD(DAY, -6, GETDATE())),
-(1, 13, 5, N'Rất muốn mua', N'Máy rất nhẹ phù hợp đi công tác xa, tôi sẵn sàng đặt cọc trước.', DATEADD(DAY, -4, GETDATE())),
-(1, 15, 3, N'Không mua', N'Tôi quen dùng máy tính bàn cấu hình cao hơn là laptop mỏng nhẹ.', DATEADD(DAY, -3, GETDATE())),
-(1, 18, 4, N'Đang cân nhắc', N'Chờ xem bản thực tế ngoài showroom SGU Tech rồi sẽ quyết định mua.', DATEADD(DAY, -2, GETDATE())),
-(2, 11, 4, N'Đang cân nhắc', N'Bản nhôm CNC rất đầm, nếu shop có sẵn switch tactile tôi sẽ mua ngay.', DATEADD(DAY, -5, GETDATE())),
-(2, 8, 5, N'Rất muốn mua', N'Mức giá 4.5 triệu cho bản Q1 Max là quá hợp lý trong phân khúc phím nhôm.', DATEADD(DAY, -4, GETDATE())),
-(2, 17, 5, N'Rất muốn mua', N'Sẵn sàng mua ngay khi mở bán đợt đầu, mong có màu đen nhám Anodized.', DATEADD(DAY, -3, GETDATE())),
-(2, 19, 3, N'Không mua', N'Đã có bàn phím cơ rồi nên chưa có nhu cầu mua thêm.', DATEADD(DAY, -1, GETDATE())),
-(3, 9, 4, N'Đang cân nhắc', N'Nếu trọng lượng nhẹ hơn bản XM5 và đệm tai êm hơn tôi sẽ nâng cấp.', DATEADD(DAY, -3, GETDATE())),
-(3, 14, 5, N'Rất muốn mua', N'Nếu chống ồn AI tốt hơn XM5 thì 8 triệu là mức giá chấp nhận được.', DATEADD(DAY, -2, GETDATE())),
-(3, 16, 4, N'Đang cân nhắc', N'Mong đợi chất âm ấm và microphone đàm thoại rõ ràng hơn.', DATEADD(DAY, -1, GETDATE())),
-(4, 11, 5, N'Rất muốn mua', N'Độ phân giải 5K rất cần cho biên tập ảnh và video, mức giá 24.5 triệu rất cạnh tranh với Apple Studio Display.', DATEADD(DAY, -2, GETDATE())),
-(4, 16, 5, N'Rất muốn mua', N'Nếu có chân đế xoay dọc công thái học và cổng sạc Thunderbolt 4 thì hoàn hảo.', DATEADD(DAY, -1, GETDATE())),
-(4, 20, 4, N'Đang cân nhắc', N'Cần kiểm tra độ tương phản thực tế tại showroom SGU Tech.', GETDATE());
+(1, 5, 5, N'Rất muốn mua', N'Thiết kế cực kỳ sang trọng, nếu có quà tặng kèm chuột không dây và túi chống sốc tôi sẽ đặt trước ngay.', DATEADD(DAY, -9, GETDATE())),
+(1, 6, 4, N'Đang cân nhắc', N'Cấu hình chip AI rất ấn tượng nhưng mức giá gần 37 triệu hơi cao đối với nhân viên văn phòng.', DATEADD(DAY, -7, GETDATE())),
+(1, 7, 5, N'Rất muốn mua', N'Màn hình OLED 3K và thời lượng pin lâu rất phù hợp cho lập trình viên, mong cửa hàng hỗ trợ trả góp 0%.', DATEADD(DAY, -6, GETDATE())),
+(1, 10, 5, N'Rất muốn mua', N'Máy rất nhẹ phù hợp đi công tác xa, tôi sẵn sàng đặt cọc trước.', DATEADD(DAY, -4, GETDATE())),
+(1, 12, 3, N'Không mua', N'Tôi quen dùng máy tính bàn cấu hình cao hơn là laptop mỏng nhẹ.', DATEADD(DAY, -3, GETDATE())),
+(1, 15, 4, N'Đang cân nhắc', N'Chờ xem bản thực tế ngoài showroom SGU Tech rồi sẽ quyết định mua.', DATEADD(DAY, -2, GETDATE())),
+(2, 8, 4, N'Đang cân nhắc', N'Bản nhôm CNC rất đầm, nếu shop có sẵn switch tactile tôi sẽ mua ngay.', DATEADD(DAY, -5, GETDATE())),
+(2, 5, 5, N'Rất muốn mua', N'Mức giá 4.5 triệu cho bản Q1 Max là quá hợp lý trong phân khúc phím nhôm.', DATEADD(DAY, -4, GETDATE())),
+(2, 14, 5, N'Rất muốn mua', N'Sẵn sàng mua ngay khi mở bán đợt đầu, mong có màu đen nhám Anodized.', DATEADD(DAY, -3, GETDATE())),
+(2, 16, 3, N'Không mua', N'Đã có bàn phím cơ rồi nên chưa có nhu cầu mua thêm.', DATEADD(DAY, -1, GETDATE())),
+(3, 6, 4, N'Đang cân nhắc', N'Nếu trọng lượng nhẹ hơn bản XM5 và đệm tai êm hơn tôi sẽ nâng cấp.', DATEADD(DAY, -3, GETDATE())),
+(3, 11, 5, N'Rất muốn mua', N'Nếu chống ồn AI tốt hơn XM5 thì 8 triệu là mức giá chấp nhận được.', DATEADD(DAY, -2, GETDATE())),
+(3, 13, 4, N'Đang cân nhắc', N'Mong đợi chất âm ấm và microphone đàm thoại rõ ràng hơn.', DATEADD(DAY, -1, GETDATE())),
+(4, 8, 5, N'Rất muốn mua', N'Độ phân giải 5K rất cần cho biên tập ảnh và video, mức giá 24.5 triệu rất cạnh tranh với Apple Studio Display.', DATEADD(DAY, -2, GETDATE())),
+(4, 13, 5, N'Rất muốn mua', N'Nếu có chân đế xoay dọc công thái học và cổng sạc Thunderbolt 4 thì hoàn hảo.', DATEADD(DAY, -1, GETDATE())),
+(4, 17, 4, N'Đang cân nhắc', N'Cần kiểm tra độ tương phản thực tế tại showroom SGU Tech.', GETDATE());
 GO
 
 -- ========================================================================

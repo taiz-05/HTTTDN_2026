@@ -45,6 +45,8 @@ namespace HTTTDN.AdminApi.DTOs
         public string DurationType { get; set; } = "NoLimit"; // "NoLimit" | "Days" | "Date"
         public int? DurationDays { get; set; }
         public DateTime? ExpiresAt { get; set; }
+        public string? RequirementsJson { get; set; }
+        public string? QuestionsJson { get; set; }
     }
 
     public class SurveyAnswerDto
@@ -52,5 +54,12 @@ namespace HTTTDN.AdminApi.DTOs
         public int Score { get; set; }
         public string BuyingIntent { get; set; } = string.Empty;
         public string? CustomerOpinion { get; set; }
+        public string? AnswersJson { get; set; }
+        public string? Username { get; set; }
+    }
+
+    public class SurveyResponseReplyDto
+    {
+        public string AdminReply { get; set; } = string.Empty;
     }
 }

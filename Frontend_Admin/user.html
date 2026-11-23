@@ -451,184 +451,46 @@
     </div>
 
     <!-- =========================================================
-         POP-UP MODAL 2: THỰC HIỆN BẢNG KHẢO SÁT CHUYÊN SÂU (ENTERPRISE SURVEY)
+         POP-UP MODAL 2: THỰC HIỆN BẢNG KHẢO SÁT ĐA CÂU HỎI & ĐA YÊU CẦU (DYNAMIC ENTERPRISE SURVEY)
          ========================================================= -->
     <div class="modal-overlay" id="surveyModal" onclick="if(event.target===this) closeSurveyModal()">
-        <div class="modal-box" style="max-width:680px; max-height:90vh; overflow-y:auto;">
+        <div class="modal-box" style="max-width:740px; max-height:90vh; overflow-y:auto;">
             <div class="modal-header">
                 <div>
-                    <h3 style="font-size:17px; font-weight:800; color:#0F172A;">Phiếu Khảo Sát Nghiên Cứu Thị Trường</h3>
-                    <div style="font-size:12px; color:#64748B; margin-top:2px;">Ý kiến của bạn định hình chiến lược phát triển sản phẩm công nghệ của doanh nghiệp</div>
+                    <h3 style="font-size:17px; font-weight:800; color:#0F172A;">Phiếu Khảo Sát Nghiên Cứu Thị Trường Đa Câu Hỏi</h3>
+                    <div style="font-size:12px; color:#64748B; margin-top:2px;">Đánh giá của bạn sẽ được gửi trực tiếp tới Người quản lý CRM để tiếp nhận và phản hồi</div>
                 </div>
                 <button class="modal-close" onclick="closeSurveyModal()">×</button>
             </div>
             <div class="modal-body" style="padding: 20px 24px;">
-                <!-- KHỐI SẢN PHẨM KHẢO SÁT CHUẨN THƯƠNG MẠI -->
-                <div style="padding:16px 20px; background:linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%); border:1.5px solid #FFD4BF; border-radius:14px; margin-bottom:20px;">
+                <!-- KHỐI SẢN PHẨM & YÊU CẦU KHẢO SÁT CHUẨN THƯƠNG MẠI -->
+                <div style="padding:16px 20px; background:linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%); border:1.5px solid #FFD4BF; border-radius:14px; margin-bottom:18px;">
                     <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
                         <div>
-                            <span class="vng-mission-tag" style="margin-bottom:6px; font-size:10px; padding:3px 10px;">DỰ ÁN SẢN PHẨM MỚI</span>
+                            <span class="vng-mission-tag" style="margin-bottom:6px; font-size:10px; padding:3px 10px;">CHIẾN DỊCH KHẢO SÁT SẢN PHẨM MỚI</span>
                             <div style="font-weight:800; color:#0F172A; font-size:16px; letter-spacing:-0.01em;" id="svModalTitle"></div>
                             <div style="font-size:13px; color:#475569; margin:4px 0 10px; line-height:1.5;" id="svModalDesc"></div>
                         </div>
                     </div>
                     <div style="display:flex; align-items:center; justify-content:space-between; padding-top:10px; border-top:1px dashed #FDBA74; flex-wrap:wrap; gap:8px;">
-                        <div style="font-size:13px; color:#334155;">Thiết bị mục tiêu: <b id="svModalProduct" style="color:#0F172A;"></b></div>
+                        <div style="font-size:13px; color:#334155;">Thiết bị khảo sát: <b id="svModalProduct" style="color:#0F172A;"></b></div>
                         <div style="font-size:13.5px; color:#334155;">Giá dự kiến mở bán: <b style="color:#EA580C; font-size:15px; font-weight:800;" id="svModalPrice"></b></div>
                     </div>
+                    <div id="svModalRequirementsBox" style="margin-top:10px; padding-top:10px; border-top:1px dashed #FDBA74;"></div>
                 </div>
 
-                <!-- CÂU 1: LIKERT SCORE 1 - 5 (INTERACTIVE BUTTONS) -->
-                <div class="survey-section-box">
-                    <div class="survey-q-title">
-                        <span style="color:#FF5B00;">1.</span> Mức độ quan tâm của bạn đối với dòng sản phẩm này *
-                    </div>
-                    <div class="survey-q-desc">Chọn mức độ từ 1 (Hoàn toàn không quan tâm) đến 5 (Rất hào hứng đón nhận)</div>
-                    <div class="survey-score-grid" id="svScoreButtonsGroup">
-                        <div class="survey-score-btn" onclick="selectSurveyScore(1, this)">
-                            <div class="survey-score-num">1</div>
-                            <div class="survey-score-label">Rất thờ ơ</div>
-                        </div>
-                        <div class="survey-score-btn" onclick="selectSurveyScore(2, this)">
-                            <div class="survey-score-num">2</div>
-                            <div class="survey-score-label">Ít quan tâm</div>
-                        </div>
-                        <div class="survey-score-btn" onclick="selectSurveyScore(3, this)">
-                            <div class="survey-score-num">3</div>
-                            <div class="survey-score-label">Bình thường</div>
-                        </div>
-                        <div class="survey-score-btn" onclick="selectSurveyScore(4, this)">
-                            <div class="survey-score-num">4</div>
-                            <div class="survey-score-label">Khá quan tâm</div>
-                        </div>
-                        <div class="survey-score-btn active" onclick="selectSurveyScore(5, this)">
-                            <div class="survey-score-num">5</div>
-                            <div class="survey-score-label">Rất hào hứng</div>
-                        </div>
-                    </div>
-                    <input type="hidden" id="svSelectedScore" value="5">
-                </div>
-
-                <!-- CÂU 2: ĐÁNH GIÁ MỨC GIÁ DỰ KIẾN (RADIO TILES) -->
-                <div class="survey-section-box">
-                    <div class="survey-q-title">
-                        <span style="color:#FF5B00;">2.</span> Bạn đánh giá thế nào về mức giá dự kiến ở trên? *
-                    </div>
-                    <div class="survey-q-desc">So sánh tương quan giữa giá niêm yết và giá trị công nghệ mang lại</div>
-                    <div class="survey-choice-grid">
-                        <div class="survey-choice-card active" onclick="selectSurveyPriceEval('Giá rất hợp lý / Đáng đầu tư', this)">
-                            <div class="survey-choice-radio"></div>
-                            <div>
-                                <div class="survey-choice-title">Giá rất hợp lý & cạnh tranh</div>
-                                <div class="survey-choice-sub">Đáng đầu tư so với cấu hình phần cứng</div>
-                            </div>
-                        </div>
-                        <div class="survey-choice-card" onclick="selectSurveyPriceEval('Mức giá hơi cao nhưng chấp nhận được', this)">
-                            <div class="survey-choice-radio"></div>
-                            <div>
-                                <div class="survey-choice-title">Hơi cao nhưng chấp nhận được</div>
-                                <div class="survey-choice-sub">Cần có thêm quà tặng kèm hoặc trả góp 0%</div>
-                            </div>
-                        </div>
-                        <div class="survey-choice-card" onclick="selectSurveyPriceEval('Mức giá quá đắt / Cần giảm thêm', this)">
-                            <div class="survey-choice-radio"></div>
-                            <div>
-                                <div class="survey-choice-title">Giá quá đắt so với thị trường</div>
-                                <div class="survey-choice-sub">Nên điều chỉnh giảm giá từ 10% - 20%</div>
-                            </div>
-                        </div>
-                        <div class="survey-choice-card" onclick="selectSurveyPriceEval('Chưa phù hợp với ngân sách', this)">
-                            <div class="survey-choice-radio"></div>
-                            <div>
-                                <div class="survey-choice-title">Chưa phù hợp với ngân sách</div>
-                                <div class="survey-choice-sub">Vượt quá khả năng chi trả hiện tại</div>
-                            </div>
-                        </div>
-                    </div>
-                    <input type="hidden" id="svSelectedPriceEval" value="Giá rất hợp lý / Đáng đầu tư">
-                </div>
-
-                <!-- CÂU 3: TÍNH NĂNG MONG ĐỢI NHẤT (MULTI-SELECT CHIPS) -->
-                <div class="survey-section-box">
-                    <div class="survey-q-title">
-                        <span style="color:#FF5B00;">3.</span> Tiêu chí & Tính năng bạn mong đợi nhất ở sản phẩm này *
-                    </div>
-                    <div class="survey-q-desc">Bấm chọn các tính năng bạn ưu tiên nhất (có thể chọn nhiều tiêu chí)</div>
-                    <div class="survey-chips-grid" id="svChipsGroup">
-                        <div class="survey-chip-item active" onclick="toggleSurveyChip(this)" data-val="Hiệu năng mạnh mẽ">⚡ Hiệu năng vượt trội</div>
-                        <div class="survey-chip-item active" onclick="toggleSurveyChip(this)" data-val="Thời lượng pin bền bỉ">🔋 Pin trâu & Sạc nhanh</div>
-                        <div class="survey-chip-item" onclick="toggleSurveyChip(this)" data-val="Thiết kế mỏng nhẹ cao cấp">🎨 Thiết kế mỏng nhẹ sang trọng</div>
-                        <div class="survey-chip-item active" onclick="toggleSurveyChip(this)" data-val="Công nghệ AI thông minh">🤖 Tính năng AI thông minh</div>
-                        <div class="survey-chip-item" onclick="toggleSurveyChip(this)" data-val="Bảo hành VIP 1 đổi 1">🛡️ Bảo hành VIP 1 đổi 1</div>
-                        <div class="survey-chip-item" onclick="toggleSurveyChip(this)" data-val="Chính sách trợ giá">💰 Trợ giá thu cũ đổi mới</div>
-                    </div>
-                </div>
-
-                <!-- CÂU 4: Ý ĐỊNH MUA SẮM (RADIO TILES) -->
-                <div class="survey-section-box">
-                    <div class="survey-q-title">
-                        <span style="color:#FF5B00;">4.</span> Kế hoạch & Ý định mua sắm của bạn khi sản phẩm mở bán *
-                    </div>
-                    <div class="survey-q-desc">Xác định thời điểm bạn sẵn sàng ra quyết định sở hữu thiết bị</div>
-                    <div class="survey-choice-grid">
-                        <div class="survey-choice-card active" onclick="selectSurveyIntent('Đặt trước ngay đợt đầu (Pre-order)', this)">
-                            <div class="survey-choice-radio"></div>
-                            <div>
-                                <div class="survey-choice-title">🚀 Đặt trước ngay (Pre-order)</div>
-                                <div class="survey-choice-sub">Mua ngay trong đợt mở bán đầu tiên</div>
-                            </div>
-                        </div>
-                        <div class="survey-choice-card" onclick="selectSurveyIntent('Chờ đánh giá thực tế', this)">
-                            <div class="survey-choice-radio"></div>
-                            <div>
-                                <div class="survey-choice-title">⏳ Chờ đánh giá thực tế</div>
-                                <div class="survey-choice-sub">Chờ 1-3 tháng xem trải nghiệm người dùng</div>
-                            </div>
-                        </div>
-                        <div class="survey-choice-card" onclick="selectSurveyIntent('Đợi đợt khuyến mãi giảm giá', this)">
-                            <div class="survey-choice-radio"></div>
-                            <div>
-                                <div class="survey-choice-title">🎁 Đợi dịp khuyến mãi</div>
-                                <div class="survey-choice-sub">Mua khi có voucher giảm giá hoặc quà khủng</div>
-                            </div>
-                        </div>
-                        <div class="survey-choice-card" onclick="selectSurveyIntent('Chưa có nhu cầu mua', this)">
-                            <div class="survey-choice-radio"></div>
-                            <div>
-                                <div class="survey-choice-title">❌ Chưa có kế hoạch mua</div>
-                                <div class="survey-choice-sub">Thiết bị hiện tại vẫn đáp ứng đủ nhu cầu</div>
-                            </div>
-                        </div>
-                    </div>
-                    <input type="hidden" id="svSelectedIntent" value="Đặt trước ngay đợt đầu (Pre-order)">
-                </div>
-
-                <!-- CÂU 5: MỨC GIÁ KỲ VỌNG & GÓP Ý HOÀN THIỆN -->
-                <div class="survey-section-box" style="margin-bottom:0;">
-                    <div class="survey-q-title">
-                        <span style="color:#FF5B00;">5.</span> Mức giá kỳ vọng & Ý kiến đóng góp hoàn thiện sản phẩm
-                    </div>
-                    <div class="grid-form" style="grid-template-columns: 1fr; margin-bottom: 12px;">
-                        <div>
-                            <label style="font-weight:600; font-size:12.5px;">Mức giá bạn sẵn sàng chi trả cho sản phẩm này (VNĐ):</label>
-                            <input type="text" id="svModalWillingPrice" placeholder="VD: 7.500.000 đ">
-                        </div>
-                    </div>
-                    <div>
-                        <label style="font-weight:600; font-size:12.5px;">Góp ý thêm về tính năng, màu sắc hoặc chính sách dịch vụ:</label>
-                        <textarea id="svModalOpinion" rows="3" placeholder="Chia sẻ kỳ vọng của bạn để doanh nghiệp cải tiến sản phẩm trước khi ra mắt chính thức..."></textarea>
-                    </div>
-                </div>
+                <!-- DANH SÁCH NHIỀU CÂU HỎI & YÊU CẦU ĐƯỢC RENDER ĐỘNG TỪ CẤU HÌNH CỦA NGƯỜI QUẢN LÝ -->
+                <div id="svDynamicQuestionsBox"></div>
             </div>
             <div class="modal-footer" style="padding:16px 24px;">
                 <button type="button" class="btn btn-warning" onclick="closeSurveyModal()">Hủy bỏ</button>
                 <button type="button" class="btn" onclick="submitModalSurvey()" style="padding:10px 24px; font-size:13.5px; border-radius:8px;">
-                    Hoàn tất & Gửi kết quả khảo sát
+                    Hoàn tất & Gửi đánh giá khảo sát về Người quản lý
                 </button>
             </div>
         </div>
     </div>
 
-    <script src="user.js?v=20261113_final_v5"></script>
+    <script src="user.js?v=20261123_multi_q"></script>
 </body>
 </html>
