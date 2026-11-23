@@ -45,6 +45,8 @@ namespace HTTTDN.AdminApi.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public bool IsActive { get; set; } = true;
         public DateTime? ExpiresAt { get; set; } // NULL = Không thời hạn
+        public string? RequirementsJson { get; set; } // Danh sách nhiều yêu cầu khảo sát (JSON array)
+        public string? QuestionsJson { get; set; } // Danh sách nhiều câu hỏi khảo sát (JSON array)
     }
 
     public class SurveyResponse
@@ -60,6 +62,10 @@ namespace HTTTDN.AdminApi.Models
         public int Score { get; set; }
         public string BuyingIntent { get; set; } = string.Empty;
         public string? CustomerOpinion { get; set; }
+        public string? AnswersJson { get; set; } // Chi tiết câu trả lời cho từng câu hỏi/yêu cầu (JSON array)
+        public string? AdminReply { get; set; } // Nội dung Người quản lý tiếp nhận & phản hồi lại đánh giá khảo sát
+        public string Status { get; set; } = "Chờ tiếp nhận"; // "Chờ tiếp nhận" | "Đã tiếp nhận & Phản hồi"
+        public DateTime? RepliedAt { get; set; }
         public DateTime SubmittedAt { get; set; } = DateTime.Now;
     }
 }

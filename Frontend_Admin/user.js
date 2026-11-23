@@ -32,13 +32,26 @@ function getInitials(fullName) {
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-window.onload = () => {
+window.onload = async () => {
     currentCus = JSON.parse(localStorage.getItem("currentCustomer") || "null");
     if (!currentCus) {
-        window.location.href = "customer_login.html";
-        return;
+        currentCus = {
+            accountId: 5,
+            username: "khachhang1",
+            fullName: "Nguyễn Văn An",
+            email: "an.nguyen@gmail.com",
+            roleName: "Customer"
+        };
+        localStorage.setItem("currentCustomer", JSON.stringify(currentCus));
     }
-    initCustomerPortal();
+    await initCustomerPortal();
+
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get("tab");
+    if (tabParam) {
+        const navBtn = document.querySelector(`button[onclick*="${tabParam}"]`);
+        switchCustomerTab(tabParam, navBtn);
+    }
 };
 
 function switchCustomerTab(sectionId, btn) {
@@ -89,7 +102,13 @@ async function initCustomerPortal() {
     if (document.getElementById("pEmailDisplay")) document.getElementById("pEmailDisplay").value = currentCus.email || (currentCus.username + "@gmail.com");
 
     try {
-        const prof = await (await fetch(`${CUS_API}/profile/${currentCus.accountId}`)).json();
+        const prof = await (await fetch(`${CUS_API}/profile/${currentCus.accountId}?username=${encodeURIComponent(currentCus.username || "")}`)).json();
+        if (prof && prof.accountId) {
+            currentCus.accountId = prof.accountId;
+            if (prof.username) currentCus.username = prof.username;
+            if (prof.fullName) currentCus.fullName = prof.fullName;
+            localStorage.setItem("currentCustomer", JSON.stringify(currentCus));
+        }
         if (document.getElementById("pFullName")) document.getElementById("pFullName").value = prof.fullName || currentCus.fullName;
         if (document.getElementById("pEmailDisplay") && prof.email) document.getElementById("pEmailDisplay").value = prof.email;
         if (document.getElementById("pPhone")) document.getElementById("pPhone").value = prof.phone || "";
@@ -505,11 +524,111 @@ function renderFilteredCommunityFeedbacks() {
 }
 
 // =========================================================
-// 2. NHẬN ĐƯỢC KHẢO SÁT VÀ THỰC HIỆN
+// 2. NHẬN ĐƯỢC KHẢO SÁT ĐA CÂU HỎI & ĐA YÊU CẦU VÀ THỰC HIỆN
 // =========================================================
+let currentModalQuestions = [];
+
+function getFallbackSurveyQuestions() {
+    return [
+        {
+            id: 1,
+            requirement: "Yêu cầu đánh giá mức độ quan tâm",
+            question: "Mức độ quan tâm và hào hứng của bạn đối với sản phẩm mới này?",
+            type: "rating",
+            required: true,
+            options: ["1 - Rất thờ ơ", "2 - Ít quan tâm", "3 - Bình thường", "4 - Khá quan tâm", "5 - Rất hào hứng"]
+        },
+        {
+            id: 2,
+            requirement: "Yêu cầu thẩm định mức giá dự kiến",
+            question: "Bạn đánh giá thế nào về mức giá dự kiến mở bán so với công nghệ mang lại?",
+            type: "single",
+            required: true,
+            options: ["Giá rất hợp lý / Đáng đầu tư", "Mức giá hơi cao nhưng chấp nhận được", "Mức giá quá đắt / Cần giảm thêm", "Chưa phù hợp với ngân sách"]
+        },
+        {
+            id: 3,
+            requirement: "Yêu cầu khảo sát tính năng & cấu hình",
+            question: "Những tiêu chí kỹ thuật & tính năng nào bạn yêu cầu bắt buộc phải có trên sản phẩm?",
+            type: "multi",
+            required: true,
+            options: ["Hiệu năng mạnh mẽ vượt trội", "Thời lượng pin bền bỉ & Sạc nhanh", "Thiết kế mỏng nhẹ cao cấp", "Tích hợp công nghệ AI thông minh", "Màn hình chuẩn màu độ phân giải cao", "Tản nhiệt êm ái & Bền bỉ"]
+        },
+        {
+            id: 4,
+            requirement: "Yêu cầu chính sách ưu đãi & hậu mãi",
+            question: "Chính sách ưu đãi hoặc dịch vụ hậu mãi nào bạn mong muốn nhất khi mở bán?",
+            type: "multi",
+            required: true,
+            options: ["Trả góp 0% lãi suất", "Bảo hành VIP 1 đổi 1 trong 24 tháng", "Tặng kèm bộ phụ kiện chính hãng", "Trợ giá thu cũ đổi mới lên đời", "Voucher giảm giá trực tiếp đợt đầu"]
+        },
+        {
+            id: 5,
+            requirement: "Yêu cầu xác định kế hoạch mua sắm",
+            question: "Kế hoạch và ý định mua sắm của bạn khi sản phẩm chính thức mở bán tại SGU Tech?",
+            type: "single",
+            required: true,
+            options: ["Rất muốn mua (Đặt trước Pre-order ngay)", "Đang cân nhắc (Chờ xem đánh giá thực tế)", "Đang cân nhắc (Đợi đợt khuyến mãi giảm giá)", "Không mua (Chưa có nhu cầu)"]
+        },
+        {
+            id: 6,
+            requirement: "Yêu cầu đề xuất mức giá & góp ý riêng",
+            question: "Mức giá bạn sẵn sàng chi trả và các yêu cầu / góp ý chi tiết khác cho sản phẩm:",
+            type: "text",
+            required: false,
+            options: []
+        }
+    ];
+}
+
+function formatCustomerMySurveyResponseHtml(myResp) {
+    let detailsHtml = "";
+    if (myResp.answersJson) {
+        try {
+            const parsed = JSON.parse(myResp.answersJson);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                detailsHtml = parsed.map((a, idx) => {
+                    const ansVal = Array.isArray(a.answer) ? a.answer.join(", ") : (a.answer || "-");
+                    return `<div style="font-size:11.5px; color:#334155; margin-top:2px;">&bull; <b>Câu ${idx + 1} (${a.requirement || "Yêu cầu"}):</b> <span style="color:#1E40AF; font-weight:600;">${ansVal}</span></div>`;
+                }).join("");
+            }
+        } catch (e) {}
+    }
+
+    if (!detailsHtml && myResp.customerOpinion) {
+        detailsHtml = `<div style="color:#475569; margin-top:3px; font-size:11.5px;"><i>"${myResp.customerOpinion}"</i></div>`;
+    }
+
+    const hasManagerReply = myResp.adminReply && myResp.adminReply.trim().length > 0;
+    const managerReplyHtml = hasManagerReply
+        ? `
+            <div style="margin-top:8px; background:#ECFDF5; border-left:3.5px solid #059669; padding:8px 10px; border-radius:6px; font-size:12px; color:#065F46; line-height:1.45;">
+                <div style="font-weight:800; font-size:11px; text-transform:uppercase; letter-spacing:0.03em; margin-bottom:2px;">✓ Người quản lý CRM đã tiếp nhận & phản hồi:</div>
+                <div>${myResp.adminReply}</div>
+            </div>
+        `
+        : `
+            <div style="margin-top:6px; font-size:11.5px; color:#D97706; font-weight:600;">
+                ⏳ Đã gửi tới Người quản lý CRM (Đang chờ tiếp nhận & phản hồi)
+            </div>
+        `;
+
+    return `
+        <div style="font-size:12px; line-height:1.45;">
+            <div style="margin-bottom:4px;">
+                <b>Điểm đánh giá:</b> <span style="color:#EA580C; font-weight:800;">${myResp.score}/5 ★</span>
+                &bull; <b>Ý định:</b> <span class="badge badge-info" style="font-size:10.5px;">${myResp.buyingIntent}</span>
+            </div>
+            ${detailsHtml}
+            ${managerReplyHtml}
+        </div>
+    `;
+}
+
 async function loadMySurveys() {
     try {
-        allSurveysCache = await (await fetch(`${CUS_API}/surveys/${currentCus.accountId}`)).json();
+        const res = await fetch(`${CUS_API}/surveys/${currentCus.accountId}?username=${encodeURIComponent(currentCus.username || "")}`);
+        allSurveysCache = await res.json();
 
         const totalCount = allSurveysCache.length;
         const doneCount = allSurveysCache.filter(s => s.isCompleted).length;
@@ -546,27 +665,40 @@ async function loadMySurveys() {
                     : `<span class="badge badge-info">Đến ngày ${d}</span>`;
             }
 
-            let myAnswerHtml = `<span style="color:#d97706; font-size:12px; font-weight:600;">Chưa thực hiện</span>`;
+            let qCount = 6;
+            let reqCount = 4;
+            try {
+                if (s.questionsJson) {
+                    const qArr = JSON.parse(s.questionsJson);
+                    if (Array.isArray(qArr) && qArr.length > 0) qCount = qArr.length;
+                }
+                if (s.requirementsJson) {
+                    const rArr = JSON.parse(s.requirementsJson);
+                    if (Array.isArray(rArr) && rArr.length > 0) reqCount = rArr.length;
+                }
+            } catch (e) {}
+
+            let myAnswerHtml = `<span style="color:#d97706; font-size:12px; font-weight:600;">Chưa thực hiện (${qCount} câu hỏi đang chờ bạn đánh giá)</span>`;
             if (s.isCompleted && s.myResponse) {
-                myAnswerHtml = `
-                    <div style="font-size:12px; line-height:1.45;">
-                        <div><b>Điểm:</b> <span style="color:#1e40af; font-weight:700;">${s.myResponse.score}/5</span> &bull; <b>Ý định:</b> <span class="badge badge-info" style="font-size:10.5px;">${s.myResponse.buyingIntent}</span></div>
-                        <div style="color:#475569; margin-top:2px;"><i>"${s.myResponse.customerOpinion}"</i></div>
-                    </div>
-                `;
+                myAnswerHtml = formatCustomerMySurveyResponseHtml(s.myResponse);
             } else if (s.isCompleted) {
                 myAnswerHtml = `<span class="badge badge-active">Đã gửi kết quả</span>`;
             }
 
             let actionHtml = "";
             if (s.isCompleted) {
-                actionHtml = `<span class="badge badge-active" style="padding:5px 12px; font-size:12px;">✓ Đã thực hiện</span>`;
+                actionHtml = `
+                    <div style="display:flex; flex-direction:column; gap:6px; align-items:center;">
+                        <span class="badge badge-active" style="padding:4px 10px; font-size:11.5px;">✓ Đã gửi đánh giá</span>
+                        ${(s.isActive && !s.isExpired) ? `<button class="btn btn-warning" style="padding:4px 10px; font-size:11.5px;" onclick="openSurveyModal(${s.surveyId})">Cập nhật lại</button>` : ''}
+                    </div>
+                `;
             } else if (!s.isActive) {
                 actionHtml = `<button class="btn btn-warning" disabled style="padding:4px 10px; font-size:12px;">Đã đóng</button>`;
             } else if (s.isExpired) {
                 actionHtml = `<button class="btn btn-warning" disabled style="padding:4px 10px; font-size:12px;">Đã hết hạn</button>`;
             } else {
-                actionHtml = `<button class="btn" style="padding:6px 16px; font-size:12px; border-radius:6px;" onclick="openSurveyModal(${s.surveyId})">Thực hiện khảo sát</button>`;
+                actionHtml = `<button class="btn" style="padding:7px 16px; font-size:12.5px; border-radius:6px;" onclick="openSurveyModal(${s.surveyId})">Thực hiện khảo sát (${qCount} câu)</button>`;
             }
 
             return `
@@ -575,6 +707,10 @@ async function loadMySurveys() {
                 <td>
                     <b style="font-size:13.5px; color:var(--text-primary);">${s.title}</b>
                     <div style="color:var(--text-muted); font-size:11.5px; margin-top:2px; line-height:1.4;">${s.description || ""}</div>
+                    <div style="margin-top:5px; display:flex; gap:5px; flex-wrap:wrap;">
+                        <span class="badge-tag" style="background:#FFF7ED; color:#EA580C; border:1px solid #FED7AA; font-size:10.5px;">📋 ${reqCount} yêu cầu</span>
+                        <span class="badge-tag" style="background:#EFF6FF; color:#1D4ED8; border:1px solid #BFDBFE; font-size:10.5px;">❓ ${qCount} câu hỏi</span>
+                    </div>
                 </td>
                 <td>
                     <b style="color:#1d4ed8;">${s.targetProduct}</b>
@@ -591,34 +727,28 @@ async function loadMySurveys() {
     }
 }
 
-function selectSurveyScore(val, el) {
-    document.getElementById("svSelectedScore").value = val;
-    document.querySelectorAll("#svScoreButtonsGroup .survey-score-btn").forEach(b => b.classList.remove("active"));
-    if (el) el.classList.add("active");
+function selectDynamicRating(qIdx, scoreVal, btnEl) {
+    const group = document.getElementById(`dynRatingGroup_${qIdx}`);
+    if (group) {
+        group.querySelectorAll(".survey-score-btn").forEach(b => b.classList.remove("active"));
+    }
+    if (btnEl) btnEl.classList.add("active");
+    const hidden = document.getElementById(`dynAnswer_${qIdx}`);
+    if (hidden) hidden.value = String(scoreVal);
 }
 
-function selectSurveyPriceEval(val, el) {
-    document.getElementById("svSelectedPriceEval").value = val;
-    document.querySelectorAll(".survey-choice-grid .survey-choice-card").forEach(c => {
-        if (c.onclick && c.onclick.toString().includes("selectSurveyPriceEval")) {
-            c.classList.remove("active");
-        }
-    });
-    if (el) el.classList.add("active");
+function selectDynamicSingleChoice(qIdx, val, cardEl) {
+    const group = document.getElementById(`dynSingleGroup_${qIdx}`);
+    if (group) {
+        group.querySelectorAll(".survey-choice-card").forEach(c => c.classList.remove("active"));
+    }
+    if (cardEl) cardEl.classList.add("active");
+    const hidden = document.getElementById(`dynAnswer_${qIdx}`);
+    if (hidden) hidden.value = val;
 }
 
-function toggleSurveyChip(el) {
-    if (el) el.classList.toggle("active");
-}
-
-function selectSurveyIntent(val, el) {
-    document.getElementById("svSelectedIntent").value = val;
-    document.querySelectorAll(".survey-choice-grid .survey-choice-card").forEach(c => {
-        if (c.onclick && c.onclick.toString().includes("selectSurveyIntent")) {
-            c.classList.remove("active");
-        }
-    });
-    if (el) el.classList.add("active");
+function toggleDynamicMultiChip(chipEl) {
+    if (chipEl) chipEl.classList.toggle("active");
 }
 
 function openSurveyModal(surveyId) {
@@ -630,32 +760,139 @@ function openSurveyModal(surveyId) {
     document.getElementById("svModalDesc").innerText = sv.description || "";
     document.getElementById("svModalProduct").innerText = sv.targetProduct;
     document.getElementById("svModalPrice").innerText = Number(sv.expectedPrice).toLocaleString("vi-VN") + " ₫";
-    
-    // Đặt lại các giá trị mặc định cho bài khảo sát
-    document.getElementById("svSelectedScore").value = 5;
-    document.querySelectorAll("#svScoreButtonsGroup .survey-score-btn").forEach((b, idx) => {
-        b.classList.toggle("active", idx === 4);
-    });
 
-    document.getElementById("svSelectedPriceEval").value = "Giá rất hợp lý / Đáng đầu tư";
-    const priceCards = document.querySelectorAll(".survey-choice-grid .survey-choice-card");
-    priceCards.forEach((c, idx) => {
-        if (c.onclick && c.onclick.toString().includes("selectSurveyPriceEval")) {
-            c.classList.toggle("active", idx === 0);
+    // Render các Yêu cầu Khảo sát trọng tâm
+    let reqs = ["Yêu cầu đánh giá mức độ quan tâm & thiết kế", "Yêu cầu thẩm định mức giá dự kiến", "Yêu cầu khảo sát tính năng kỹ thuật", "Yêu cầu xác định kế hoạch mua sắm"];
+    try {
+        if (sv.requirementsJson) {
+            const parsedReqs = JSON.parse(sv.requirementsJson);
+            if (Array.isArray(parsedReqs) && parsedReqs.length > 0) reqs = parsedReqs;
         }
-    });
+    } catch (e) {}
 
-    document.getElementById("svSelectedIntent").value = "Đặt trước ngay đợt đầu (Pre-order)";
-    priceCards.forEach((c, idx) => {
-        if (c.onclick && c.onclick.toString().includes("selectSurveyIntent")) {
-            c.classList.toggle("active", idx === 4);
-        }
-    });
-
-    if (document.getElementById("svModalWillingPrice")) {
-        document.getElementById("svModalWillingPrice").value = Number(sv.expectedPrice).toLocaleString("vi-VN") + " ₫";
+    const reqBox = document.getElementById("svModalRequirementsBox");
+    if (reqBox) {
+        reqBox.innerHTML = `
+            <div style="font-size:11.5px; font-weight:800; color:#9A3412; margin-bottom:5px;">CÁC YÊU CẦU KHẢO SÁT TRỌNG TÂM CỦA NGƯỜI QUẢN LÝ (${reqs.length} YÊU CẦU):</div>
+            <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                ${reqs.map(r => `<span style="background:#FFFFFF; color:#C2410C; border:1px solid #FDBA74; font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px;">✓ ${r}</span>`).join("")}
+            </div>
+        `;
     }
-    document.getElementById("svModalOpinion").value = "";
+
+    // Parse danh sách câu hỏi động của bài khảo sát
+    let questions = getFallbackSurveyQuestions();
+    try {
+        if (sv.questionsJson) {
+            const parsedQ = JSON.parse(sv.questionsJson);
+            if (Array.isArray(parsedQ) && parsedQ.length > 0) {
+                questions = parsedQ;
+            }
+        }
+    } catch (e) {}
+    currentModalQuestions = questions;
+
+    const qContainer = document.getElementById("svDynamicQuestionsBox");
+    if (qContainer) {
+        qContainer.innerHTML = currentModalQuestions.map((q, idx) => {
+            const qType = q.type || "single";
+            const reqTag = q.requirement
+                ? `<span style="background:#FFF7ED; color:#EA580C; border:1px solid #FED7AA; font-size:11px; font-weight:700; padding:2px 8px; border-radius:4px; margin-left:6px;">${q.requirement}</span>`
+                : "";
+
+            if (qType === "rating") {
+                const labels = Array.isArray(q.options) && q.options.length >= 5
+                    ? q.options
+                    : ["1 - Rất thờ ơ", "2 - Ít quan tâm", "3 - Bình thường", "4 - Khá quan tâm", "5 - Rất hào hứng"];
+                return `
+                    <div class="survey-section-box" data-qidx="${idx}">
+                        <div class="survey-q-title">
+                            <span style="color:#FF5B00;">Câu ${idx + 1}.</span> ${q.question} * ${reqTag}
+                        </div>
+                        <div class="survey-q-desc">Chọn mức điểm từ 1 (Thấp nhất) đến 5 (Cao nhất)</div>
+                        <div class="survey-score-grid" id="dynRatingGroup_${idx}">
+                            ${[1, 2, 3, 4, 5].map(num => {
+                                const lbl = (labels[num - 1] || `${num} điểm`).replace(/^\d+\s*-\s*/, "");
+                                return `
+                                    <div class="survey-score-btn ${num === 5 ? 'active' : ''}" onclick="selectDynamicRating(${idx}, ${num}, this)">
+                                        <div class="survey-score-num">${num}</div>
+                                        <div class="survey-score-label">${lbl}</div>
+                                    </div>
+                                `;
+                            }).join("")}
+                        </div>
+                        <input type="hidden" id="dynAnswer_${idx}" value="5">
+                    </div>
+                `;
+            } else if (qType === "single") {
+                const opts = Array.isArray(q.options) && q.options.length > 0
+                    ? q.options
+                    : ["Rất phù hợp / Đồng ý", "Đang cân nhắc thêm", "Chưa phù hợp"];
+                const defaultOpt = opts[0];
+                return `
+                    <div class="survey-section-box" data-qidx="${idx}">
+                        <div class="survey-q-title">
+                            <span style="color:#FF5B00;">Câu ${idx + 1}.</span> ${q.question} * ${reqTag}
+                        </div>
+                        <div class="survey-q-desc">Chọn 1 phương án phù hợp nhất với đánh giá của bạn</div>
+                        <div class="survey-choice-grid" id="dynSingleGroup_${idx}">
+                            ${opts.map((opt, oIdx) => {
+                                const safeOpt = String(opt).replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                                return `
+                                    <div class="survey-choice-card ${oIdx === 0 ? 'active' : ''}" onclick="selectDynamicSingleChoice(${idx}, '${safeOpt}', this)">
+                                        <div class="survey-choice-radio"></div>
+                                        <div>
+                                            <div class="survey-choice-title">${opt}</div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join("")}
+                        </div>
+                        <input type="hidden" id="dynAnswer_${idx}" value="${String(defaultOpt).replace(/"/g, '&quot;')}">
+                    </div>
+                `;
+            } else if (qType === "multi") {
+                const opts = Array.isArray(q.options) && q.options.length > 0
+                    ? q.options
+                    : ["Hiệu năng mạnh mẽ", "Pin bền bỉ & Sạc nhanh", "Thiết kế mỏng nhẹ", "Giá ưu đãi & Quà tặng"];
+                return `
+                    <div class="survey-section-box" data-qidx="${idx}">
+                        <div class="survey-q-title">
+                            <span style="color:#FF5B00;">Câu ${idx + 1}.</span> ${q.question} * ${reqTag}
+                        </div>
+                        <div class="survey-q-desc">Bấm chọn nhiều yêu cầu / tiêu chí bạn mong muốn (có thể chọn nhiều ô)</div>
+                        <div class="survey-chips-grid" id="dynMultiGroup_${idx}">
+                            ${opts.map((opt, oIdx) => `
+                                <div class="survey-chip-item ${oIdx < 2 ? 'active' : ''}" onclick="toggleDynamicMultiChip(this)" data-val="${String(opt).replace(/"/g, '&quot;')}">
+                                    ${opt}
+                                </div>
+                            `).join("")}
+                        </div>
+                    </div>
+                `;
+            } else {
+                // type === "text"
+                const defaultPriceStr = Number(sv.expectedPrice).toLocaleString("vi-VN") + " ₫";
+                return `
+                    <div class="survey-section-box" data-qidx="${idx}" style="margin-bottom:10px;">
+                        <div class="survey-q-title">
+                            <span style="color:#FF5B00;">Câu ${idx + 1}.</span> ${q.question} ${reqTag}
+                        </div>
+                        <div class="grid-form" style="grid-template-columns: 1fr; margin-bottom: 10px;">
+                            <div>
+                                <label style="font-weight:600; font-size:12.5px;">Mức giá kỳ vọng bạn sẵn sàng chi trả cho sản phẩm (VNĐ):</label>
+                                <input type="text" id="dynWillingPrice_${idx}" value="${defaultPriceStr}" placeholder="VD: 25.000.000 ₫">
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-weight:600; font-size:12.5px;">Ý kiến đóng góp & Yêu cầu chi tiết gửi Người quản lý CRM:</label>
+                            <textarea id="dynTextAnswer_${idx}" rows="3" placeholder="Chia sẻ cụ thể yêu cầu của bạn về cấu hình, mức giá, màu sắc hoặc chính sách bảo hành..."></textarea>
+                        </div>
+                    </div>
+                `;
+            }
+        }).join("");
+    }
 
     document.getElementById("surveyModal").classList.add("show");
 }
@@ -665,40 +902,92 @@ function closeSurveyModal() {
 }
 
 async function submitModalSurvey() {
-    const score = Number(document.getElementById("svSelectedScore")?.value || 5);
-    const intent = document.getElementById("svSelectedIntent")?.value || "Đặt trước ngay đợt đầu (Pre-order)";
-    const priceEval = document.getElementById("svSelectedPriceEval")?.value || "Giá rất hợp lý / Đáng đầu tư";
-    
-    const selectedChips = Array.from(document.querySelectorAll("#svChipsGroup .survey-chip-item.active"))
-        .map(c => c.getAttribute("data-val") || c.innerText.replace("✓", "").trim())
-        .filter(Boolean);
-    const chipText = selectedChips.length > 0 ? selectedChips.join(", ") : "Hiệu năng vượt trội, Pin trâu";
+    let overallScore = 5;
+    let overallIntent = "Rất muốn mua (Đặt trước Pre-order ngay)";
+    let summaryParts = [];
+    let answersList = [];
 
-    const willingPrice = document.getElementById("svModalWillingPrice")?.value.trim() || "";
-    const extraOpinion = document.getElementById("svModalOpinion")?.value.trim() || "";
+    for (let idx = 0; idx < currentModalQuestions.length; idx++) {
+        const q = currentModalQuestions[idx];
+        const qType = q.type || "single";
+        let ansVal = "";
 
-    // Đóng gói cấu trúc phản hồi chi tiết đa tiêu chí
-    let formattedOpinion = `[Đánh giá giá: ${priceEval}] [Tiêu chí mong đợi: ${chipText}]`;
-    if (willingPrice) formattedOpinion += ` [Giá sẵn sàng chi: ${willingPrice}]`;
-    if (extraOpinion) formattedOpinion += ` [Góp ý: ${extraOpinion}]`;
+        if (qType === "rating") {
+            const val = Number(document.getElementById(`dynAnswer_${idx}`)?.value || 5);
+            overallScore = val;
+            ansVal = `${val} / 5 điểm`;
+            summaryParts.push(`[${q.requirement || "Điểm đánh giá"}: ${ansVal}]`);
+        } else if (qType === "single") {
+            const val = (document.getElementById(`dynAnswer_${idx}`)?.value || "").trim();
+            ansVal = val;
+            const qLower = (q.question + " " + (q.requirement || "")).toLowerCase();
+            if (qLower.includes("mua") || qLower.includes("kế hoạch") || qLower.includes("ý định")) {
+                overallIntent = val;
+            }
+            summaryParts.push(`[${q.requirement || `Câu ${idx + 1}`}: ${val}]`);
+        } else if (qType === "multi") {
+            const chips = Array.from(document.querySelectorAll(`#dynMultiGroup_${idx} .survey-chip-item.active`))
+                .map(c => c.getAttribute("data-val") || c.innerText.trim())
+                .filter(Boolean);
+            if (q.required && chips.length === 0) {
+                return alert(`Vui lòng chọn ít nhất 1 tiêu chí cho Câu hỏi #${idx + 1} (${q.question})!`);
+            }
+            ansVal = chips.join(", ");
+            summaryParts.push(`[${q.requirement || `Tiêu chí câu ${idx + 1}`}: ${ansVal}]`);
+        } else {
+            const wPrice = (document.getElementById(`dynWillingPrice_${idx}`)?.value || "").trim();
+            const txt = (document.getElementById(`dynTextAnswer_${idx}`)?.value || "").trim();
+            const combined = [];
+            if (wPrice) {
+                combined.push(`Giá kỳ vọng: ${wPrice}`);
+                summaryParts.push(`[Giá sẵn sàng chi: ${wPrice}]`);
+            }
+            if (txt) {
+                combined.push(`Góp ý: ${txt}`);
+                summaryParts.push(`[Góp ý: ${txt}]`);
+            }
+            ansVal = combined.length > 0 ? combined.join(" | ") : "Đồng ý với cấu hình và chính sách đề xuất";
+        }
+
+        answersList.push({
+            questionId: q.id || (idx + 1),
+            requirement: q.requirement || `Yêu cầu #${idx + 1}`,
+            question: q.question,
+            type: qType,
+            answer: ansVal
+        });
+    }
+
+    const formattedOpinion = summaryParts.join(" ");
 
     try {
         const res = await fetch(`${CUS_API}/surveys/${selectedModalSurveyId}/submit/${currentCus.accountId}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                score,
-                buyingIntent: intent,
-                customerOpinion: formattedOpinion
+                score: overallScore,
+                buyingIntent: overallIntent,
+                customerOpinion: formattedOpinion,
+                answersJson: JSON.stringify(answersList),
+                username: currentCus.username
             })
         });
         const data = await res.json();
-        alert(data.message || "Đã gửi bảng khảo sát thành công! Cảm ơn ý kiến quý báu của bạn.");
+        if (!res.ok) {
+            return alert(data.message || "Không thể gửi kết quả khảo sát. Vui lòng thử lại!");
+        }
+
+        if (data && data.accountId) {
+            currentCus.accountId = data.accountId;
+            localStorage.setItem("currentCustomer", JSON.stringify(currentCus));
+        }
+
+        alert(data.message || "Đã gửi đánh giá khảo sát thành công! Người quản lý CRM đã nhận được câu trả lời của bạn.");
         closeSurveyModal();
         await loadMySurveys();
         notifyDataChanged("surveys");
     } catch (err) {
-        alert("Lỗi gửi khảo sát: " + err.message);
+        alert("Lỗi kết nối khi gửi khảo sát: " + err.message);
     }
 }
 

@@ -335,9 +335,40 @@
                         </div>
                     </div>
 
+                    <div class="card" style="margin-top:20px; padding:16px 20px; border: 1.5px solid #FFD4BF;">
+                        <div class="card-title" style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                            <div>
+                                <span style="color:#EA580C; font-weight:800;">1. Tiếp nhận & Phản hồi Đánh giá Bài Khảo sát từ Khách hàng</span>
+                                <div style="font-size:12px; color:#64748B; font-weight:500; margin-top:2px;">Khi khách hàng hoàn thành bài khảo sát, toàn bộ câu trả lời nhiều câu hỏi sẽ hiển thị tại đây để Người quản lý tiếp nhận và phản hồi</div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <select id="fbTabSurveyFilter" onchange="renderSurveyResponsesInFeedbackTab()" style="font-size:12.5px; padding:6px 10px; min-width:240px;">
+                                    <option value="">Tất cả chiến dịch khảo sát</option>
+                                </select>
+                                <span class="badge badge-active" id="crmSurveyRespCountBadge">0 đánh giá khảo sát</span>
+                            </div>
+                        </div>
+                        <div class="table-wrap" style="margin-top:0;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width:155px;">Khách hàng</th>
+                                        <th style="width:210px;">Chiến dịch & Sản phẩm KS</th>
+                                        <th style="width:115px;">Điểm & Ý định</th>
+                                        <th>Chi tiết Câu trả lời Nhiều Câu hỏi & Yêu cầu Khảo sát</th>
+                                        <th style="width:230px;">Phản hồi của Người quản lý</th>
+                                        <th style="width:125px;">Trạng thái</th>
+                                        <th style="text-align: center; width: 145px;">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="surveyFeedbackList"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
                     <div class="card" style="margin-top:20px; padding:16px 20px;">
                         <div class="card-title" style="margin-bottom:12px;">
-                            <span>Danh sách Phản hồi từ Khách hàng</span>
+                            <span>2. Danh sách Phản hồi Đánh giá Sản phẩm từ Khách hàng</span>
                         </div>
                         <div class="table-wrap" style="margin-top:0;">
                             <table>
@@ -488,16 +519,19 @@
                         </div>
                     </div>
 
-                    <!-- FORM THIẾT LẬP BẢNG KHẢO SÁT -->
-                    <div class="card" style="padding: 20px; margin-bottom: 20px;">
-                        <div class="card-title" style="margin-bottom: 14px;">
-                            <span>Thiết lập Chiến dịch Khảo sát Mới</span>
+                    <!-- FORM THIẾT LẬP BẢNG KHẢO SÁT ĐA CÂU HỎI & ĐA YÊU CẦU -->
+                    <div class="card" style="padding: 22px; margin-bottom: 20px; border: 1.5px solid #FFD4BF;">
+                        <div class="card-title" style="margin-bottom: 14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                            <div>
+                                <span style="font-size:15.5px; font-weight:800; color:#0F172A;">Thiết lập Chiến dịch Khảo sát Đa Câu hỏi & Đa Yêu cầu</span>
+                                <div style="font-size:12px; color:#64748B; font-weight:500; margin-top:2px;">Xây dựng bộ nhiều câu hỏi và nhiều yêu cầu khảo sát chuyên sâu gửi trực tiếp đến tài khoản khách hàng</div>
+                            </div>
                             <span class="badge badge-info" id="surveyRecipientBadge">Phát hành trực tiếp đến tài khoản khách hàng</span>
                         </div>
 
                         <div class="grid-form" style="grid-template-columns: 1.6fr 1.2fr 0.9fr 0.9fr;">
                             <div>
-                                <label>Tiêu đề khảo sát *</label>
+                                <label>Tiêu đề chiến dịch khảo sát *</label>
                                 <input type="text" id="inlineSvTitle" placeholder="VD: Khảo sát nhu cầu dòng Laptop Gaming RTX 5070">
                             </div>
                             <div>
@@ -519,10 +553,10 @@
                             </div>
                         </div>
 
-                        <div class="grid-form" style="grid-template-columns: 1.3fr 1fr; align-items: start;">
+                        <div class="grid-form" style="grid-template-columns: 1.3fr 1fr; align-items: start; margin-bottom:16px;">
                             <div>
-                                <label>Nội dung câu hỏi & mô tả sản phẩm gửi khách hàng *</label>
-                                <textarea id="inlineSvDesc" rows="3" placeholder="Nhập cấu hình nổi bật, công nghệ mới và các câu hỏi thăm dò ý kiến khách hàng..."></textarea>
+                                <label>Mô tả tổng quan chiến dịch & thông số sản phẩm *</label>
+                                <textarea id="inlineSvDesc" rows="2" placeholder="Nhập mô tả cấu hình nổi bật, công nghệ mới và mục tiêu khảo sát thị trường..."></textarea>
                             </div>
                             <div>
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
@@ -532,14 +566,54 @@
                                         Chọn tất cả
                                     </label>
                                 </div>
-                                <div id="surveyRecipientList" style="max-height: 82px; overflow-y: auto; padding: 8px 10px; background: #f8fafc; border: 1px solid var(--brand-border); border-radius: 6px; display: flex; flex-wrap: wrap; gap: 6px;">
+                                <div id="surveyRecipientList" style="max-height: 76px; overflow-y: auto; padding: 8px 10px; background: #f8fafc; border: 1px solid var(--brand-border); border-radius: 6px; display: flex; flex-wrap: wrap; gap: 6px;">
                                 </div>
                             </div>
                         </div>
 
-                        <div style="display:flex; justify-content:flex-end; margin-top:6px;">
-                            <button class="btn" onclick="submitInlineSurvey()" style="padding: 9px 20px; font-size: 13px;">
-                                Phát hành chiến dịch khảo sát
+                        <!-- MỤC A: DANH SÁCH NHIỀU YÊU CẦU KHẢO SÁT TRỌNG TÂM -->
+                        <div style="background:#FFF7ED; border:1px solid #FED7AA; border-radius:10px; padding:14px 16px; margin-bottom:16px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+                                <div>
+                                    <div style="font-weight:800; font-size:13.5px; color:#9A3412;">A. Các Yêu cầu Khảo sát Trọng tâm Cần Thu thập từ Khách hàng</div>
+                                    <div style="font-size:11.5px; color:#C2410C;">Chọn nhiều yêu cầu khảo sát hoặc thêm yêu cầu mới cho chiến dịch này</div>
+                                </div>
+                                <div style="display:flex; gap:6px; align-items:center;">
+                                    <input type="text" id="newSurveyReqInput" placeholder="Nhập thêm yêu cầu khảo sát mới..." style="width:240px; padding:5px 10px; font-size:12px; margin:0; background:#ffffff;">
+                                    <button type="button" class="btn" onclick="addCustomSurveyRequirement()" style="padding:5px 12px; font-size:12px; white-space:nowrap;">+ Thêm yêu cầu</button>
+                                </div>
+                            </div>
+                            <div id="surveyRequirementsBox" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+                        </div>
+
+                        <!-- MỤC B: TRÌNH THIẾT KẾ NHIỀU CÂU HỎI KHẢO SÁT ĐỘNG -->
+                        <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px; padding:16px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+                                <div>
+                                    <div style="font-weight:800; font-size:14px; color:#0F172A;">
+                                        B. Danh sách Nhiều Câu hỏi & Yêu cầu trong Bài Khảo sát (<span id="builderQuestionCount" style="color:#EA580C;">0</span> câu hỏi)
+                                    </div>
+                                    <div style="font-size:12px; color:#64748B;">Người quản lý có thể thêm không giới hạn số lượng câu hỏi với nhiều loại câu hỏi và phương án trả lời khác nhau</div>
+                                </div>
+                                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                    <button type="button" class="btn btn-warning" onclick="resetDefaultInlineSurveyQuestions()" style="padding:6px 12px; font-size:12px;">
+                                        Nạp mẫu 6 câu hỏi chuẩn
+                                    </button>
+                                    <button type="button" class="btn" onclick="addInlineSurveyQuestion()" style="padding:6px 14px; font-size:12px; background:#059669;">
+                                        + Thêm câu hỏi & yêu cầu mới
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="inlineQuestionsContainer" style="display:flex; flex-direction:column; gap:10px;"></div>
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; padding-top:14px; border-top:1px solid var(--brand-border);">
+                            <div style="font-size:12.5px; color:#64748B;">
+                                Toàn bộ các câu hỏi và yêu cầu trên sẽ hiển thị trực tiếp trên phiếu khảo sát của Khách hàng tại <b>user.html</b>.
+                            </div>
+                            <button class="btn" onclick="submitInlineSurvey()" style="padding: 10px 24px; font-size: 13.5px; font-weight:700;">
+                                Phát hành Chiến dịch Khảo sát Đa Câu hỏi
                             </button>
                         </div>
                     </div>
@@ -553,14 +627,14 @@
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Tiêu đề khảo sát</th>
+                                        <th>Tiêu đề & Cấu trúc Câu hỏi / Yêu cầu</th>
                                         <th>Sản phẩm dự kiến</th>
                                         <th>Giá dự kiến</th>
                                         <th>Tài khoản nhận</th>
                                         <th>Thời hạn</th>
                                         <th>Trạng thái</th>
-                                        <th>Lượt phản hồi</th>
-                                        <th style="text-align: center; width: 210px;">Thao tác quản lý</th>
+                                        <th>Tiếp nhận Đánh giá</th>
+                                        <th style="text-align: center; width: 240px;">Thao tác quản lý</th>
                                     </tr>
                                 </thead>
                                 <tbody id="surveyList"></tbody>
@@ -656,23 +730,24 @@
                         </div>
                     </div>
 
-                    <!-- BẢNG Ý KIẾN CHI TIẾT -->
+                    <!-- BẢNG Ý KIẾN CHI TIẾT & TIẾP NHẬN PHẢN HỒI KHẢO SÁT -->
                     <div class="card" id="surveyStatCard" style="padding:22px;">
-                        <div class="card-title" id="statTitle" style="color:#0F172A; font-size:16px; font-weight:800;">Chi tiết kết quả khảo sát</div>
-                        <div style="background:#FFF7ED; padding:14px 18px; border-radius:10px; margin-bottom:16px; border:1.5px solid #FFD4BF;">
+                        <div class="card-title" id="statTitle" style="color:#0F172A; font-size:16px; font-weight:800;">Chi tiết kết quả khảo sát & Tiếp nhận Phản hồi Đánh giá</div>
+                        <div style="background:#FFF7ED; padding:14px 18px; border-radius:10px; margin-bottom:14px; border:1.5px solid #FFD4BF;">
                             <p id="statSummary" style="margin-bottom: 0; font-weight: 700; color: #9A3412; line-height:1.6; font-size:13px;"></p>
+                            <div id="statQuestionsOverview" style="margin-top:10px; padding-top:10px; border-top:1px dashed #FDBA74; font-size:12px; color:#475569;"></div>
                         </div>
                         <div class="table-wrap" style="margin-top:0;">
-                            <table style="min-width: 1050px;">
+                            <table style="min-width: 1120px;">
                                 <thead>
                                     <tr>
-                                        <th style="width: 200px;">Khách hàng & Tài khoản</th>
-                                        <th style="width: 120px;">Điểm quan tâm</th>
-                                        <th style="width: 180px;">Đánh giá giá đề xuất</th>
-                                        <th style="width: 220px;">Tiêu chí mong đợi</th>
-                                        <th style="width: 160px;">Ý định mua sắm</th>
+                                        <th style="width: 165px;">Khách hàng & Tài khoản</th>
+                                        <th style="width: 115px;">Điểm & Ý định</th>
+                                        <th style="width: 310px;">Chi tiết Câu trả lời Đa Câu hỏi & Yêu cầu</th>
                                         <th>Góp ý chi tiết & Mức giá kỳ vọng</th>
-                                        <th style="width: 130px;">Thời gian gửi</th>
+                                        <th style="width: 230px;">Phản hồi từ Người quản lý</th>
+                                        <th style="width: 120px;">Trạng thái</th>
+                                        <th style="text-align:center; width: 145px;">Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody id="statResponses"></tbody>
@@ -839,6 +914,6 @@
         </div>
     </div>
 
-    <script src="manager_crm.js?v=20261113_final_v5"></script>
+    <script src="manager_crm.js?v=20261123_multi_q"></script>
 </body>
 </html>

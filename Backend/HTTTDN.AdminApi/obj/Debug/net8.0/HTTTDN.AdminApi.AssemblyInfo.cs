@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HTTTDN.AdminApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e7d9e134aafe847cfa36f4b23eb58fc496e83320")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cba466dfab57db39794086c57fa2e96680bf950f")]
 [assembly: System.Reflection.AssemblyProductAttribute("HTTTDN.AdminApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HTTTDN.AdminApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

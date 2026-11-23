@@ -67,6 +67,13 @@ window.onload = async () => {
 
     await loadRoles();
     await loadAccounts();
+
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get("tab");
+    if (tabParam) {
+        const navBtn = document.querySelector(`button[onclick*="${tabParam}"]`);
+        switchTab(tabParam, navBtn);
+    }
 };
 
 async function refreshAdminData() {
